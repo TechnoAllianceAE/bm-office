@@ -98,6 +98,14 @@ export default {
 					'0%': { transform: 'translateY(20px)', opacity: '0' },
 					'100%': { transform: 'translateY(0)', opacity: '1' }
 				},
+				'slide-in-bottom': {
+					'0%': { transform: 'translateY(100%)', opacity: '0' },
+					'100%': { transform: 'translateY(0)', opacity: '1' }
+				},
+				'slide-out-bottom': {
+					'0%': { transform: 'translateY(0)', opacity: '1' },
+					'100%': { transform: 'translateY(100%)', opacity: '0' }
+				},
 				'counter': {
 					'0%': { transform: 'translateY(100%)' },
 					'100%': { transform: 'translateY(0)' }
@@ -115,20 +123,22 @@ export default {
 				'scale-in': 'scale-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
 				'slide-in': 'slide-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
 				'slide-up': 'slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+				'slide-in-bottom': 'slide-in-bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+				'slide-out-bottom': 'slide-out-bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
 				'counter': 'counter 0.5s ease-out forwards',
 				'blur-in': 'blur-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards'
 			},
 			boxShadow: {
 				'neomorphic': '10px 10px 20px rgba(166, 171, 189, 0.1), -10px -10px 20px rgba(255, 255, 255, 0.8)',
 				'neomorphic-sm': '5px 5px 10px rgba(166, 171, 189, 0.1), -5px -5px 10px rgba(255, 255, 255, 0.8)',
-				'glass': '0 4px 30px rgba(0, 0, 0, 0.1)',
+				'glass': '0 8px 32px rgba(31, 38, 135, 0.15)',
 			},
 			backdropFilter: {
 				'glass': 'blur(10px) saturate(180%)',
 			},
 			fontFamily: {
-				'sans': ['SF Pro Text', 'Inter', 'system-ui', 'sans-serif'],
-				'display': ['SF Pro Display', 'Inter', 'system-ui', 'sans-serif'],
+				'sans': ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
+				'display': ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
 			},
 		}
 	},

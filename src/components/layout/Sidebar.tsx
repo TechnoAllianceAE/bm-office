@@ -3,9 +3,10 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   Home, Clock, Briefcase, Users, FileText, Settings, ChevronLeft, ChevronRight, Calendar, BarChart3,
-  Sparkles, Database, Wrench, Building, ShoppingCart, LayoutDashboard, HeartHandshake, Share2
+  Sparkles, Database, Wrench, Building, ShoppingCart, LayoutDashboard, HeartHandshake, Share2, Mail
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -16,38 +17,41 @@ type NavItem = {
   name: string;
   path: string;
   icon: React.ElementType;
+  emoji?: string;
 };
 
 const mainNavItems: NavItem[] = [
-  { name: 'Dashboard', path: '/', icon: Home },
-  { name: 'Timesheet', path: '/timesheet', icon: Clock },
-  { name: 'Projects', path: '/projects', icon: Briefcase },
-  { name: 'Calendar', path: '/calendar', icon: Calendar },
-  { name: 'Directory', path: '/directory', icon: Users },
-  { name: 'AI Assistant', path: '/ai-assistant', icon: Sparkles },
-  { name: 'AI Workflow', path: '/ai-workflow', icon: Share2 },
-  { name: 'DMS', path: '/dms', icon: Database },
-  { name: 'Handy Tools', path: '/tools', icon: Wrench },
-  { name: 'MIS', path: '/mis', icon: LayoutDashboard },
-  { name: 'Requisition', path: '/requisition', icon: ShoppingCart },
-  { name: 'HelpDesk', path: '/helpdesk', icon: HeartHandshake },
+  { name: 'Dashboard', path: '/', icon: Home, emoji: '🏠' },
+  { name: 'Timesheet', path: '/timesheet', icon: Clock, emoji: '⏱️' },
+  { name: 'Projects', path: '/projects', icon: Briefcase, emoji: '💼' },
+  { name: 'Calendar', path: '/calendar', icon: Calendar, emoji: '📅' },
+  { name: 'Directory', path: '/directory', icon: Users, emoji: '👥' },
+  { name: 'Email', path: '/email', icon: Mail, emoji: '📧' },
+  { name: 'AI Assistant', path: '/ai-assistant', icon: Sparkles, emoji: '✨' },
+  { name: 'AI Workflow', path: '/ai-workflow', icon: Share2, emoji: '🔄' },
+  { name: 'DMS', path: '/dms', icon: Database, emoji: '🗄️' },
+  { name: 'Handy Tools', path: '/tools', icon: Wrench, emoji: '🔧' },
+  { name: 'MIS', path: '/mis', icon: LayoutDashboard, emoji: '📊' },
+  { name: 'Requisition', path: '/requisition', icon: ShoppingCart, emoji: '🛒' },
+  { name: 'HelpDesk', path: '/helpdesk', icon: HeartHandshake, emoji: '🆘' },
 ];
 
 const secondaryNavItems: NavItem[] = [
-  { name: 'HR Portal', path: '/hr', icon: FileText },
-  { name: 'Analytics', path: '/analytics', icon: BarChart3 },
-  { name: 'Settings', path: '/settings', icon: Settings },
+  { name: 'HR Portal', path: '/hr', icon: FileText, emoji: '📝' },
+  { name: 'Analytics', path: '/analytics', icon: BarChart3, emoji: '📈' },
+  { name: 'Settings', path: '/settings', icon: Settings, emoji: '⚙️' },
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
   const location = useLocation();
+  const isMobile = useIsMobile();
   
   return (
     <>
       {/* Mobile sidebar overlay */}
-      {isOpen && (
+      {isOpen && isMobile && (
         <div 
-          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 lg:hidden"
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
           onClick={toggleSidebar}
         />
       )}
@@ -58,8 +62,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
           "fixed top-0 left-0 h-full z-50 transition-all duration-300 ease-in-out",
           "sidebar-glassmorphism",
           isOpen ? "w-64" : "w-20",
-          "transform lg:transform-none",
-          !isOpen && "-translate-x-full lg:translate-x-0"
+          "transform",
+          isMobile ? (isOpen ? "translate-x-0" : "-translate-x-full") : "translate-x-0"
         )}
       >
         {/* Logo */}
@@ -83,12 +87,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
               </button>
             </>
           ) : (
-            <button 
-              onClick={toggleSidebar}
-              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </button>
+            <>
+              <Link to="/" className="flex items-center justify-center">
+                <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
+                  <Building className="h-5 w-5 text-primary-foreground" />
+                </div>
+              </Link>
+              {!isMobile && (
+                <button 
+                  onClick={toggleSidebar}
+                  className="absolute -right-3 top-7 w-6 h-6 rounded-full bg-white flex items-center justify-center shadow-md hover:bg-gray-100 z-10"
+                >
+                  <ChevronRight className="h-3 w-3" />
+                </button>
+              )}
+            </>
           )}
         </div>
         
@@ -160,7 +173,11 @@ const NavItem: React.FC<NavItemProps> = ({ item, isActive, isOpen, animationDela
       )}
       style={{ animationDelay: `${animationDelay}ms` }}
     >
-      <item.icon className={cn("flex-shrink-0", isOpen ? "mr-3 h-5 w-5" : "h-5 w-5")} />
+      {isOpen && item.emoji ? (
+        <span className="mr-3 text-lg">{item.emoji}</span>
+      ) : (
+        <item.icon className={cn("flex-shrink-0", isOpen ? "mr-3 h-5 w-5" : "h-5 w-5")} />
+      )}
       {isOpen && <span className="truncate">{item.name}</span>}
     </Link>
   );

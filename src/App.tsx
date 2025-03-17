@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Navbar } from "./components/layout/Navbar";
 import { Sidebar } from "./components/layout/Sidebar";
 import { PageTransition } from "./components/layout/PageTransition";
+import { useIsMobile } from "./hooks/use-mobile";
 
 // Pages
 import Dashboard from "./pages/Dashboard";
@@ -24,16 +25,27 @@ import MIS from "./pages/MIS";
 import Requisition from "./pages/Requisition";
 import AIWorkflow from "./pages/AIWorkflow";
 import HelpDesk from "./pages/HelpDesk";
+import Email from "./pages/Email";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
 const App = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const isMobile = useIsMobile();
   
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
+  
+  useEffect(() => {
+    // Close sidebar automatically on mobile
+    if (isMobile) {
+      setIsSidebarOpen(false);
+    } else {
+      setIsSidebarOpen(true);
+    }
+  }, [isMobile]);
   
   useEffect(() => {
     const defaultBackgroundUrl = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=2070';
@@ -84,7 +96,7 @@ const App = () => {
             <main className={`flex-1 transition-all duration-300 ${
               isSidebarOpen ? "lg:ml-64" : "lg:ml-20"
             }`}>
-              <Navbar isSidebarOpen={isSidebarOpen} />
+              <Navbar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
               
               <div className="container px-4 pt-24 pb-12">
                 <PageTransition>
@@ -94,6 +106,7 @@ const App = () => {
                     <Route path="/projects" element={<Projects />} />
                     <Route path="/hr" element={<HR />} />
                     <Route path="/directory" element={<Directory />} />
+                    <Route path="/email" element={<Email />} />
                     <Route path="/ai-assistant" element={<AIAssistant />} />
                     <Route path="/ai-workflow" element={<AIWorkflow />} />
                     <Route path="/dms" element={<DMS />} />

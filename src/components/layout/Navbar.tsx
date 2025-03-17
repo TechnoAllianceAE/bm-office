@@ -1,17 +1,20 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Bell, Search, User } from 'lucide-react';
+import { Bell, Search, User, Menu } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface NavbarProps {
   isSidebarOpen: boolean;
+  toggleSidebar: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ isSidebarOpen }) => {
+export const Navbar: React.FC<NavbarProps> = ({ isSidebarOpen, toggleSidebar }) => {
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const [pageTitle, setPageTitle] = useState('Dashboard');
+  const isMobile = useIsMobile();
 
   // Update page title based on current route
   useEffect(() => {
@@ -21,7 +24,13 @@ export const Navbar: React.FC<NavbarProps> = ({ isSidebarOpen }) => {
     else if (path.includes('projects')) setPageTitle('Projects');
     else if (path.includes('hr')) setPageTitle('HR Portal');
     else if (path.includes('directory')) setPageTitle('Employee Directory');
-    else setPageTitle('GlobalHub');
+    else if (path.includes('email')) setPageTitle('Email');
+    else if (path.includes('tools')) setPageTitle('Handy Tools');
+    else if (path.includes('helpdesk')) setPageTitle('Help Desk');
+    else if (path.includes('ai-workflow')) setPageTitle('AI Workflow');
+    else if (path.includes('mis')) setPageTitle('MIS Dashboard');
+    else if (path.includes('requisition')) setPageTitle('Requisition');
+    else setPageTitle('BM Office');
   }, [location]);
 
   // Add shadow on scroll
@@ -36,18 +45,26 @@ export const Navbar: React.FC<NavbarProps> = ({ isSidebarOpen }) => {
   return (
     <header 
       className={cn(
-        "fixed top-0 right-0 w-full z-40 transition-all duration-300",
+        "fixed top-0 right-0 w-full z-40 transition-all duration-300 glassmorphic-navbar",
         isSidebarOpen ? "lg:pl-64" : "lg:pl-20",
-        scrolled ? "bg-white/70 backdrop-blur-lg shadow-sm" : "bg-transparent"
+        scrolled ? "shadow-sm" : ""
       )}
     >
       <div className="flex items-center justify-between h-16 px-4 md:px-6">
-        <div className="flex items-center">
+        <div className="flex items-center gap-4">
+          {isMobile && (
+            <button 
+              onClick={toggleSidebar}
+              className="p-2 rounded-full hover:bg-white/20 transition-colors"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+          )}
           <h1 className="text-xl font-semibold animate-fade-in">{pageTitle}</h1>
         </div>
         
         <div className="flex items-center space-x-4">
-          <div className="hidden md:flex items-center h-9 w-64 rounded-full bg-secondary/80 px-3 text-muted-foreground transition-all duration-300 hover:bg-secondary focus-within:bg-secondary">
+          <div className="hidden md:flex items-center h-9 w-64 rounded-full glassmorphic-input px-3 text-muted-foreground transition-all duration-300 focus-within:bg-white/70">
             <Search className="h-4 w-4 mr-2" />
             <input 
               type="search" 
@@ -56,7 +73,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isSidebarOpen }) => {
             />
           </div>
           
-          <button className="relative p-2 rounded-full hover:bg-secondary transition-colors">
+          <button className="relative p-2 rounded-full hover:bg-white/30 transition-colors">
             <Bell className="h-5 w-5" />
             <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
