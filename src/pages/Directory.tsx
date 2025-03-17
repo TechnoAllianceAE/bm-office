@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Search, Users, Phone, Mail, MapPin, Filter, Grid, List } from 'lucide-react';
 import { Card } from '@/components/common/Card';
 
-// Sample employee data
+// Sample employee data with avatar URLs
 const employees = [
   { 
     id: 1, 
@@ -13,7 +13,7 @@ const employees = [
     location: 'New York', 
     email: 'alice.smith@company.com', 
     phone: '+1 (555) 123-4567',
-    avatar: null 
+    avatar: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=150&h=150&fit=crop&crop=faces' 
   },
   { 
     id: 2, 
@@ -23,7 +23,7 @@ const employees = [
     location: 'San Francisco', 
     email: 'bob.johnson@company.com', 
     phone: '+1 (555) 234-5678',
-    avatar: null 
+    avatar: 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=150&h=150&fit=crop&crop=faces' 
   },
   { 
     id: 3, 
@@ -33,7 +33,7 @@ const employees = [
     location: 'London', 
     email: 'charlie.lee@company.com', 
     phone: '+44 (20) 1234-5678',
-    avatar: null 
+    avatar: 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=150&h=150&fit=crop&crop=faces' 
   },
   { 
     id: 4, 
@@ -43,7 +43,7 @@ const employees = [
     location: 'Singapore', 
     email: 'diana.wang@company.com', 
     phone: '+65 8765-4321',
-    avatar: null 
+    avatar: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=150&h=150&fit=crop&crop=faces' 
   },
   { 
     id: 5, 
@@ -53,7 +53,7 @@ const employees = [
     location: 'Chicago', 
     email: 'ethan.brown@company.com', 
     phone: '+1 (555) 987-6543',
-    avatar: null 
+    avatar: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=150&h=150&fit=crop&crop=faces' 
   },
   { 
     id: 6, 
@@ -63,7 +63,7 @@ const employees = [
     location: 'Madrid', 
     email: 'fiona.garcia@company.com', 
     phone: '+34 91 234-5678',
-    avatar: null 
+    avatar: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=150&h=150&fit=crop&crop=faces' 
   },
   { 
     id: 7, 
@@ -73,7 +73,7 @@ const employees = [
     location: 'Seoul', 
     email: 'george.kim@company.com', 
     phone: '+82 2-1234-5678',
-    avatar: null 
+    avatar: 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=150&h=150&fit=crop&crop=faces' 
   },
   { 
     id: 8, 
@@ -83,7 +83,7 @@ const employees = [
     location: 'Toronto', 
     email: 'hannah.wilson@company.com', 
     phone: '+1 (416) 123-4567',
-    avatar: null 
+    avatar: 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=150&h=150&fit=crop&crop=faces' 
   },
 ];
 
@@ -199,9 +199,17 @@ const Directory = () => {
                 style={{ animationDelay: `${index * 50}ms` }}
               >
                 <div className="flex flex-col items-center text-center">
-                  <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xl font-semibold mb-4">
-                    {employee.name.split(' ').map(n => n[0]).join('')}
-                  </div>
+                  {employee.avatar ? (
+                    <img 
+                      src={employee.avatar} 
+                      alt={employee.name}
+                      className="w-20 h-20 rounded-full object-cover mb-4"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xl font-semibold mb-4">
+                      {employee.name.split(' ').map(n => n[0]).join('')}
+                    </div>
+                  )}
                   <h3 className="font-medium text-lg">{employee.name}</h3>
                   <p className="text-muted-foreground mb-4">{employee.title}</p>
                   
@@ -235,9 +243,17 @@ const Directory = () => {
                 className="p-4 flex items-center gap-4 hover:bg-secondary/30 transition-colors cursor-pointer animate-slide-in"
                 style={{ animationDelay: `${index * 50}ms` }}
               >
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
-                  {employee.name.split(' ').map(n => n[0]).join('')}
-                </div>
+                {employee.avatar ? (
+                  <img 
+                    src={employee.avatar} 
+                    alt={employee.name}
+                    className="w-12 h-12 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
+                    {employee.name.split(' ').map(n => n[0]).join('')}
+                  </div>
+                )}
                 <div className="min-w-0 flex-1">
                   <h3 className="font-medium">{employee.name}</h3>
                   <p className="text-sm text-muted-foreground">{employee.title} • {employee.department}</p>

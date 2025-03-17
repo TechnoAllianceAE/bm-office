@@ -1,16 +1,16 @@
 
 import React, { useState } from 'react';
-import { Link2, QrCode, Image, FileText, Calculator, Globe, Clipboard, Calendar } from 'lucide-react';
+import { Link2, QrCode, Image, FileText, Calculator, Globe, Clipboard, Calendar, FormInput } from 'lucide-react';
 import { Card } from '@/components/common/Card';
 import { CalculatorTool } from '@/components/tools/CalculatorTool';
 import { CurrencyConverter } from '@/components/tools/CurrencyConverter';
+import { SurveyCreator } from '@/components/tools/SurveyCreator';
 
 type Tool = {
   id: string;
   name: string;
   description: string;
   icon: React.ElementType;
-  emoji?: string;
   path: string | null;
   component?: React.ReactNode;
 };
@@ -24,7 +24,6 @@ const Tools = () => {
       name: 'Advanced Calculator', 
       description: 'Perform complex calculations', 
       icon: Calculator,
-      emoji: '🧮',
       path: null,
       component: <CalculatorTool />
     },
@@ -33,16 +32,22 @@ const Tools = () => {
       name: 'Currency Converter', 
       description: 'Convert between different currencies', 
       icon: Globe,
-      emoji: '💱',
       path: null,
       component: <CurrencyConverter />
+    },
+    { 
+      id: 'survey', 
+      name: 'Survey Creator', 
+      description: 'Create and share surveys and forms', 
+      icon: FormInput,
+      path: null,
+      component: <SurveyCreator />
     },
     { 
       id: 'url-shortener', 
       name: 'URL Shortener', 
       description: 'Create shortened URLs for easy sharing', 
       icon: Link2,
-      emoji: '🔗',
       path: '/tools/url-shortener'
     },
     { 
@@ -50,7 +55,6 @@ const Tools = () => {
       name: 'QR Code Generator', 
       description: 'Generate QR codes for links and information', 
       icon: QrCode,
-      emoji: '📱',
       path: '/tools/qr-generator'
     },
     { 
@@ -58,7 +62,6 @@ const Tools = () => {
       name: 'AI Image Generator', 
       description: 'Create images with artificial intelligence', 
       icon: Image,
-      emoji: '🎨',
       path: '/tools/ai-image'
     },
     { 
@@ -66,7 +69,6 @@ const Tools = () => {
       name: 'Text Formatter', 
       description: 'Format and beautify text content', 
       icon: FileText,
-      emoji: '📝',
       path: '/tools/text-formatter'
     },
     { 
@@ -74,7 +76,6 @@ const Tools = () => {
       name: 'Shared Clipboard', 
       description: 'Share clipboard content between devices', 
       icon: Clipboard,
-      emoji: '📋',
       path: '/tools/clipboard'
     },
     { 
@@ -82,7 +83,6 @@ const Tools = () => {
       name: 'Date Calculator', 
       description: 'Calculate date differences and workdays', 
       icon: Calendar,
-      emoji: '📅',
       path: '/tools/date-calculator'
     },
   ];
@@ -96,7 +96,7 @@ const Tools = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">Handy Tools</h1>
+        <h1 className="text-2xl font-semibold">Utilities</h1>
         <p className="text-muted-foreground">Productivity tools to make your work easier</p>
       </div>
 
@@ -112,7 +112,7 @@ const Tools = () => {
               </svg>
             </button>
             <div className="flex items-center">
-              <span className="text-xl mr-3">{activeTool.emoji}</span>
+              <span className="text-xl mr-3"><activeTool.icon className="h-6 w-6" /></span>
               <h2 className="text-xl font-medium">{activeTool.name}</h2>
             </div>
           </div>
@@ -130,7 +130,7 @@ const Tools = () => {
             >
               <div className="p-6 flex flex-col items-center text-center">
                 <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <span className="text-2xl">{tool.emoji}</span>
+                  <tool.icon className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="text-lg font-medium mb-2">{tool.name}</h3>
                 <p className="text-sm text-muted-foreground">{tool.description}</p>

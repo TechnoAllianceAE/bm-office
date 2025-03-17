@@ -1,12 +1,16 @@
 
 import React, { useState } from 'react';
-import { Search, Plus, Filter, Calendar, Clock, Users, CheckCircle, Circle, MoreHorizontal } from 'lucide-react';
+import { Search, Plus, Filter, Calendar, Clock, Users, CheckCircle, Circle, MoreHorizontal, X } from 'lucide-react';
 import { Card } from '@/components/common/Card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 type ProjectStatus = 'active' | 'completed' | 'onHold';
 
@@ -83,8 +87,179 @@ const ProjectItem: React.FC<{ project: Project }> = ({ project }) => {
   );
 };
 
+const NewProjectForm = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  const [projectName, setProjectName] = useState('');
+  const [clientName, setClientName] = useState('');
+  const [description, setDescription] = useState('');
+  const [status, setStatus] = useState<ProjectStatus>('active');
+  const [dueDate, setDueDate] = useState('');
+  const [tag, setTag] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
+  
+  const handleAddTag = () => {
+    if (tag.trim() && !tags.includes(tag.trim())) {
+      setTags([...tags, tag.trim()]);
+      setTag('');
+    }
+  };
+  
+  const handleRemoveTag = (tagToRemove: string) => {
+    setTags(tags.filter(t => t !== tagToRemove));
+  };
+  
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Here you would typically create a new project and add it to your projects array
+    // For now, we'll just close the dialog
+    onClose();
+  };
+  
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[600px]">
+        <DialogHeader>
+          <DialogTitle>Create New Project</DialogTitle>
+          <DialogDescription>
+            Add a new project to your dashboard.
+          </DialogDescription>
+        </DialogHeader>
+        
+        <form onSubmit={handleSubmit} className="space-y-4 py-4">
+          <div className="grid grid-cols-1 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="project-name">Project Name</Label>
+              <Input 
+                id="project-name" 
+                value={projectName} 
+                onChange={(e) => setProjectName(e.target.value)} 
+                placeholder="Enter project name" 
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="client-name">Client</Label>
+              <Input 
+                id="client-name" 
+                value={clientName} 
+                onChange={(e) => setClientName(e.target.value)} 
+                placeholder="Enter client name" 
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea 
+                id="description" 
+                value={description} 
+                onChange={(e) => setDescription(e.target.value)} 
+                placeholder="Enter project description" 
+                className="min-h-[100px]"
+                required
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <Select 
+                  value={status} 
+                  onValueChange={(value) => setStatus(value as ProjectStatus)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="onHold">On Hold</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="due-date">Due Date</Label>
+                <Input 
+                  id="due-date" 
+                  type="date" 
+                  value={dueDate} 
+                  onChange={(e) => setDueDate(e.target.value)} 
+                  required
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="tags">Tags</Label>
+              <div className="flex gap-2">
+                <Input 
+                  id="tags" 
+                  value={tag} 
+                  onChange={(e) => setTag(e.target.value)} 
+                  placeholder="Add tags" 
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddTag();
+                    }
+                  }}
+                />
+                <Button type="button" onClick={handleAddTag} variant="secondary">
+                  Add
+                </Button>
+              </div>
+              
+              {tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {tags.map((t, i) => (
+                    <Badge key={i} variant="secondary" className="flex items-center gap-1">
+                      {t}
+                      <button 
+                        type="button" 
+                        onClick={() => handleRemoveTag(t)}
+                        className="ml-1 rounded-full hover:bg-background/20 p-0.5"
+                      >
+                        <X className="h-3 w-3" />
+                        <span className="sr-only">Remove</span>
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="team">Team Members</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select team members" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="alice">Alice Smith</SelectItem>
+                  <SelectItem value="bob">Bob Johnson</SelectItem>
+                  <SelectItem value="charlie">Charlie Lee</SelectItem>
+                  <SelectItem value="diana">Diana Wang</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="submit">Create Project</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 const Projects = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
   
   const projects: Project[] = [
     {
@@ -172,7 +347,7 @@ const Projects = () => {
           <h1 className="text-2xl font-semibold">Projects</h1>
           <p className="text-muted-foreground">Manage and track your projects</p>
         </div>
-        <Button className="gap-1">
+        <Button className="gap-1" onClick={() => setShowNewProjectDialog(true)}>
           <Plus className="h-4 w-4" />
           New Project
         </Button>
@@ -234,6 +409,12 @@ const Projects = () => {
           </div>
         </TabsContent>
       </Tabs>
+      
+      {/* New Project Dialog */}
+      <NewProjectForm 
+        isOpen={showNewProjectDialog} 
+        onClose={() => setShowNewProjectDialog(false)} 
+      />
     </div>
   );
 };

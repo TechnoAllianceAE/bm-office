@@ -26,6 +26,7 @@ import Requisition from "./pages/Requisition";
 import AIWorkflow from "./pages/AIWorkflow";
 import HelpDesk from "./pages/HelpDesk";
 import Email from "./pages/Email";
+import Calendar from "./pages/Calendar";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -104,6 +105,7 @@ const App = () => {
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/timesheet" element={<Timesheet />} />
                     <Route path="/projects" element={<Projects />} />
+                    <Route path="/calendar" element={<Calendar />} />
                     <Route path="/hr" element={<HR />} />
                     <Route path="/directory" element={<Directory />} />
                     <Route path="/email" element={<Email />} />

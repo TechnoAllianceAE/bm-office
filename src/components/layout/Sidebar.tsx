@@ -17,29 +17,28 @@ type NavItem = {
   name: string;
   path: string;
   icon: React.ElementType;
-  emoji?: string;
 };
 
 const mainNavItems: NavItem[] = [
-  { name: 'Dashboard', path: '/', icon: Home, emoji: '🏠' },
-  { name: 'Timesheet', path: '/timesheet', icon: Clock, emoji: '⏱️' },
-  { name: 'Projects', path: '/projects', icon: Briefcase, emoji: '💼' },
-  { name: 'Calendar', path: '/calendar', icon: Calendar, emoji: '📅' },
-  { name: 'Directory', path: '/directory', icon: Users, emoji: '👥' },
-  { name: 'Email', path: '/email', icon: Mail, emoji: '📧' },
-  { name: 'AI Assistant', path: '/ai-assistant', icon: Sparkles, emoji: '✨' },
-  { name: 'AI Workflow', path: '/ai-workflow', icon: Share2, emoji: '🔄' },
-  { name: 'DMS', path: '/dms', icon: Database, emoji: '🗄️' },
-  { name: 'Handy Tools', path: '/tools', icon: Wrench, emoji: '🔧' },
-  { name: 'MIS', path: '/mis', icon: LayoutDashboard, emoji: '📊' },
-  { name: 'Requisition', path: '/requisition', icon: ShoppingCart, emoji: '🛒' },
-  { name: 'HelpDesk', path: '/helpdesk', icon: HeartHandshake, emoji: '🆘' },
+  { name: 'Dashboard', path: '/', icon: Home },
+  { name: 'Timesheet', path: '/timesheet', icon: Clock },
+  { name: 'Projects', path: '/projects', icon: Briefcase },
+  { name: 'Calendar', path: '/calendar', icon: Calendar },
+  { name: 'Directory', path: '/directory', icon: Users },
+  { name: 'Email', path: '/email', icon: Mail },
+  { name: 'AI Assistant', path: '/ai-assistant', icon: Sparkles },
+  { name: 'AI Workflow', path: '/ai-workflow', icon: Share2 },
+  { name: 'DMS', path: '/dms', icon: Database },
+  { name: 'Utilities', path: '/tools', icon: Wrench },
+  { name: 'MIS', path: '/mis', icon: LayoutDashboard },
+  { name: 'Requisition', path: '/requisition', icon: ShoppingCart },
+  { name: 'HelpDesk', path: '/helpdesk', icon: HeartHandshake },
 ];
 
 const secondaryNavItems: NavItem[] = [
-  { name: 'HR Portal', path: '/hr', icon: FileText, emoji: '📝' },
-  { name: 'Analytics', path: '/analytics', icon: BarChart3, emoji: '📈' },
-  { name: 'Settings', path: '/settings', icon: Settings, emoji: '⚙️' },
+  { name: 'HR Portal', path: '/hr', icon: FileText },
+  { name: 'Analytics', path: '/analytics', icon: BarChart3 },
+  { name: 'Settings', path: '/settings', icon: Settings },
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
@@ -105,8 +104,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
           )}
         </div>
         
-        {/* Main navigation */}
-        <nav className="flex-1 pt-4 overflow-y-auto">
+        {/* Main navigation - Make scrollable */}
+        <nav className="flex-1 pt-4 overflow-y-auto max-h-[calc(100vh-4rem)]">
           <div className="px-3 mb-6">
             {mainNavItems.map((item, index) => (
               <NavItem 
@@ -173,11 +172,7 @@ const NavItem: React.FC<NavItemProps> = ({ item, isActive, isOpen, animationDela
       )}
       style={{ animationDelay: `${animationDelay}ms` }}
     >
-      {isOpen && item.emoji ? (
-        <span className="mr-3 text-lg">{item.emoji}</span>
-      ) : (
-        <item.icon className={cn("flex-shrink-0", isOpen ? "mr-3 h-5 w-5" : "h-5 w-5")} />
-      )}
+      <item.icon className={cn("flex-shrink-0", isOpen ? "mr-3 h-5 w-5" : "h-5 w-5")} />
       {isOpen && <span className="truncate">{item.name}</span>}
     </Link>
   );
