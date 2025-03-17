@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { Card } from '@/components/common/Card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Calendar, Download, BarChart3, Activity, Server, Globe, Smartphone, Database } from 'lucide-react';
+import { Calendar, Download, BarChart3, Activity, Server, Globe, Smartphone, Database, Clock } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const Analytics = () => {
