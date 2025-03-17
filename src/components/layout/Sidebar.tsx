@@ -25,7 +25,6 @@ const mainNavItems: NavItem[] = [
   { name: 'Timesheet', path: '/timesheet', icon: Clock },
   { name: 'Projects', path: '/projects', icon: Briefcase },
   { name: 'BM HR', path: '/hr', icon: FileText },
-  { name: 'LMS', path: '/lms', icon: GraduationCap },
   { name: 'Calendar', path: '/calendar', icon: Calendar },
   { name: 'Email', path: '/email', icon: Mail },
   { name: 'AI Assistant', path: '/ai-assistant', icon: Sparkles },
@@ -40,6 +39,7 @@ const mainNavItems: NavItem[] = [
 const secondaryNavItems: NavItem[] = [
   { name: 'Directory', path: '/directory', icon: Users },
   { name: 'Utilities', path: '/tools', icon: Wrench },
+  { name: 'LMS', path: '/lms', icon: GraduationCap },
   { name: 'Analytics', path: '/analytics', icon: BarChart3 },
   { name: 'Settings', path: '/settings', icon: Settings },
 ];

@@ -1,9 +1,21 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { FileText, Calendar, User, Users, Clock, BarChart3, Plus } from 'lucide-react';
 import { Card } from '@/components/common/Card';
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Button } from '@/components/ui/button';
+import { NewHRRequestForm } from '@/components/hr/NewHRRequestForm';
 
 const HR = () => {
+  const [isFormOpen, setIsFormOpen] = useState(false);
+
+  const handleNewRequest = () => {
+    setIsFormOpen(true);
+  };
+
+  const handleCloseForm = () => {
+    setIsFormOpen(false);
+  };
+
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Page header */}
@@ -18,12 +30,21 @@ const HR = () => {
             <FileText className="w-4 h-4" />
             <span>Policies</span>
           </button>
-          <button className="bg-primary text-white hover:bg-primary/90 transition-colors rounded-lg px-4 py-2 flex items-center gap-1">
+          <button 
+            className="bg-primary text-white hover:bg-primary/90 transition-colors rounded-lg px-4 py-2 flex items-center gap-1"
+            onClick={handleNewRequest}
+          >
             <Plus className="w-4 h-4" />
             <span>New Request</span>
           </button>
         </div>
       </div>
+
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent className="max-w-3xl bg-white/95 backdrop-blur-md">
+          <NewHRRequestForm onClose={handleCloseForm} />
+        </DialogContent>
+      </Dialog>
       
       {/* Quick actions */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">

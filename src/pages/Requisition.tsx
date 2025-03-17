@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Plus, Search, Filter, FileDown, Printer, ChevronDown, 
@@ -8,12 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Card } from '@/components/common/Card';
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { NewRequisitionForm } from '@/components/requisition/NewRequisitionForm';
 
 type RequisitionStatus = 'Pending' | 'Approved' | 'Rejected' | 'Draft';
 
@@ -92,6 +93,16 @@ const Requisition = () => {
     },
   ]);
 
+  const [isFormOpen, setIsFormOpen] = useState(false);
+
+  const handleNewRequisition = () => {
+    setIsFormOpen(true);
+  };
+
+  const handleCloseForm = () => {
+    setIsFormOpen(false);
+  };
+
   const getStatusIcon = (status: RequisitionStatus) => {
     switch (status) {
       case 'Approved':
@@ -122,11 +133,17 @@ const Requisition = () => {
           <p className="text-muted-foreground">Manage procurement requests and approvals</p>
         </div>
         
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={handleNewRequisition}>
           <Plus className="h-4 w-4" />
           New Requisition
         </Button>
       </div>
+
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent className="max-w-3xl bg-white/95 backdrop-blur-md">
+          <NewRequisitionForm onClose={handleCloseForm} />
+        </DialogContent>
+      </Dialog>
       
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {[

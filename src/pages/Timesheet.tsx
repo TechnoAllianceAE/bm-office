@@ -1,9 +1,10 @@
-
 import React, { useState } from 'react';
 import { Calendar, Clock, ChevronLeft, ChevronRight, Plus, Filter, Download } from 'lucide-react';
 import { Card } from '@/components/common/Card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { NewTimesheetEntryForm } from '@/components/timesheet/NewTimesheetEntryForm';
 
 // Sample project data
 const projects = [
@@ -30,6 +31,7 @@ const timesheetEntries = [
 
 const Timesheet = () => {
   const [currentWeek, setCurrentWeek] = useState('Nov 20 - Nov 26, 2023');
+  const [isFormOpen, setIsFormOpen] = useState(false);
   
   // Generate days of the week
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -38,6 +40,14 @@ const Timesheet = () => {
   const getProjectById = (id: number) => projects.find(project => project.id === id);
 
   const totalHours = timesheetEntries.reduce((sum, entry) => sum + entry.hours, 0);
+
+  const handleNewEntry = () => {
+    setIsFormOpen(true);
+  };
+
+  const handleCloseForm = () => {
+    setIsFormOpen(false);
+  };
 
   return (
     <div className="space-y-6">
@@ -53,12 +63,21 @@ const Timesheet = () => {
           <Button variant="outline" size="icon" onClick={() => {}}>
             <Download className="h-4 w-4" />
           </Button>
-          <Button className="gap-1">
+          <Button className="gap-1" onClick={handleNewEntry}>
             <Plus className="h-4 w-4" />
             New Entry
           </Button>
         </div>
       </div>
+
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent className="max-w-3xl bg-white/95 backdrop-blur-md">
+          <NewTimesheetEntryForm 
+            onClose={handleCloseForm} 
+            projects={projects}
+          />
+        </DialogContent>
+      </Dialog>
 
       <Tabs defaultValue="week">
         <TabsList className="mb-6 bg-secondary/50 backdrop-blur-sm">
@@ -89,7 +108,6 @@ const Timesheet = () => {
             </div>
 
             <div className="grid grid-cols-7 gap-4">
-              {/* Day headers */}
               {days.map((day, i) => (
                 <div key={day} className="text-center">
                   <div className="font-medium">{day}</div>
@@ -97,17 +115,15 @@ const Timesheet = () => {
                 </div>
               ))}
               
-              {/* Time blocks */}
               {days.map((day, dayIndex) => (
                 <div 
                   key={`time-${day}`} 
                   className="bg-background/30 backdrop-blur-sm rounded-lg border border-border/50 h-32 relative hover:border-primary/30 transition cursor-pointer"
                 >
-                  {/* Filter entries for this day */}
                   {timesheetEntries
                     .filter(entry => {
                       const entryDate = new Date(entry.date);
-                      return entryDate.getDate() === parseInt(dates[dayIndex]) && entryDate.getMonth() === 10; // November
+                      return entryDate.getDate() === parseInt(dates[dayIndex]) && entryDate.getMonth() === 10;
                     })
                     .map(entry => {
                       const project = getProjectById(entry.project);

@@ -7,7 +7,12 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Filter, MoreHorizontal, MessageSquare, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
+import { 
+  Plus, Search, Filter, MoreHorizontal, MessageSquare, 
+  Clock, CheckCircle2, AlertCircle 
+} from 'lucide-react';
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { NewTicketForm } from '@/components/helpdesk/NewTicketForm';
 
 const ticketStatuses = {
   open: { color: 'bg-green-500/20 text-green-700', label: 'Open' },
@@ -27,9 +32,18 @@ const sampleTickets = [
 const HelpDesk = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTicket, setSelectedTicket] = useState(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
   
   const handleTicketClick = (ticket) => {
     setSelectedTicket(ticket);
+  };
+  
+  const handleNewTicket = () => {
+    setIsFormOpen(true);
+  };
+
+  const handleCloseForm = () => {
+    setIsFormOpen(false);
   };
   
   const filteredTickets = sampleTickets.filter(ticket => 
@@ -45,12 +59,18 @@ const HelpDesk = () => {
           <p className="text-muted-foreground">Manage support tickets and requests</p>
         </div>
         <div className="flex items-center space-x-2">
-          <Button className="gap-1">
+          <Button className="gap-1" onClick={handleNewTicket}>
             <Plus className="h-4 w-4" />
             New Ticket
           </Button>
         </div>
       </div>
+
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent className="max-w-3xl bg-white/95 backdrop-blur-md">
+          <NewTicketForm onClose={handleCloseForm} />
+        </DialogContent>
+      </Dialog>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-1">
