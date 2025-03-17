@@ -4,7 +4,9 @@ import {
   BarChart, PieChart, LineChart, LayoutDashboard, ArrowDown, 
   ArrowUp, Share2, Download, Grid3X3, ListFilter, 
   FileText, DollarSign, CheckCircle2, AlertCircle,
-  Building, FileBarChart, User, Calendar
+  Building, FileBarChart, User, Calendar, 
+  // Import the correct icon
+  Clock as ClockIcon
 } from 'lucide-react';
 import { Card } from '@/components/common/Card';
 import { Button } from '@/components/ui/button';
@@ -580,7 +582,7 @@ const MIS = () => {
             
             <DashboardWidget
               title="Pending Expenses"
-              icon={<Clock className="h-5 w-5" />}
+              icon={<ClockIcon className="h-5 w-5" />}
               className="bg-white/30 backdrop-blur-sm"
             >
               <div className="flex flex-col items-center justify-center text-center h-full">
@@ -787,7 +789,7 @@ const MIS = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <DashboardWidget
               title="Pending Approvals"
-              icon={<Clock className="h-5 w-5" />}
+              icon={<ClockIcon className="h-5 w-5" />}
               className="bg-white/30 backdrop-blur-sm"
             >
               <div className="flex flex-col items-center justify-center text-center h-full">
