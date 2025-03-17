@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   Home, Clock, Briefcase, Users, FileText, Settings, ChevronLeft, ChevronRight, Calendar, BarChart3,
-  Sparkles, Database, Wrench, Building, ShoppingCart, LayoutDashboard, HeartHandshake, Share2, Mail
+  Sparkles, Database, Wrench, Building, ShoppingCart, LayoutDashboard, HeartHandshake, Share2, Mail,
+  GraduationCap
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -23,20 +24,22 @@ const mainNavItems: NavItem[] = [
   { name: 'Dashboard', path: '/', icon: Home },
   { name: 'Timesheet', path: '/timesheet', icon: Clock },
   { name: 'Projects', path: '/projects', icon: Briefcase },
+  { name: 'BM HR', path: '/hr', icon: FileText },
+  { name: 'LMS', path: '/lms', icon: GraduationCap },
   { name: 'Calendar', path: '/calendar', icon: Calendar },
-  { name: 'Directory', path: '/directory', icon: Users },
   { name: 'Email', path: '/email', icon: Mail },
   { name: 'AI Assistant', path: '/ai-assistant', icon: Sparkles },
   { name: 'AI Workflow', path: '/ai-workflow', icon: Share2 },
   { name: 'DMS', path: '/dms', icon: Database },
-  { name: 'Utilities', path: '/tools', icon: Wrench },
   { name: 'MIS', path: '/mis', icon: LayoutDashboard },
   { name: 'Requisition', path: '/requisition', icon: ShoppingCart },
   { name: 'HelpDesk', path: '/helpdesk', icon: HeartHandshake },
+  { name: 'Claims', path: '/claims', icon: FileText },
 ];
 
 const secondaryNavItems: NavItem[] = [
-  { name: 'HR Portal', path: '/hr', icon: FileText },
+  { name: 'Directory', path: '/directory', icon: Users },
+  { name: 'Utilities', path: '/tools', icon: Wrench },
   { name: 'Analytics', path: '/analytics', icon: BarChart3 },
   { name: 'Settings', path: '/settings', icon: Settings },
 ];

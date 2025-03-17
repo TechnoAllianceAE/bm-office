@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -28,6 +27,9 @@ import HelpDesk from "./pages/HelpDesk";
 import Email from "./pages/Email";
 import Calendar from "./pages/Calendar";
 import NotFound from "./pages/NotFound";
+import LMS from "./pages/LMS";
+import CourseView from "./pages/CourseView";
+import Claims from "./pages/Claims";
 
 const queryClient = new QueryClient();
 
@@ -118,6 +120,9 @@ const App = () => {
                     <Route path="/mis" element={<MIS />} />
                     <Route path="/requisition" element={<Requisition />} />
                     <Route path="/helpdesk" element={<HelpDesk />} />
+                    <Route path="/lms" element={<LMS />} />
+                    <Route path="/lms/course/:id" element={<CourseView />} />
+                    <Route path="/claims" element={<Claims />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </PageTransition>

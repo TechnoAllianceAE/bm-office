@@ -1,10 +1,11 @@
 
 import React, { useState } from 'react';
-import { Link2, QrCode, Image, FileText, Calculator, Globe, Clipboard, Calendar, FormInput } from 'lucide-react';
+import { Link2, QrCode, Image, FileText, Calculator, Globe, Clipboard, Calendar, FormInput, NotebookPen } from 'lucide-react';
 import { Card } from '@/components/common/Card';
 import { CalculatorTool } from '@/components/tools/CalculatorTool';
 import { CurrencyConverter } from '@/components/tools/CurrencyConverter';
 import { SurveyCreator } from '@/components/tools/SurveyCreator';
+import { QuickNote } from '@/components/tools/QuickNote';
 
 type Tool = {
   id: string;
@@ -42,6 +43,14 @@ const Tools = () => {
       icon: FormInput,
       path: null,
       component: <SurveyCreator />
+    },
+    { 
+      id: 'quick-note', 
+      name: 'Quick Note', 
+      description: 'Create and manage notes quickly', 
+      icon: NotebookPen,
+      path: null,
+      component: <QuickNote />
     },
     { 
       id: 'url-shortener', 
