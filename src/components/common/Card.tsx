@@ -8,6 +8,7 @@ interface CardProps {
   variant?: 'glass' | 'neomorphic' | 'default';
   animate?: boolean;
   animationDelay?: number;
+  onClick?: () => void;
 }
 
 export const Card: React.FC<CardProps> = ({
@@ -16,6 +17,7 @@ export const Card: React.FC<CardProps> = ({
   variant = 'default',
   animate = true,
   animationDelay = 0,
+  onClick,
 }) => {
   const getCardClasses = (): string => {
     switch (variant) {
@@ -34,9 +36,11 @@ export const Card: React.FC<CardProps> = ({
         'rounded-xl overflow-hidden',
         getCardClasses(),
         animate && 'opacity-0 animate-scale-in',
+        onClick && 'cursor-pointer',
         className
       )}
       style={animate ? { animationDelay: `${animationDelay}ms` } : undefined}
+      onClick={onClick}
     >
       {children}
     </div>

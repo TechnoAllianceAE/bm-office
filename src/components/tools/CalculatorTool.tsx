@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/common/Card';
@@ -271,7 +272,7 @@ export const CalculatorTool: React.FC = () => {
                 
                 <Button variant="secondary" size="sm" onClick={() => handleNumberClick('0')} className="col-span-2">0</Button>
                 <Button variant="secondary" size="sm" onClick={handleDecimalClick}>.</Button>
-                <Button variant="primary" size="sm" onClick={calculateResult}>=</Button>
+                <Button variant="default" size="sm" onClick={calculateResult}>=</Button>
               </div>
             </TabsContent>
             
@@ -318,7 +319,7 @@ export const CalculatorTool: React.FC = () => {
                 <Button variant="secondary" size="sm" onClick={() => handleNumberClick('0')}>0</Button>
                 <Button variant="secondary" size="sm" onClick={() => handleNumberClick('00')}>00</Button>
                 <Button variant="secondary" size="sm" onClick={handleDecimalClick}>.</Button>
-                <Button variant="primary" size="sm" onClick={calculateResult}>=</Button>
+                <Button variant="default" size="sm" onClick={calculateResult}>=</Button>
               </div>
             </TabsContent>
           </div>
