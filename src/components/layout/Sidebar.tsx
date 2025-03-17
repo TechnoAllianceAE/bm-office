@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   Home, Clock, Briefcase, Users, FileText, Settings, ChevronLeft, ChevronRight, Calendar, BarChart3,
-  Sparkles, Database, Wrench, Building, ShoppingCart, LayoutDashboard
+  Sparkles, Database, Wrench, Building, ShoppingCart, LayoutDashboard, HeartHandshake, Share2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -25,10 +25,12 @@ const mainNavItems: NavItem[] = [
   { name: 'Calendar', path: '/calendar', icon: Calendar },
   { name: 'Directory', path: '/directory', icon: Users },
   { name: 'AI Assistant', path: '/ai-assistant', icon: Sparkles },
+  { name: 'AI Workflow', path: '/ai-workflow', icon: Share2 },
   { name: 'DMS', path: '/dms', icon: Database },
   { name: 'Handy Tools', path: '/tools', icon: Wrench },
   { name: 'MIS', path: '/mis', icon: LayoutDashboard },
   { name: 'Requisition', path: '/requisition', icon: ShoppingCart },
+  { name: 'HelpDesk', path: '/helpdesk', icon: HeartHandshake },
 ];
 
 const secondaryNavItems: NavItem[] = [
@@ -50,11 +52,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
         />
       )}
       
-      {/* Sidebar */}
+      {/* Sidebar with glassmorphism */}
       <aside 
         className={cn(
-          "fixed top-0 left-0 h-full bg-sidebar z-50 transition-all duration-300 ease-in-out",
-          "border-r border-sidebar-border flex flex-col",
+          "fixed top-0 left-0 h-full z-50 transition-all duration-300 ease-in-out",
+          "sidebar-glassmorphism",
           isOpen ? "w-64" : "w-20",
           "transform lg:transform-none",
           !isOpen && "-translate-x-full lg:translate-x-0"
@@ -62,7 +64,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
       >
         {/* Logo */}
         <div className={cn(
-          "h-16 flex items-center px-4 border-b border-sidebar-border transition-all duration-300",
+          "h-16 flex items-center px-4 border-b border-white/30 transition-all duration-300",
           isOpen ? "justify-between" : "justify-center"
         )}>
           {isOpen ? (
@@ -75,7 +77,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
               </Link>
               <button 
                 onClick={toggleSidebar}
-                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-sidebar-accent transition-colors"
+                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
@@ -83,7 +85,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
           ) : (
             <button 
               onClick={toggleSidebar}
-              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-sidebar-accent transition-colors"
+              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors"
             >
               <ChevronRight className="h-5 w-5" />
             </button>
@@ -120,7 +122,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
         
         {/* User profile */}
         <div className={cn(
-          "border-t border-sidebar-border p-3 transition-all duration-300",
+          "border-t border-white/30 p-3 transition-all duration-300",
           isOpen ? "flex items-center space-x-3" : "flex flex-col items-center"
         )}>
           <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
@@ -153,8 +155,8 @@ const NavItem: React.FC<NavItemProps> = ({ item, isActive, isOpen, animationDela
         "flex items-center h-10 rounded-md mb-1 transition-all duration-200",
         isOpen ? "px-3" : "justify-center",
         isActive 
-          ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-          : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+          ? "bg-white/30 backdrop-blur-sm font-medium"
+          : "text-sidebar-foreground hover:bg-white/20 hover:text-sidebar-accent-foreground"
       )}
       style={{ animationDelay: `${animationDelay}ms` }}
     >

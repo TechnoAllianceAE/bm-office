@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -21,6 +22,8 @@ import Analytics from "./pages/Analytics";
 import SettingsPage from "./pages/Settings";
 import MIS from "./pages/MIS";
 import Requisition from "./pages/Requisition";
+import AIWorkflow from "./pages/AIWorkflow";
+import HelpDesk from "./pages/HelpDesk";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -92,12 +95,14 @@ const App = () => {
                     <Route path="/hr" element={<HR />} />
                     <Route path="/directory" element={<Directory />} />
                     <Route path="/ai-assistant" element={<AIAssistant />} />
+                    <Route path="/ai-workflow" element={<AIWorkflow />} />
                     <Route path="/dms" element={<DMS />} />
                     <Route path="/tools" element={<Tools />} />
                     <Route path="/analytics" element={<Analytics />} />
                     <Route path="/settings" element={<SettingsPage />} />
                     <Route path="/mis" element={<MIS />} />
                     <Route path="/requisition" element={<Requisition />} />
+                    <Route path="/helpdesk" element={<HelpDesk />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </PageTransition>

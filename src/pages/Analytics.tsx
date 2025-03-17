@@ -1,12 +1,15 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from '@/components/common/Card';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Calendar, Download, BarChart3 } from 'lucide-react';
+import { Calendar, Download, BarChart3, Activity, Server, Globe, Smartphone, Database } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const Analytics = () => {
+  const [timeRange, setTimeRange] = useState('30d');
+  
   // Sample data for charts
   const projectData = [
     { name: 'Jan', completed: 4, inProgress: 2, planned: 1 },
@@ -32,8 +35,52 @@ const Analytics = () => {
     { name: 'HR', value: 10 },
     { name: 'Finance', value: 10 },
   ];
+  
+  // Website analytics data
+  const websiteData = [
+    { date: 'Jun 01', users: 1200, pageviews: 3800, sessions: 1500 },
+    { date: 'Jun 08', users: 1300, pageviews: 4200, sessions: 1700 },
+    { date: 'Jun 15', users: 1100, pageviews: 3700, sessions: 1400 },
+    { date: 'Jun 22', users: 1400, pageviews: 4500, sessions: 1800 },
+    { date: 'Jun 29', users: 1500, pageviews: 4800, sessions: 2000 },
+    { date: 'Jul 06', users: 1700, pageviews: 5200, sessions: 2200 },
+  ];
+  
+  // App usage data
+  const appUsageData = [
+    { date: 'Jun 01', activeUsers: 820, sessions: 1200, screenTime: 22 },
+    { date: 'Jun 08', activeUsers: 900, sessions: 1350, screenTime: 25 },
+    { date: 'Jun 15', activeUsers: 880, sessions: 1280, screenTime: 23 },
+    { date: 'Jun 22', activeUsers: 950, sessions: 1400, screenTime: 28 },
+    { date: 'Jun 29', activeUsers: 1000, sessions: 1500, screenTime: 30 },
+    { date: 'Jul 06', activeUsers: 1050, sessions: 1600, screenTime: 32 },
+  ];
+  
+  // Server status data
+  const serverStatusData = [
+    { name: 'Web-01', cpu: 45, memory: 62, disk: 38, status: 'Healthy' },
+    { name: 'Web-02', cpu: 28, memory: 45, disk: 32, status: 'Healthy' },
+    { name: 'DB-01', cpu: 72, memory: 83, disk: 55, status: 'Warning' },
+    { name: 'Cache-01', cpu: 32, memory: 40, disk: 22, status: 'Healthy' },
+    { name: 'API-01', cpu: 88, memory: 75, disk: 45, status: 'Critical' },
+  ];
+  
+  // CPU Load over time
+  const cpuLoadData = [
+    { time: '00:00', web01: 30, web02: 20, db01: 65, cache01: 25, api01: 70 },
+    { time: '04:00', web01: 25, web02: 15, db01: 55, cache01: 20, api01: 60 },
+    { time: '08:00', web01: 45, web02: 25, db01: 75, cache01: 30, api01: 85 },
+    { time: '12:00', web01: 50, web02: 30, db01: 80, cache01: 35, api01: 90 },
+    { time: '16:00', web01: 40, web02: 28, db01: 72, cache01: 32, api01: 88 },
+    { time: '20:00', web01: 35, web02: 22, db01: 68, cache01: 28, api01: 75 },
+  ];
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+  const STATUS_COLORS = {
+    'Healthy': 'bg-green-500',
+    'Warning': 'bg-amber-500',
+    'Critical': 'bg-red-500'
+  };
 
   return (
     <div className="space-y-6">
@@ -43,11 +90,19 @@ const Analytics = () => {
           <p className="text-muted-foreground">Insights and metrics for your organization</p>
         </div>
         <div className="flex items-center space-x-2">
-          <Button variant="outline" className="gap-1">
-            <Calendar className="h-4 w-4" />
-            Last 30 Days
-          </Button>
-          <Button variant="outline" className="gap-1">
+          <Select value={timeRange} onValueChange={setTimeRange}>
+            <SelectTrigger className="w-[180px] bg-white/30">
+              <Calendar className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Select time range" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="7d">Last 7 Days</SelectItem>
+              <SelectItem value="30d">Last 30 Days</SelectItem>
+              <SelectItem value="90d">Last 90 Days</SelectItem>
+              <SelectItem value="12m">Last 12 Months</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button variant="outline" className="gap-1 bg-white/30">
             <Download className="h-4 w-4" />
             Export
           </Button>
@@ -55,7 +110,7 @@ const Analytics = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="p-4 bg-card/40 backdrop-blur-md border border-white/10">
+        <Card className="page-content p-4">
           <div className="flex items-center justify-between mb-2">
             <h3 className="font-medium">Total Projects</h3>
             <div className="bg-primary/10 p-2 rounded-full">
@@ -66,7 +121,7 @@ const Analytics = () => {
           <div className="text-sm text-green-500">+12% from last month</div>
         </Card>
         
-        <Card className="p-4 bg-card/40 backdrop-blur-md border border-white/10">
+        <Card className="page-content p-4">
           <div className="flex items-center justify-between mb-2">
             <h3 className="font-medium">Average Hours</h3>
             <div className="bg-primary/10 p-2 rounded-full">
@@ -77,7 +132,7 @@ const Analytics = () => {
           <div className="text-sm text-red-500">-2% from last month</div>
         </Card>
         
-        <Card className="p-4 bg-card/40 backdrop-blur-md border border-white/10">
+        <Card className="page-content p-4">
           <div className="flex items-center justify-between mb-2">
             <h3 className="font-medium">Team Efficiency</h3>
             <div className="bg-primary/10 p-2 rounded-full">
@@ -90,14 +145,17 @@ const Analytics = () => {
       </div>
 
       <Tabs defaultValue="projects">
-        <TabsList className="mb-6 bg-secondary/50 backdrop-blur-sm">
+        <TabsList className="mb-6 bg-white/30 backdrop-blur-sm">
           <TabsTrigger value="projects">Projects</TabsTrigger>
           <TabsTrigger value="time">Time Tracking</TabsTrigger>
           <TabsTrigger value="departments">Departments</TabsTrigger>
+          <TabsTrigger value="web-analytics">Website Analytics</TabsTrigger>
+          <TabsTrigger value="app-usage">App Usage</TabsTrigger>
+          <TabsTrigger value="server-status">Server Status</TabsTrigger>
         </TabsList>
         
         <TabsContent value="projects">
-          <Card className="p-6 bg-card/40 backdrop-blur-md border border-white/10">
+          <Card className="chart-card p-6">
             <h3 className="text-lg font-medium mb-4">Project Status Overview</h3>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
@@ -105,7 +163,7 @@ const Analytics = () => {
                   data={projectData}
                   margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" />
+                  <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(5px)' }} />
@@ -120,7 +178,7 @@ const Analytics = () => {
         </TabsContent>
         
         <TabsContent value="time">
-          <Card className="p-6 bg-card/40 backdrop-blur-md border border-white/10">
+          <Card className="chart-card p-6">
             <h3 className="text-lg font-medium mb-4">Weekly Hours Logged</h3>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
@@ -128,7 +186,7 @@ const Analytics = () => {
                   data={timeData}
                   margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" />
+                  <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(5px)' }} />
@@ -141,7 +199,7 @@ const Analytics = () => {
         </TabsContent>
         
         <TabsContent value="departments">
-          <Card className="p-6 bg-card/40 backdrop-blur-md border border-white/10">
+          <Card className="chart-card p-6">
             <h3 className="text-lg font-medium mb-4">Resource Allocation by Department</h3>
             <div className="h-80 flex items-center justify-center">
               <ResponsiveContainer width="100%" height="100%">
@@ -165,6 +223,246 @@ const Analytics = () => {
               </ResponsiveContainer>
             </div>
           </Card>
+        </TabsContent>
+        
+        <TabsContent value="web-analytics">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <Card className="page-content p-4">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-medium">Unique Visitors</h3>
+                <div className="bg-primary/10 p-2 rounded-full">
+                  <Globe className="h-4 w-4 text-primary" />
+                </div>
+              </div>
+              <div className="text-3xl font-bold">24,892</div>
+              <div className="text-sm text-green-500">+8.2% from last month</div>
+            </Card>
+            
+            <Card className="page-content p-4">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-medium">Page Views</h3>
+                <div className="bg-primary/10 p-2 rounded-full">
+                  <Activity className="h-4 w-4 text-primary" />
+                </div>
+              </div>
+              <div className="text-3xl font-bold">78,623</div>
+              <div className="text-sm text-green-500">+12.5% from last month</div>
+            </Card>
+            
+            <Card className="page-content p-4">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-medium">Bounce Rate</h3>
+                <div className="bg-primary/10 p-2 rounded-full">
+                  <Activity className="h-4 w-4 text-primary" />
+                </div>
+              </div>
+              <div className="text-3xl font-bold">42.3%</div>
+              <div className="text-sm text-red-500">+2.8% from last month</div>
+            </Card>
+          </div>
+          
+          <Card className="chart-card p-6">
+            <h3 className="text-lg font-medium mb-4">Website Traffic Overview</h3>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart
+                  data={websiteData}
+                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(5px)' }} />
+                  <Legend />
+                  <Area type="monotone" dataKey="users" stackId="1" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} name="Users" />
+                  <Area type="monotone" dataKey="pageviews" stackId="2" stroke="#82ca9d" fill="#82ca9d" fillOpacity={0.6} name="Page Views" />
+                  <Area type="monotone" dataKey="sessions" stackId="3" stroke="#ffc658" fill="#ffc658" fillOpacity={0.6} name="Sessions" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="app-usage">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <Card className="page-content p-4">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-medium">Active Users</h3>
+                <div className="bg-primary/10 p-2 rounded-full">
+                  <Smartphone className="h-4 w-4 text-primary" />
+                </div>
+              </div>
+              <div className="text-3xl font-bold">1,050</div>
+              <div className="text-sm text-green-500">+5% from last month</div>
+            </Card>
+            
+            <Card className="page-content p-4">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-medium">Sessions per User</h3>
+                <div className="bg-primary/10 p-2 rounded-full">
+                  <Activity className="h-4 w-4 text-primary" />
+                </div>
+              </div>
+              <div className="text-3xl font-bold">1.8</div>
+              <div className="text-sm text-green-500">+0.3 from last month</div>
+            </Card>
+            
+            <Card className="page-content p-4">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-medium">Avg. Screen Time</h3>
+                <div className="bg-primary/10 p-2 rounded-full">
+                  <Clock className="h-4 w-4 text-primary" />
+                </div>
+              </div>
+              <div className="text-3xl font-bold">32m</div>
+              <div className="text-sm text-green-500">+2m from last month</div>
+            </Card>
+          </div>
+          
+          <Card className="chart-card p-6">
+            <h3 className="text-lg font-medium mb-4">App Usage Trends</h3>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={appUsageData}
+                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                  <XAxis dataKey="date" />
+                  <YAxis yAxisId="left" />
+                  <YAxis yAxisId="right" orientation="right" />
+                  <Tooltip contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(5px)' }} />
+                  <Legend />
+                  <Line yAxisId="left" type="monotone" dataKey="activeUsers" stroke="#8884d8" activeDot={{ r: 8 }} name="Active Users" />
+                  <Line yAxisId="left" type="monotone" dataKey="sessions" stroke="#82ca9d" name="Sessions" />
+                  <Line yAxisId="right" type="monotone" dataKey="screenTime" stroke="#ffc658" name="Screen Time (mins)" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="server-status">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <Card className="page-content p-4">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-medium">Total Servers</h3>
+                <div className="bg-primary/10 p-2 rounded-full">
+                  <Server className="h-4 w-4 text-primary" />
+                </div>
+              </div>
+              <div className="text-3xl font-bold">5</div>
+              <div className="flex space-x-2 mt-2">
+                <div className="px-2 py-1 rounded bg-green-500/20 text-green-700 text-xs">3 Healthy</div>
+                <div className="px-2 py-1 rounded bg-amber-500/20 text-amber-700 text-xs">1 Warning</div>
+                <div className="px-2 py-1 rounded bg-red-500/20 text-red-700 text-xs">1 Critical</div>
+              </div>
+            </Card>
+            
+            <Card className="page-content p-4">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-medium">Avg. CPU Usage</h3>
+                <div className="bg-primary/10 p-2 rounded-full">
+                  <Activity className="h-4 w-4 text-primary" />
+                </div>
+              </div>
+              <div className="text-3xl font-bold">53%</div>
+              <div className="text-sm text-amber-500">+8% from yesterday</div>
+            </Card>
+            
+            <Card className="page-content p-4">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-medium">Avg. Memory Usage</h3>
+                <div className="bg-primary/10 p-2 rounded-full">
+                  <Database className="h-4 w-4 text-primary" />
+                </div>
+              </div>
+              <div className="text-3xl font-bold">61%</div>
+              <div className="text-sm text-amber-500">+5% from yesterday</div>
+            </Card>
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card className="chart-card p-6">
+              <h3 className="text-lg font-medium mb-4">Server Status</h3>
+              <div className="space-y-4">
+                {serverStatusData.map((server) => (
+                  <div key={server.name} className="p-3 bg-white/30 rounded-md">
+                    <div className="flex justify-between items-center mb-2">
+                      <div className="flex items-center">
+                        <div className={`w-2 h-2 rounded-full ${STATUS_COLORS[server.status]} mr-2`}></div>
+                        <span className="font-medium">{server.name}</span>
+                      </div>
+                      <span className={`text-xs px-2 py-1 rounded ${STATUS_COLORS[server.status]}/20 ${server.status === 'Healthy' ? 'text-green-700' : server.status === 'Warning' ? 'text-amber-700' : 'text-red-700'}`}>
+                        {server.status}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div>
+                        <div className="text-xs text-muted-foreground">CPU</div>
+                        <div className="flex items-center">
+                          <div className="w-full bg-gray-200 rounded-full h-2 mr-2">
+                            <div 
+                              className={`h-2 rounded-full ${server.cpu > 80 ? 'bg-red-500' : server.cpu > 60 ? 'bg-amber-500' : 'bg-green-500'}`} 
+                              style={{ width: `${server.cpu}%` }}
+                            ></div>
+                          </div>
+                          <span className="text-xs">{server.cpu}%</span>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-muted-foreground">Memory</div>
+                        <div className="flex items-center">
+                          <div className="w-full bg-gray-200 rounded-full h-2 mr-2">
+                            <div 
+                              className={`h-2 rounded-full ${server.memory > 80 ? 'bg-red-500' : server.memory > 60 ? 'bg-amber-500' : 'bg-green-500'}`} 
+                              style={{ width: `${server.memory}%` }}
+                            ></div>
+                          </div>
+                          <span className="text-xs">{server.memory}%</span>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-muted-foreground">Disk</div>
+                        <div className="flex items-center">
+                          <div className="w-full bg-gray-200 rounded-full h-2 mr-2">
+                            <div 
+                              className={`h-2 rounded-full ${server.disk > 80 ? 'bg-red-500' : server.disk > 60 ? 'bg-amber-500' : 'bg-green-500'}`} 
+                              style={{ width: `${server.disk}%` }}
+                            ></div>
+                          </div>
+                          <span className="text-xs">{server.disk}%</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+            
+            <Card className="chart-card p-6">
+              <h3 className="text-lg font-medium mb-4">CPU Load Over Time</h3>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={cpuLoadData}
+                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                    <XAxis dataKey="time" />
+                    <YAxis />
+                    <Tooltip contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(5px)' }} />
+                    <Legend />
+                    <Line type="monotone" dataKey="web01" stroke="#4CAF50" name="Web-01" />
+                    <Line type="monotone" dataKey="web02" stroke="#2196F3" name="Web-02" />
+                    <Line type="monotone" dataKey="db01" stroke="#FFC107" name="DB-01" />
+                    <Line type="monotone" dataKey="cache01" stroke="#9C27B0" name="Cache-01" />
+                    <Line type="monotone" dataKey="api01" stroke="#F44336" name="API-01" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
