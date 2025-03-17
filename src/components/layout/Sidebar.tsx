@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -118,7 +117,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
           isOpen ? "flex items-center space-x-3" : "flex flex-col items-center"
         )}>
           <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-            <User className="h-5 w-5" />
+            <Users className="h-5 w-5" />
           </div>
           {isOpen && (
             <div className="min-w-0">
