@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   Home, Clock, Briefcase, Users, FileText, Settings, ChevronLeft, ChevronRight, Calendar, BarChart3,
-  Sparkles, Database, Wrench
+  Sparkles, Database, Wrench, Building, ShoppingCart, LayoutDashboard
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -27,6 +27,8 @@ const mainNavItems: NavItem[] = [
   { name: 'AI Assistant', path: '/ai-assistant', icon: Sparkles },
   { name: 'DMS', path: '/dms', icon: Database },
   { name: 'Handy Tools', path: '/tools', icon: Wrench },
+  { name: 'MIS', path: '/mis', icon: LayoutDashboard },
+  { name: 'Requisition', path: '/requisition', icon: ShoppingCart },
 ];
 
 const secondaryNavItems: NavItem[] = [
@@ -67,9 +69,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
             <>
               <Link to="/" className="flex items-center space-x-2">
                 <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
-                  <span className="text-primary-foreground text-lg font-bold">G</span>
+                  <Building className="h-5 w-5 text-primary-foreground" />
                 </div>
-                <span className="font-semibold text-lg">GlobalHub</span>
+                <span className="font-semibold text-lg">BM Office</span>
               </Link>
               <button 
                 onClick={toggleSidebar}

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -20,6 +19,8 @@ import DMS from "./pages/DMS";
 import Tools from "./pages/Tools";
 import Analytics from "./pages/Analytics";
 import SettingsPage from "./pages/Settings";
+import MIS from "./pages/MIS";
+import Requisition from "./pages/Requisition";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,7 +32,6 @@ const App = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
   
-  // Apply a default background on first load
   useEffect(() => {
     const defaultBackgroundUrl = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=2070';
     document.body.style.backgroundImage = `url(${defaultBackgroundUrl})`;
@@ -39,7 +39,6 @@ const App = () => {
     document.body.style.backgroundPosition = 'center';
     document.body.style.backgroundAttachment = 'fixed';
     
-    // Create a pseudo-element for the blur effect
     const styleEl = document.createElement('style');
     styleEl.innerHTML = `
       body::before {
@@ -97,6 +96,8 @@ const App = () => {
                     <Route path="/tools" element={<Tools />} />
                     <Route path="/analytics" element={<Analytics />} />
                     <Route path="/settings" element={<SettingsPage />} />
+                    <Route path="/mis" element={<MIS />} />
+                    <Route path="/requisition" element={<Requisition />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </PageTransition>
