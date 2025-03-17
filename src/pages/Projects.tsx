@@ -1,224 +1,239 @@
 
-import React from 'react';
-import { Search, Plus, Filter, BarChart3, Users, Clock, Calendar, ChevronRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, Plus, Filter, Calendar, Clock, Users, CheckCircle, Circle, MoreHorizontal } from 'lucide-react';
 import { Card } from '@/components/common/Card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
 
-const projects = [
-  {
-    id: 1,
-    name: 'Website Redesign',
-    client: 'Acme Corp',
-    progress: 75,
-    status: 'In Progress',
-    team: 5,
-    dueDate: '2023-12-15',
-    description: 'Complete overhaul of the corporate website with new design system.',
-  },
-  {
-    id: 2,
-    name: 'Mobile Application',
-    client: 'Global Tech',
-    progress: 45,
-    status: 'In Progress',
-    team: 8,
-    dueDate: '2024-01-30',
-    description: 'Cross-platform mobile application for customer engagement.',
-  },
-  {
-    id: 3,
-    name: 'CRM Integration',
-    client: 'InnoSystems',
-    progress: 90,
-    status: 'Nearly Complete',
-    team: 3,
-    dueDate: '2023-11-25',
-    description: 'Integration of new CRM system with existing infrastructure.',
-  },
-  {
-    id: 4,
-    name: 'Marketing Campaign',
-    client: 'StyleBrands',
-    progress: 20,
-    status: 'Just Started',
-    team: 4,
-    dueDate: '2024-02-28',
-    description: 'Q1 marketing campaign for new product launches.',
-  },
-];
+type ProjectStatus = 'active' | 'completed' | 'onHold';
+
+type Project = {
+  id: number;
+  name: string;
+  client: string;
+  status: ProjectStatus;
+  progress: number;
+  dueDate: string;
+  team: string[];
+  description: string;
+  tags: string[];
+};
+
+const ProjectItem: React.FC<{ project: Project }> = ({ project }) => {
+  const getStatusColor = (status: ProjectStatus) => {
+    switch (status) {
+      case 'active': return 'bg-green-500';
+      case 'completed': return 'bg-blue-500';
+      case 'onHold': return 'bg-amber-500';
+      default: return 'bg-gray-500';
+    }
+  };
+  
+  const statusColor = getStatusColor(project.status);
+  
+  return (
+    <Card className="bg-card/40 backdrop-blur-md border border-white/10 hover:border-primary/30 transition">
+      <div className="p-6">
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <div className="flex items-center">
+              <div className={`w-2 h-2 rounded-full ${statusColor} mr-2`}></div>
+              <h3 className="text-lg font-semibold">{project.name}</h3>
+            </div>
+            <div className="text-sm text-muted-foreground mt-1">{project.client}</div>
+          </div>
+          <Button variant="ghost" size="icon">
+            <MoreHorizontal className="h-5 w-5" />
+          </Button>
+        </div>
+        
+        <p className="text-sm mb-4 line-clamp-2">{project.description}</p>
+        
+        <div className="mb-4">
+          <div className="flex justify-between text-sm mb-1">
+            <span>Progress</span>
+            <span>{project.progress}%</span>
+          </div>
+          <Progress value={project.progress} className="h-2" />
+        </div>
+        
+        <div className="flex flex-wrap gap-2 mb-4">
+          {project.tags.map((tag, index) => (
+            <Badge key={index} variant="secondary" className="bg-secondary/40 backdrop-blur-sm">
+              {tag}
+            </Badge>
+          ))}
+        </div>
+        
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="flex items-center">
+            <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
+            <span>{project.dueDate}</span>
+          </div>
+          <div className="flex items-center">
+            <Users className="h-4 w-4 mr-2 text-muted-foreground" />
+            <span>{project.team.length} Members</span>
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+};
 
 const Projects = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  const projects: Project[] = [
+    {
+      id: 1,
+      name: 'Website Redesign',
+      client: 'Acme Corporation',
+      status: 'active',
+      progress: 65,
+      dueDate: 'Dec 15, 2023',
+      team: ['John D.', 'Sarah L.', 'Michael B.'],
+      description: 'Complete overhaul of the corporate website with focus on user experience and conversion optimization.',
+      tags: ['Web', 'Design', 'UX']
+    },
+    {
+      id: 2,
+      name: 'Mobile App Development',
+      client: 'TechStart Inc.',
+      status: 'active',
+      progress: 40,
+      dueDate: 'Jan 30, 2024',
+      team: ['Emma S.', 'David K.', 'Lisa T.', 'Marcus W.'],
+      description: 'Developing a cross-platform mobile application for inventory management and order processing.',
+      tags: ['Mobile', 'React Native', 'API']
+    },
+    {
+      id: 3,
+      name: 'Annual Marketing Campaign',
+      client: 'Global Retail',
+      status: 'active',
+      progress: 85,
+      dueDate: 'Dec 05, 2023',
+      team: ['Robert J.', 'Anna P.'],
+      description: 'Planning and execution of the annual holiday marketing campaign across multiple channels.',
+      tags: ['Marketing', 'Strategy', 'Social Media']
+    },
+    {
+      id: 4,
+      name: 'Infrastructure Upgrade',
+      client: 'FinServe Solutions',
+      status: 'onHold',
+      progress: 30,
+      dueDate: 'Feb 28, 2024',
+      team: ['Thomas R.', 'Julia M.', 'Christopher L.'],
+      description: 'Modernizing the IT infrastructure with cloud migration and security enhancements.',
+      tags: ['IT', 'Cloud', 'Security']
+    },
+    {
+      id: 5,
+      name: 'User Research Study',
+      client: 'HealthCare Inc.',
+      status: 'completed',
+      progress: 100,
+      dueDate: 'Oct 20, 2023',
+      team: ['Sophie G.', 'Daniel T.'],
+      description: 'Comprehensive user research study to gather insights for the upcoming product redesign.',
+      tags: ['Research', 'UX', 'Analytics']
+    },
+    {
+      id: 6,
+      name: 'Brand Identity Refresh',
+      client: 'Nexus Innovations',
+      status: 'active',
+      progress: 75,
+      dueDate: 'Dec 22, 2023',
+      team: ['Laura B.', 'Connor S.', 'Maria L.'],
+      description: 'Refreshing the brand identity including logo, color palette, and brand guidelines.',
+      tags: ['Branding', 'Design', 'Strategy']
+    },
+  ];
+  
+  const filteredProjects = projects.filter(project => 
+    project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    project.client.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    project.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+  
+  const activeProjects = filteredProjects.filter(p => p.status === 'active');
+  const completedProjects = filteredProjects.filter(p => p.status === 'completed');
+  const onHoldProjects = filteredProjects.filter(p => p.status === 'onHold');
+  
   return (
-    <div className="space-y-8 animate-fade-in">
-      {/* Page header */}
-      <div className="glass-card p-6 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-semibold mb-1">Projects</h1>
-          <p className="text-muted-foreground">Track and manage your ongoing projects</p>
+          <h1 className="text-2xl font-semibold">Projects</h1>
+          <p className="text-muted-foreground">Manage and track your projects</p>
         </div>
-        
-        <div className="flex gap-3">
-          <div className="relative w-64">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <input 
-              type="search" 
-              placeholder="Search projects..." 
-              className="pl-9 pr-4 py-2 w-full bg-secondary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50" 
-            />
-          </div>
-          <button className="bg-secondary hover:bg-secondary/80 transition-colors rounded-lg px-4 py-2 flex items-center gap-1">
-            <Filter className="w-4 h-4" />
-            <span>Filter</span>
-          </button>
-          <button className="bg-primary text-white hover:bg-primary/90 transition-colors rounded-lg px-4 py-2 flex items-center gap-1">
-            <Plus className="w-4 h-4" />
-            <span>New Project</span>
-          </button>
-        </div>
+        <Button className="gap-1">
+          <Plus className="h-4 w-4" />
+          New Project
+        </Button>
       </div>
       
-      {/* Stats overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="p-6 flex items-center gap-4">
-          <div className="bg-primary/10 text-primary rounded-full p-3">
-            <BarChart3 className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="text-muted-foreground text-sm">Active Projects</div>
-            <div className="text-2xl font-semibold">{projects.length}</div>
-          </div>
-        </Card>
-        
-        <Card className="p-6 flex items-center gap-4">
-          <div className="bg-green-100 text-green-600 rounded-full p-3">
-            <Users className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="text-muted-foreground text-sm">Team Members</div>
-            <div className="text-2xl font-semibold">15</div>
-          </div>
-        </Card>
-        
-        <Card className="p-6 flex items-center gap-4">
-          <div className="bg-amber-100 text-amber-600 rounded-full p-3">
-            <Clock className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="text-muted-foreground text-sm">Hours Logged</div>
-            <div className="text-2xl font-semibold">246</div>
-          </div>
-        </Card>
-        
-        <Card className="p-6 flex items-center gap-4">
-          <div className="bg-blue-100 text-blue-600 rounded-full p-3">
-            <Calendar className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="text-muted-foreground text-sm">Upcoming Deadlines</div>
-            <div className="text-2xl font-semibold">3</div>
-          </div>
-        </Card>
+      <div className="flex items-center space-x-2">
+        <div className="relative flex-grow">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input 
+            placeholder="Search projects" 
+            className="pl-9 bg-background/50 backdrop-blur-sm"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+        <Button variant="outline" className="gap-1">
+          <Filter className="h-4 w-4" />
+          Filter
+        </Button>
       </div>
       
-      {/* Projects list */}
-      <Card>
-        <div className="p-4 border-b flex justify-between items-center">
-          <h2 className="font-medium">Active Projects</h2>
-          <button className="text-primary text-sm hover:underline flex items-center">
-            View All <ChevronRight className="w-4 h-4 ml-1" />
-          </button>
-        </div>
+      <Tabs defaultValue="all">
+        <TabsList className="mb-6 bg-secondary/50 backdrop-blur-sm">
+          <TabsTrigger value="all">All Projects</TabsTrigger>
+          <TabsTrigger value="active">Active</TabsTrigger>
+          <TabsTrigger value="completed">Completed</TabsTrigger>
+          <TabsTrigger value="onHold">On Hold</TabsTrigger>
+        </TabsList>
         
-        <div className="divide-y">
-          {projects.map((project, index) => (
-            <div 
-              key={project.id} 
-              className="p-6 hover:bg-secondary/30 transition-colors cursor-pointer animate-fade-in"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-lg font-medium">{project.name}</h3>
-                    <div className={`px-2 py-0.5 rounded-full text-xs ${
-                      project.progress > 75 ? 'bg-green-100 text-green-800' :
-                      project.progress > 25 ? 'bg-amber-100 text-amber-800' :
-                      'bg-blue-100 text-blue-800'
-                    }`}>
-                      {project.status}
-                    </div>
-                  </div>
-                  <p className="text-muted-foreground">{project.description}</p>
-                  <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Users className="w-3.5 h-3.5" />
-                      <span>{project.team} members</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5" />
-                      <span>Due {new Date(project.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                    </div>
-                    <div>Client: {project.client}</div>
-                  </div>
-                </div>
-                
-                <div className="w-full md:w-64">
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>Progress</span>
-                    <span className="font-medium">{project.progress}%</span>
-                  </div>
-                  <div className="w-full bg-secondary rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full transition-all duration-1000 ease-out ${
-                        project.progress > 75 ? 'bg-green-500' :
-                        project.progress > 25 ? 'bg-amber-500' :
-                        'bg-blue-500'
-                      }`}
-                      style={{ width: `${project.progress}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </Card>
-      
-      {/* Recent activity */}
-      <Card>
-        <div className="p-4 border-b">
-          <h2 className="font-medium">Recent Project Activity</h2>
-        </div>
+        <TabsContent value="all">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredProjects.map(project => (
+              <ProjectItem key={project.id} project={project} />
+            ))}
+          </div>
+        </TabsContent>
         
-        <div className="p-6 space-y-4">
-          {[
-            { user: 'Alice Smith', action: 'completed task "Update homepage design"', project: 'Website Redesign', time: '2 hours ago' },
-            { user: 'Bob Johnson', action: 'added comment on "API Integration"', project: 'CRM Integration', time: '3 hours ago' },
-            { user: 'Charlie Lee', action: 'updated deadline for "User Testing"', project: 'Mobile Application', time: '5 hours ago' },
-            { user: 'Diana Wang', action: 'created new task "Social Media Assets"', project: 'Marketing Campaign', time: 'Yesterday' },
-            { user: 'Ethan Brown', action: 'added team member "Frank Miller"', project: 'Website Redesign', time: 'Yesterday' },
-          ].map((activity, index) => (
-            <div 
-              key={index} 
-              className="flex items-start gap-3 pb-4 border-b last:border-0 last:pb-0 animate-slide-in"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary flex-shrink-0 mt-1">
-                {activity.user[0]}
-              </div>
-              <div>
-                <p>
-                  <span className="font-medium">{activity.user}</span>{' '}
-                  <span className="text-muted-foreground">{activity.action}</span>
-                </p>
-                <p className="text-sm">
-                  <span className="text-primary">{activity.project}</span>
-                  <span className="text-muted-foreground"> • {activity.time}</span>
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </Card>
+        <TabsContent value="active">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {activeProjects.map(project => (
+              <ProjectItem key={project.id} project={project} />
+            ))}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="completed">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {completedProjects.map(project => (
+              <ProjectItem key={project.id} project={project} />
+            ))}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="onHold">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {onHoldProjects.map(project => (
+              <ProjectItem key={project.id} project={project} />
+            ))}
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

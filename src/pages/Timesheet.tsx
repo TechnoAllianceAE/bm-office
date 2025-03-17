@@ -1,194 +1,187 @@
 
 import React, { useState } from 'react';
-import { Clock, Plus, Calendar, Filter, ChevronRight } from 'lucide-react';
+import { Calendar, Clock, ChevronLeft, ChevronRight, Plus, Filter, Download } from 'lucide-react';
 import { Card } from '@/components/common/Card';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+// Sample project data
+const projects = [
+  { id: 1, name: 'Website Redesign', client: 'Acme Corp', color: 'bg-blue-500' },
+  { id: 2, name: 'Mobile App Development', client: 'TechStart', color: 'bg-green-500' },
+  { id: 3, name: 'Marketing Campaign', client: 'Global Retail', color: 'bg-purple-500' },
+  { id: 4, name: 'Infrastructure Upgrade', client: 'FinServe', color: 'bg-amber-500' },
+  { id: 5, name: 'User Research', client: 'HealthCare Inc', color: 'bg-pink-500' },
+];
+
+// Sample timesheet entries
+const timesheetEntries = [
+  { id: 1, date: '2023-11-20', project: 1, hours: 3.5, notes: 'Homepage wireframes' },
+  { id: 2, date: '2023-11-20', project: 3, hours: 2, notes: 'Content strategy' },
+  { id: 3, date: '2023-11-20', project: 5, hours: 1.5, notes: 'User interviews' },
+  { id: 4, date: '2023-11-21', project: 1, hours: 4, notes: 'Design implementation' },
+  { id: 5, date: '2023-11-21', project: 2, hours: 3, notes: 'API development' },
+  { id: 6, date: '2023-11-22', project: 4, hours: 6, notes: 'Server configuration' },
+  { id: 7, date: '2023-11-22', project: 3, hours: 2, notes: 'Campaign analytics' },
+  { id: 8, date: '2023-11-23', project: 2, hours: 5, notes: 'Frontend development' },
+  { id: 9, date: '2023-11-24', project: 5, hours: 4, notes: 'Analysis and reporting' },
+  { id: 10, date: '2023-11-24', project: 1, hours: 3, notes: 'Client feedback review' },
+];
 
 const Timesheet = () => {
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const [currentWeek, setCurrentWeek] = useState('Nov 20 - Nov 26, 2023');
   
-  // Get the current week dates
-  const getCurrentWeekDates = () => {
-    const currentDate = new Date(selectedDate);
-    const day = currentDate.getDay();
-    const diff = currentDate.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is Sunday
-    
-    return days.map((_, index) => {
-      const date = new Date(currentDate);
-      date.setDate(diff + index);
-      return date;
-    });
-  };
-  
-  const weekDates = getCurrentWeekDates();
-  
-  // Dummy timesheet entries data
-  const timesheetEntries = [
-    { project: 'Marketing Website', task: 'Design Updates', hours: 3.5, date: new Date() },
-    { project: 'Marketing Website', task: 'Client Meeting', hours: 1, date: new Date() },
-    { project: 'CRM Integration', task: 'API Development', hours: 4, date: new Date() },
-    { project: 'Mobile App', task: 'UI Implementation', hours: 2.5, date: new Date(Date.now() - 86400000) },
-    { project: 'Mobile App', task: 'Bug Fixes', hours: 1.5, date: new Date(Date.now() - 86400000) },
-  ];
-  
-  // Group entries by date
-  const groupedEntries = timesheetEntries.reduce((acc, entry) => {
-    const dateKey = entry.date.toDateString();
-    if (!acc[dateKey]) {
-      acc[dateKey] = [];
-    }
-    acc[dateKey].push(entry);
-    return acc;
-  }, {} as Record<string, typeof timesheetEntries>);
-  
+  // Generate days of the week
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const dates = ['20', '21', '22', '23', '24', '25', '26'];
+
+  const getProjectById = (id: number) => projects.find(project => project.id === id);
+
+  const totalHours = timesheetEntries.reduce((sum, entry) => sum + entry.hours, 0);
+
   return (
-    <div className="space-y-8 animate-fade-in">
-      {/* Page header */}
-      <div className="glass-card p-6 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-semibold mb-1">Timesheet</h1>
+          <h1 className="text-2xl font-semibold">Timesheet</h1>
           <p className="text-muted-foreground">Track and manage your working hours</p>
         </div>
-        
-        <div className="flex gap-2">
-          <button className="bg-primary/10 text-primary hover:bg-primary/20 transition-colors rounded-lg px-4 py-2 flex items-center gap-2">
-            <Calendar className="w-4 h-4" />
-            <span>Calendar View</span>
-          </button>
-          <button className="bg-primary text-white hover:bg-primary/90 transition-colors rounded-lg px-4 py-2 flex items-center gap-2">
-            <Plus className="w-4 h-4" />
-            <span>Log Time</span>
-          </button>
+        <div className="flex items-center space-x-2">
+          <Button variant="outline" size="icon" onClick={() => {}}>
+            <Filter className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="icon" onClick={() => {}}>
+            <Download className="h-4 w-4" />
+          </Button>
+          <Button className="gap-1">
+            <Plus className="h-4 w-4" />
+            New Entry
+          </Button>
         </div>
       </div>
-      
-      {/* Weekly view */}
-      <Card>
-        <div className="p-4 border-b flex justify-between items-center">
-          <h2 className="font-medium">Weekly Overview</h2>
-          <div className="flex gap-2">
-            <button className="bg-secondary hover:bg-secondary/80 transition-colors rounded-lg px-3 py-1.5 text-sm flex items-center gap-1">
-              <Filter className="w-3.5 h-3.5" />
-              <span>Filter</span>
-            </button>
-            <button className="bg-secondary hover:bg-secondary/80 transition-colors rounded-lg px-3 py-1.5 text-sm">
-              Previous Week
-            </button>
-            <button className="bg-secondary hover:bg-secondary/80 transition-colors rounded-lg px-3 py-1.5 text-sm">
-              Next Week
-            </button>
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-7 divide-x border-b">
-          {weekDates.map((date, index) => {
-            const isToday = date.toDateString() === new Date().toDateString();
-            const dateKey = date.toDateString();
-            const entriesForDay = groupedEntries[dateKey] || [];
-            const totalHours = entriesForDay.reduce((sum, entry) => sum + entry.hours, 0);
-            
-            return (
-              <div 
-                key={index}
-                className={`p-4 flex flex-col items-center ${isToday ? 'bg-primary/5' : ''}`}
-              >
-                <p className="text-sm text-muted-foreground">{days[index]}</p>
-                <p className={`text-lg font-medium ${isToday ? 'text-primary' : ''}`}>
-                  {date.getDate()}
-                </p>
-                <div className={`mt-2 px-3 py-1 rounded-full text-sm ${
-                  isToday ? 'bg-primary text-white' : totalHours > 0 ? 'bg-secondary' : 'bg-secondary/50'
-                }`}>
-                  {totalHours > 0 ? `${totalHours}h` : 'No time'}
+
+      <Tabs defaultValue="week">
+        <TabsList className="mb-6 bg-secondary/50 backdrop-blur-sm">
+          <TabsTrigger value="week">Week</TabsTrigger>
+          <TabsTrigger value="month">Month</TabsTrigger>
+          <TabsTrigger value="entries">All Entries</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="week">
+          <Card className="p-6 bg-card/40 backdrop-blur-md border border-white/10">
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex items-center space-x-4">
+                <Button variant="outline" size="icon" onClick={() => {}}>
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <div className="flex items-center">
+                  <Calendar className="h-5 w-5 mr-2" />
+                  <span className="font-medium">{currentWeek}</span>
                 </div>
+                <Button variant="outline" size="icon" onClick={() => {}}>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
               </div>
-            );
-          })}
-        </div>
-        
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="font-medium">Recent Time Entries</h3>
-            <button className="text-primary text-sm hover:underline flex items-center">
-              View All <ChevronRight className="w-4 h-4 ml-1" />
-            </button>
-          </div>
-          
-          <div className="space-y-2">
-            {timesheetEntries.slice(0, 5).map((entry, index) => (
-              <div 
-                key={index} 
-                className="bg-secondary/30 rounded-lg p-4 flex justify-between items-center hover:bg-secondary/50 transition-colors cursor-pointer animate-fade-in"
-                style={{ animationDelay: `${index * 50}ms` }}
-              >
-                <div className="flex gap-3 items-center">
-                  <div className="bg-primary/10 text-primary rounded-full p-2">
-                    <Clock className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <p className="font-medium">{entry.project}</p>
-                    <p className="text-sm text-muted-foreground">{entry.task}</p>
-                  </div>
-                </div>
-                <div className="flex gap-6 items-center">
-                  <div className="text-right">
-                    <p className="font-medium">{entry.hours}h</p>
-                    <p className="text-sm text-muted-foreground">
-                      {entry.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                    </p>
-                  </div>
-                  <button className="text-muted-foreground hover:text-foreground">
-                    <ChevronRight className="w-5 h-5" />
-                  </button>
-                </div>
+              <div className="flex items-center space-x-2">
+                <Clock className="h-5 w-5 text-muted-foreground" />
+                <span className="font-medium">{totalHours} hours this week</span>
               </div>
-            ))}
-          </div>
-        </div>
-      </Card>
-      
-      {/* Weekly statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="p-6">
-          <div className="text-muted-foreground text-sm mb-1">This Week</div>
-          <div className="text-3xl font-semibold">32.5h</div>
-          <div className="flex items-center text-sm mt-2">
-            <span className="text-green-500 font-medium">80%</span>
-            <span className="ml-1 text-muted-foreground">of target (40h)</span>
-          </div>
-          <div className="w-full bg-secondary rounded-full h-2 mt-4">
-            <div className="bg-primary h-2 rounded-full transition-all duration-1000 ease-out animate-slide-in" style={{ width: '80%' }} />
-          </div>
-        </Card>
-        
-        <Card className="p-6">
-          <div className="text-muted-foreground text-sm mb-1">Previous Week</div>
-          <div className="text-3xl font-semibold">38.0h</div>
-          <div className="flex items-center text-sm mt-2">
-            <span className="text-green-500 font-medium">95%</span>
-            <span className="ml-1 text-muted-foreground">of target (40h)</span>
-          </div>
-          <div className="w-full bg-secondary rounded-full h-2 mt-4">
-            <div className="bg-primary h-2 rounded-full" style={{ width: '95%' }} />
-          </div>
-        </Card>
-        
-        <Card className="p-6">
-          <div className="text-muted-foreground text-sm mb-1">Most Time On</div>
-          <div className="text-xl font-semibold mt-1">Marketing Website</div>
-          <div className="text-muted-foreground text-sm mt-1">12.5 hours this week</div>
-          <div className="w-full bg-secondary rounded-full h-2 mt-4">
-            <div className="bg-primary h-2 rounded-full" style={{ width: '40%' }} />
-          </div>
-        </Card>
-        
-        <Card className="p-6">
-          <div className="text-muted-foreground text-sm mb-1">Pending Approvals</div>
-          <div className="text-3xl font-semibold">2</div>
-          <div className="text-muted-foreground text-sm mt-2">Timesheets awaiting approval</div>
-          <button className="text-primary text-sm mt-4 hover:underline">Review now</button>
-        </Card>
-      </div>
+            </div>
+
+            <div className="grid grid-cols-7 gap-4">
+              {/* Day headers */}
+              {days.map((day, i) => (
+                <div key={day} className="text-center">
+                  <div className="font-medium">{day}</div>
+                  <div className="text-sm text-muted-foreground">{dates[i]}</div>
+                </div>
+              ))}
+              
+              {/* Time blocks */}
+              {days.map((day, dayIndex) => (
+                <div 
+                  key={`time-${day}`} 
+                  className="bg-background/30 backdrop-blur-sm rounded-lg border border-border/50 h-32 relative hover:border-primary/30 transition cursor-pointer"
+                >
+                  {/* Filter entries for this day */}
+                  {timesheetEntries
+                    .filter(entry => {
+                      const entryDate = new Date(entry.date);
+                      return entryDate.getDate() === parseInt(dates[dayIndex]) && entryDate.getMonth() === 10; // November
+                    })
+                    .map(entry => {
+                      const project = getProjectById(entry.project);
+                      return (
+                        <div 
+                          key={entry.id} 
+                          className="p-2 text-xs rounded-md m-1 bg-white/10 backdrop-blur-sm border border-white/5"
+                        >
+                          <div className="flex items-center mb-1">
+                            <div className={`w-2 h-2 rounded-full mr-1 ${project?.color}`}></div>
+                            <span className="font-medium truncate">{project?.name}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="truncate">{entry.notes}</span>
+                            <span className="font-medium">{entry.hours}h</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              ))}
+            </div>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="month">
+          <Card className="flex items-center justify-center h-96 bg-card/40 backdrop-blur-md border border-white/10">
+            <div className="text-center">
+              <Calendar className="h-16 w-16 text-muted-foreground mb-4 mx-auto" />
+              <h3 className="text-lg font-medium mb-2">Month View Coming Soon</h3>
+              <p className="text-muted-foreground mb-4">
+                We're working on this feature. It will be available soon.
+              </p>
+            </div>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="entries">
+          <Card className="overflow-hidden bg-card/40 backdrop-blur-md border border-white/10">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-border/50">
+                <thead className="bg-secondary/30 backdrop-blur-sm">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Date</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Project</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Client</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Notes</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Hours</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-background/20 backdrop-blur-sm divide-y divide-border/50">
+                  {timesheetEntries.map((entry) => {
+                    const project = getProjectById(entry.project);
+                    return (
+                      <tr key={entry.id} className="hover:bg-secondary/20 transition">
+                        <td className="px-6 py-4 whitespace-nowrap">{entry.date}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className={`w-3 h-3 rounded-full mr-2 ${project?.color}`}></div>
+                            {project?.name}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">{project?.client}</td>
+                        <td className="px-6 py-4">{entry.notes}</td>
+                        <td className="px-6 py-4 whitespace-nowrap font-medium">{entry.hours}h</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

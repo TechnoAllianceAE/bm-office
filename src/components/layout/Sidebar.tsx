@@ -1,7 +1,9 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
-  Home, Clock, Briefcase, Users, FileText, Settings, ChevronLeft, ChevronRight, Calendar, BarChart3
+  Home, Clock, Briefcase, Users, FileText, Settings, ChevronLeft, ChevronRight, Calendar, BarChart3,
+  Sparkles, Database, Wrench
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -22,6 +24,9 @@ const mainNavItems: NavItem[] = [
   { name: 'Projects', path: '/projects', icon: Briefcase },
   { name: 'Calendar', path: '/calendar', icon: Calendar },
   { name: 'Directory', path: '/directory', icon: Users },
+  { name: 'AI Assistant', path: '/ai-assistant', icon: Sparkles },
+  { name: 'DMS', path: '/dms', icon: Database },
+  { name: 'Handy Tools', path: '/tools', icon: Wrench },
 ];
 
 const secondaryNavItems: NavItem[] = [
