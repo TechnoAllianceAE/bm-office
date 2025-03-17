@@ -38,8 +38,8 @@ const mainNavItems: NavItem[] = [
 
 const secondaryNavItems: NavItem[] = [
   { name: 'Directory', path: '/directory', icon: Users },
-  { name: 'Utilities', path: '/tools', icon: Wrench },
   { name: 'LMS', path: '/lms', icon: GraduationCap },
+  { name: 'Utilities', path: '/tools', icon: Wrench },
   { name: 'Analytics', path: '/analytics', icon: BarChart3 },
   { name: 'Settings', path: '/settings', icon: Settings },
 ];
