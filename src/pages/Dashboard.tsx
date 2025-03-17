@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { BarChart3, Clock, Calendar, Users, FileText, LineChart, PieChart, CheckCircle, ClipboardList, PlusCircle, X, AlertTriangle } from 'lucide-react';
 import { DashboardWidget } from '@/components/dashboard/DashboardWidget';
@@ -34,7 +33,6 @@ const Dashboard = () => {
   const [newTodoUrgent, setNewTodoUrgent] = useState(false);
   const [isAddingTodo, setIsAddingTodo] = useState(false);
 
-  // Get current time in India and UAE
   const [indiaTime, setIndiaTime] = useState('');
   const [uaeTime, setUaeTime] = useState('');
   const [indiaDate, setIndiaDate] = useState('');
@@ -42,51 +40,46 @@ const Dashboard = () => {
   const [isIndiaHoliday, setIsIndiaHoliday] = useState(false);
   const [isUaeHoliday, setIsUaeHoliday] = useState(false);
   
-  // Update time every minute
   useEffect(() => {
     const updateTime = () => {
-      // India time (UTC+5:30)
       const indiaOptions = { 
-        hour: '2-digit', 
-        minute: '2-digit', 
+        hour: "2-digit" as const, 
+        minute: "2-digit" as const, 
         timeZone: 'Asia/Kolkata' 
       };
       const indiaDateOptions = { 
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
+        weekday: 'long' as const,
+        year: 'numeric' as const,
+        month: 'long' as const,
+        day: 'numeric' as const,
         timeZone: 'Asia/Kolkata'
       };
       setIndiaTime(new Date().toLocaleTimeString('en-US', indiaOptions));
-      setIndiaDate(new Date().toLocaleDateString('en-US', indiaDateOptions as any));
+      setIndiaDate(new Date().toLocaleDateString('en-US', indiaDateOptions));
       
-      // UAE time (UTC+4)
       const uaeOptions = { 
-        hour: '2-digit', 
-        minute: '2-digit', 
+        hour: "2-digit" as const, 
+        minute: "2-digit" as const, 
         timeZone: 'Asia/Dubai' 
       };
       const uaeDateOptions = { 
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
+        weekday: 'long' as const,
+        year: 'numeric' as const,
+        month: 'long' as const,
+        day: 'numeric' as const,
         timeZone: 'Asia/Dubai'
       };
       setUaeTime(new Date().toLocaleTimeString('en-US', uaeOptions));
-      setUaeDate(new Date().toLocaleDateString('en-US', uaeDateOptions as any));
+      setUaeDate(new Date().toLocaleDateString('en-US', uaeDateOptions));
       
-      // Simulated holiday check - in a real app, this would check against an API or calendar
       const today = new Date();
-      const isWeekend = today.getDay() === 0 || today.getDay() === 6; // Sunday or Saturday
+      const isWeekend = today.getDay() === 0 || today.getDay() === 6;
       setIsIndiaHoliday(isWeekend);
-      setIsUaeHoliday(today.getDay() === 5 || today.getDay() === 6); // Friday or Saturday for UAE weekend
+      setIsUaeHoliday(today.getDay() === 5 || today.getDay() === 6);
     };
     
     updateTime();
-    const interval = setInterval(updateTime, 60000); // Update every minute
-    
+    const interval = setInterval(updateTime, 60000);
     return () => clearInterval(interval);
   }, []);
   
@@ -125,7 +118,6 @@ const Dashboard = () => {
     setTodos(todos.filter(todo => todo.id !== id));
   };
   
-  // Sort todos: urgent first, then by creation date (newest first)
   const sortedTodos = [...todos].sort((a, b) => {
     if (a.urgent && !b.urgent) return -1;
     if (!a.urgent && b.urgent) return 1;
@@ -134,7 +126,6 @@ const Dashboard = () => {
   
   return (
     <div className="flex flex-col lg:flex-row gap-8 animate-fade-in">
-      {/* Todo list column - only visible on larger screens in sidebar layout */}
       <div className="w-full lg:w-72 flex-shrink-0">
         <Card className="p-4 bg-yellow-50/80 h-full flex flex-col glassmorphic-card">
           <div className="flex items-center justify-between mb-4">
@@ -217,15 +208,13 @@ const Dashboard = () => {
         </Card>
       </div>
       
-      {/* Main dashboard content */}
       <div className="flex-1">
-        {/* Welcome header */}
         <div className="glass-card p-8 rounded-xl">
           <h1 className="text-3xl font-semibold mb-1">Welcome back, John</h1>
           <p className="text-muted-foreground">Here's what's happening today.</p>
           
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
-            <Card className="p-4 flex flex-col items-center justify-center" animationDelay={100}>
+            <Card className="p-4 flex flex-col items-center justify-center" style={{ animationDelay: '100ms' }}>
               <p className="text-sm text-muted-foreground mb-1">Time Logged This Week</p>
               <div className="flex items-baseline">
                 <AnimatedCounter value={32} className="text-2xl font-semibold" />
@@ -233,24 +222,23 @@ const Dashboard = () => {
               </div>
             </Card>
             
-            <Card className="p-4 flex flex-col items-center justify-center" animationDelay={200}>
+            <Card className="p-4 flex flex-col items-center justify-center" style={{ animationDelay: '200ms' }}>
               <p className="text-sm text-muted-foreground mb-1">Active Projects</p>
               <AnimatedCounter value={7} className="text-2xl font-semibold" />
             </Card>
             
-            <Card className="p-4 flex flex-col items-center justify-center" animationDelay={300}>
+            <Card className="p-4 flex flex-col items-center justify-center" style={{ animationDelay: '300ms' }}>
               <p className="text-sm text-muted-foreground mb-1">Pending Tasks</p>
               <AnimatedCounter value={12} className="text-2xl font-semibold" />
             </Card>
             
-            <Card className="p-4 flex flex-col items-center justify-center" animationDelay={400}>
+            <Card className="p-4 flex flex-col items-center justify-center" style={{ animationDelay: '400ms' }}>
               <p className="text-sm text-muted-foreground mb-1">Upcoming Meetings</p>
               <AnimatedCounter value={3} className="text-2xl font-semibold" />
             </Card>
           </div>
         </div>
         
-        {/* Time widget for India and UAE */}
         <div className="glass-card p-6 rounded-xl my-6">
           <h2 className="font-semibold mb-4">Current Time</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -292,7 +280,6 @@ const Dashboard = () => {
           </div>
         </div>
         
-        {/* Widgets */}
         <WidgetGrid>
           <DashboardWidget 
             title="Recent Timesheets" 
@@ -433,7 +420,6 @@ const Dashboard = () => {
         </WidgetGrid>
       </div>
       
-      {/* Add Todo Dialog */}
       <Dialog open={isAddingTodo} onOpenChange={setIsAddingTodo}>
         <DialogContent>
           <DialogHeader>

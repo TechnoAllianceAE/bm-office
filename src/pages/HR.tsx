@@ -36,7 +36,7 @@ const HR = () => {
           <Card 
             key={index} 
             className="p-6 cursor-pointer hover:shadow-md transition-shadow animate-scale-in"
-            animationDelay={index * 100}
+            style={{ animationDelay: `${index * 100}ms` }}
           >
             <div className="flex flex-col items-center md:flex-row md:items-center gap-4">
               <div className={`${action.color} rounded-full p-3`}>

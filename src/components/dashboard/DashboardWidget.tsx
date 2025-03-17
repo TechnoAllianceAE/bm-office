@@ -18,12 +18,12 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
   children,
   className,
   footer,
-  animationDelay = 0,
+  animationDelay,
 }) => {
   return (
     <Card 
       className={cn("flex flex-col h-full", className)} 
-      animationDelay={animationDelay}
+      style={animationDelay !== undefined ? { animationDelay: `${animationDelay}ms` } : undefined}
     >
       <div className="px-5 py-4 flex items-center justify-between border-b">
         <h3 className="font-medium flex items-center">

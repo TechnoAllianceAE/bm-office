@@ -1,21 +1,33 @@
+
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
 const Card = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & { onClick?: () => void }
->(({ className, onClick, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "rounded-lg border bg-card text-card-foreground shadow-sm",
-      className
-    )}
-    onClick={onClick}
-    {...props}
-  />
-))
+  React.HTMLAttributes<HTMLDivElement> & { 
+    onClick?: () => void;
+    animationDelay?: number;
+  }
+>(({ className, onClick, animationDelay, style, ...props }, ref) => {
+  // Apply animation delay as inline style if provided
+  const combinedStyle = animationDelay !== undefined
+    ? { ...style, animationDelay: `${animationDelay}ms` }
+    : style;
+
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        "rounded-lg border bg-card text-card-foreground shadow-sm",
+        className
+      )}
+      onClick={onClick}
+      style={combinedStyle}
+      {...props}
+    />
+  );
+})
 Card.displayName = "Card"
 
 const CardHeader = React.forwardRef<

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Filter, GraduationCap, BookOpen, Book, Video, Play } from 'lucide-react';
@@ -201,7 +200,7 @@ const FeaturedCourses = ({ courses }) => {
           >
             <Card 
               className="glassmorphic-card h-full flex flex-col hover:shadow-lg transition-all duration-300"
-              animationDelay={course.id * 100}
+              style={{ animationDelay: `${course.id * 100}ms` }}
             >
               <div 
                 className="h-40 rounded-t-xl bg-cover bg-center relative"
@@ -274,7 +273,7 @@ const AllCourses = ({ courses, title }) => {
           >
             <Card 
               className="glassmorphic-card h-full flex flex-col hover:shadow-lg transition-all duration-300"
-              animationDelay={course.id * 100}
+              style={{ animationDelay: `${course.id * 100}ms` }}
             >
               <div 
                 className="h-40 rounded-t-xl bg-cover bg-center relative"

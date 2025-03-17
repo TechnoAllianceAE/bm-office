@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
   ChevronLeft, Play, Pause, SkipForward, SkipBack, 
   Volume2, VolumeX, Maximize, List, BookOpen, MessageSquare, 
-  GraduationCap, ThumbsUp, Download, Share2
+  GraduationCap, ThumbsUp, Download, Share2, Sparkle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/common/Card';
@@ -289,7 +288,7 @@ const CourseView = () => {
           {/* AI Assistant Card */}
           <Card className="glassmorphic-card p-4">
             <div className="flex items-center mb-4">
-              <Sparkles className="h-5 w-5 text-primary mr-2" />
+              <Sparkle className="h-5 w-5 text-primary mr-2" />
               <h3 className="text-lg font-medium">AI Learning Assistant</h3>
             </div>
             
@@ -377,3 +376,4 @@ const CourseView = () => {
 };
 
 export default CourseView;
+
