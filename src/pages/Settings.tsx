@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/common/Card';
@@ -11,6 +10,10 @@ import { Settings, User, Bell, Lock, Palette, Image as ImageIcon, Upload } from 
 
 // Sample background images
 const backgroundImages = [
+  { id: 'abstract', url: 'https://images.unsplash.com/photo-1557682250-81f969aa2c6d?q=80&w=2200', name: 'Abstract White' },
+  { id: 'black', url: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070', name: 'Black' },
+  { id: 'teal', url: 'https://images.unsplash.com/photo-1604076913837-52ab5629fba9?q=80&w=2000', name: 'Teal' },
+  { id: 'skyblue', url: 'https://images.unsplash.com/photo-1579546929662-711aa81148cf?q=80&w=2070', name: 'Sky Blue' },
   { id: 'mountains', url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=2070', name: 'Mountains' },
   { id: 'ocean', url: 'https://images.unsplash.com/photo-1505144808419-1957a94ca61e?q=80&w=2070', name: 'Ocean' },
   { id: 'forest', url: 'https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=2070', name: 'Forest' },
@@ -20,7 +23,7 @@ const backgroundImages = [
 ];
 
 const SettingsPage = () => {
-  const [selectedBackground, setSelectedBackground] = useState('mountains');
+  const [selectedBackground, setSelectedBackground] = useState('abstract');
   const [customBackgroundUrl, setCustomBackgroundUrl] = useState('');
   const [blurLevel, setBlurLevel] = useState('medium');
   
@@ -321,3 +324,4 @@ const SettingsPage = () => {
 };
 
 export default SettingsPage;
+
