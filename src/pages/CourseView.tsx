@@ -285,42 +285,7 @@ const CourseView = () => {
         
         {/* Sidebar column with course content and AI assistant */}
         <div className="lg:col-span-1 space-y-4">
-          {/* AI Assistant Card */}
-          <Card className="glassmorphic-card p-4">
-            <div className="flex items-center mb-4">
-              <Sparkle className="h-5 w-5 text-primary mr-2" />
-              <h3 className="text-lg font-medium">AI Learning Assistant</h3>
-            </div>
-            
-            <Textarea 
-              placeholder="Ask any question about this course..." 
-              className="mb-2"
-              value={assistQuestion}
-              onChange={(e) => setAssistQuestion(e.target.value)}
-            />
-            <Button 
-              className="w-full"
-              onClick={handleAskAI}
-            >
-              Ask Assistant
-            </Button>
-            
-            <div className="mt-4 space-y-3 max-h-60 overflow-y-auto">
-              {aiResponses.map((item, index) => (
-                <div key={index} className="bg-secondary/30 rounded-lg p-3">
-                  <p className="text-sm font-medium mb-1">{item.question}</p>
-                  <p className="text-sm text-muted-foreground">{item.answer}</p>
-                  <div className="flex items-center justify-end mt-2">
-                    <Button variant="ghost" size="sm" className="h-6">
-                      <ThumbsUp className="h-3 w-3 mr-1" />
-                      Helpful
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Card>
-          
+                    
           {/* Course content card */}
           <Card className="glassmorphic-card p-4">
             <div className="flex items-center justify-between mb-4">
@@ -369,6 +334,43 @@ const CourseView = () => {
               ))}
             </div>
           </Card>
+          {/* AI Assistant Card */}
+          <Card className="glassmorphic-card p-4">
+            <div className="flex items-center mb-4">
+              <Sparkle className="h-5 w-5 text-primary mr-2" />
+              <h3 className="text-lg font-medium">AI Learning Assistant</h3>
+            </div>
+            
+            <Textarea 
+              placeholder="Ask any question about this course..." 
+              className="mb-2"
+              value={assistQuestion}
+              onChange={(e) => setAssistQuestion(e.target.value)}
+            />
+            <Button 
+              className="w-full"
+              onClick={handleAskAI}
+            >
+              Ask Assistant
+            </Button>
+            
+            <div className="mt-4 space-y-3 max-h-60 overflow-y-auto">
+              {aiResponses.map((item, index) => (
+                <div key={index} className="bg-secondary/30 rounded-lg p-3">
+                  <p className="text-sm font-medium mb-1">{item.question}</p>
+                  <p className="text-sm text-muted-foreground">{item.answer}</p>
+                  <div className="flex items-center justify-end mt-2">
+                    <Button variant="ghost" size="sm" className="h-6">
+                      <ThumbsUp className="h-3 w-3 mr-1" />
+                      Helpful
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+
         </div>
       </div>
     </div>
