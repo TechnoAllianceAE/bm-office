@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -24,7 +25,7 @@ import MIS from "./pages/MIS";
 import Requisition from "./pages/Requisition";
 import AIWorkflow from "./pages/AIWorkflow";
 import HelpDesk from "./pages/HelpDesk";
-import Email from "./pages/Email";
+import Mailbox from "./pages/Mailbox";
 import Calendar from "./pages/Calendar";
 import NotFound from "./pages/NotFound";
 import LMS from "./pages/LMS";
@@ -110,7 +111,7 @@ const App = () => {
                     <Route path="/calendar" element={<Calendar />} />
                     <Route path="/hr" element={<HR />} />
                     <Route path="/directory" element={<Directory />} />
-                    <Route path="/email" element={<Email />} />
+                    <Route path="/mailbox" element={<Mailbox />} />
                     <Route path="/ai-assistant" element={<AIAssistant />} />
                     <Route path="/ai-workflow" element={<AIWorkflow />} />
                     <Route path="/dms" element={<DMS />} />

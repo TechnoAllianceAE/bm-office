@@ -107,7 +107,7 @@
 
 @layer components {
   .glass-card {
-    @apply bg-white/70 backdrop-blur-lg border border-white/20 shadow-glass m-0.5;
+    @apply bg-white/80 backdrop-blur-lg border border-white/20 shadow-glass m-0.5;
   }
 
   .neomorphic {
@@ -161,34 +161,34 @@
 
 /* Adding consistent glassmorphism styles */
 .page-content {
-  @apply bg-white/60 backdrop-blur-lg border border-white/20 m-0.5 rounded-md;
+  @apply bg-white/80 backdrop-blur-lg border border-white/20 m-0.5 rounded-md;
 }
 
 .sidebar-glassmorphism {
-  @apply bg-white/50 backdrop-blur-xl border-r border-white/30;
+  @apply bg-white/80 backdrop-blur-xl border-r border-white/30;
 }
 
 .chart-card {
-  @apply bg-white/60 backdrop-blur-lg border border-white/20 m-0.5 rounded-md;
+  @apply bg-white/80 backdrop-blur-lg border border-white/20 m-0.5 rounded-md;
 }
 
 /* Enhanced glassmorphism */
 .glassmorphic-container {
-  @apply bg-white/40 backdrop-blur-xl border border-white/40 shadow-xl rounded-xl m-0.5;
+  @apply bg-white/80 backdrop-blur-xl border border-white/40 shadow-xl rounded-xl m-0.5;
 }
 
 .glassmorphic-navbar {
-  @apply bg-white/50 backdrop-blur-xl border-b border-white/30 shadow-sm;
+  @apply bg-white/80 backdrop-blur-xl border-b border-white/30 shadow-sm;
 }
 
 .glassmorphic-card {
-  @apply bg-white/50 backdrop-blur-lg border border-white/30 shadow-md rounded-xl m-0.5 hover:shadow-lg transition-all duration-300;
+  @apply bg-white/80 backdrop-blur-lg border border-white/30 shadow-md rounded-xl m-0.5 hover:shadow-lg transition-all duration-300;
 }
 
 .glassmorphic-button {
-  @apply bg-white/60 backdrop-blur-md border border-white/40 shadow-sm hover:bg-white/70 transition-all duration-300;
+  @apply bg-white/80 backdrop-blur-md border border-white/40 shadow-sm hover:bg-white/90 transition-all duration-300;
 }
 
 .glassmorphic-input {
-  @apply bg-white/60 backdrop-blur-md border border-white/40 focus:border-primary/60 focus:ring-1 focus:ring-primary/30;
+  @apply bg-white/80 backdrop-blur-md border border-white/40 focus:border-primary/60 focus:ring-1 focus:ring-primary/30;
 }

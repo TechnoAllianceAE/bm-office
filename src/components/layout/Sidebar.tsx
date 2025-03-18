@@ -26,7 +26,7 @@ const mainNavItems: NavItem[] = [
   { name: 'Projects', path: '/projects', icon: Briefcase },
   { name: 'BM HR', path: '/hr', icon: FileText },
   { name: 'Calendar', path: '/calendar', icon: Calendar },
-  { name: 'Email', path: '/email', icon: Mail },
+  { name: 'Mailbox', path: '/mailbox', icon: Mail },
   { name: 'AI Assistant', path: '/ai-assistant', icon: Sparkles },
   { name: 'AI Workflow', path: '/ai-workflow', icon: Share2 },
   { name: 'DMS', path: '/dms', icon: Database },

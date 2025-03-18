@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Inbox, Mail, SendHorizontal, File, Star, AlertCircle, Trash2, 
@@ -89,7 +88,7 @@ const emails = [
   },
 ];
 
-const Email = () => {
+const Mailbox = () => {
   const [selectedEmail, setSelectedEmail] = useState<number | null>(null);
   const [composeOpen, setComposeOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -107,7 +106,7 @@ const Email = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-semibold">Email</h1>
+          <h1 className="text-2xl font-semibold">Mailbox</h1>
           <p className="text-muted-foreground">Manage your messages</p>
         </div>
         
@@ -134,7 +133,7 @@ const Email = () => {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Sidebar */}
         <div className="col-span-1">
-          <Card className="glassmorphic-card overflow-visible">
+          <Card className="glassmorphic-card bg-white/80 overflow-visible">
             <div className="p-4">
               <Tabs defaultValue="inbox" onValueChange={setCurrentTab}>
                 <TabsList className="w-full grid grid-cols-2 mb-4">
@@ -143,33 +142,33 @@ const Email = () => {
                 </TabsList>
                 
                 <div className="space-y-2">
-                  <div className={`flex items-center rounded-md px-3 py-2 cursor-pointer ${currentTab === 'inbox' ? 'bg-white/30' : 'hover:bg-white/20'}`}>
+                  <div className={`flex items-center rounded-md px-3 py-2 cursor-pointer ${currentTab === 'inbox' ? 'bg-white/80' : 'hover:bg-white/60'}`}>
                     <Inbox className="h-4 w-4 mr-2" />
                     <span>Inbox</span>
                     <span className="ml-auto bg-primary/20 text-primary px-2 rounded-full text-xs">14</span>
                   </div>
                   
-                  <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/20">
+                  <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/60">
                     <Star className="h-4 w-4 mr-2 text-yellow-500" />
                     <span>Starred</span>
                   </div>
                   
-                  <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/20">
+                  <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/60">
                     <SendHorizontal className="h-4 w-4 mr-2" />
                     <span>Sent</span>
                   </div>
                   
-                  <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/20">
+                  <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/60">
                     <File className="h-4 w-4 mr-2" />
                     <span>Drafts</span>
                   </div>
                   
-                  <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/20">
+                  <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/60">
                     <AlertCircle className="h-4 w-4 mr-2" />
                     <span>Spam</span>
                   </div>
                   
-                  <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/20">
+                  <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/60">
                     <Trash2 className="h-4 w-4 mr-2" />
                     <span>Trash</span>
                   </div>
@@ -178,22 +177,22 @@ const Email = () => {
                 <div className="mt-6">
                   <h3 className="text-sm font-medium mb-2">Labels</h3>
                   <div className="space-y-2">
-                    <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/20">
+                    <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/60">
                       <span className="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
                       <span>Work</span>
                     </div>
                     
-                    <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/20">
+                    <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/60">
                       <span className="w-2 h-2 rounded-full bg-green-500 mr-2"></span>
                       <span>Personal</span>
                     </div>
                     
-                    <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/20">
+                    <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/60">
                       <span className="w-2 h-2 rounded-full bg-red-500 mr-2"></span>
                       <span>Important</span>
                     </div>
                     
-                    <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/20">
+                    <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/60">
                       <span className="w-2 h-2 rounded-full bg-purple-500 mr-2"></span>
                       <span>Updates</span>
                     </div>
@@ -206,7 +205,7 @@ const Email = () => {
         
         {/* Email List and Detail View */}
         <div className="col-span-1 lg:col-span-3">
-          <Card className="glassmorphic-card h-[calc(100vh-14rem)] overflow-hidden flex flex-col">
+          <Card className="glassmorphic-card bg-white/80 h-[calc(100vh-14rem)] overflow-hidden flex flex-col">
             {/* Search bar */}
             <div className="p-4 border-b border-white/20">
               <div className="relative">
@@ -226,7 +225,7 @@ const Email = () => {
                     key={email.id}
                     onClick={() => handleEmailSelect(email.id)}
                     className={`border-b border-white/10 p-4 cursor-pointer transition-colors ${
-                      selectedEmail === email.id ? 'bg-white/30' : 'hover:bg-white/20'
+                      selectedEmail === email.id ? 'bg-white/80' : 'hover:bg-white/60'
                     } ${!email.isRead ? 'font-medium' : ''}`}
                   >
                     <div className="flex items-start justify-between">
@@ -335,7 +334,7 @@ const Email = () => {
       
       {/* Compose Email Sheet */}
       <Sheet open={composeOpen} onOpenChange={setComposeOpen}>
-        <SheetContent side="bottom" className="h-[80vh] glassmorphic-container">
+        <SheetContent side="bottom" className="h-[80vh] glassmorphic-container bg-white/80">
           <SheetHeader className="mb-4">
             <SheetTitle>New Message</SheetTitle>
           </SheetHeader>
@@ -416,7 +415,7 @@ const Email = () => {
       
       {/* Email Settings Sheet */}
       <Sheet open={settingsOpen} onOpenChange={setSettingsOpen}>
-        <SheetContent className="sm:max-w-lg glassmorphic-container">
+        <SheetContent className="sm:max-w-lg glassmorphic-container bg-white/80">
           <SheetHeader>
             <SheetTitle>Email Settings</SheetTitle>
             <SheetDescription>Customize your email preferences</SheetDescription>
@@ -532,4 +531,4 @@ const Email = () => {
   );
 };
 
-export default Email;
+export default Mailbox;

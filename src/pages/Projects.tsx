@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Search, Plus, Filter, Calendar, Clock, Users, CheckCircle, Circle, MoreHorizontal, X } from 'lucide-react';
 import { Card } from '@/components/common/Card';
@@ -39,7 +38,7 @@ const ProjectItem: React.FC<{ project: Project }> = ({ project }) => {
   const statusColor = getStatusColor(project.status);
   
   return (
-    <Card className="bg-card/40 backdrop-blur-md border border-white/10 hover:border-primary/30 transition">
+    <Card className="bg-card/80 backdrop-blur-md border border-white/10 hover:border-primary/30 transition">
       <div className="p-6">
         <div className="flex justify-between items-start mb-4">
           <div>
@@ -66,7 +65,7 @@ const ProjectItem: React.FC<{ project: Project }> = ({ project }) => {
         
         <div className="flex flex-wrap gap-2 mb-4">
           {project.tags.map((tag, index) => (
-            <Badge key={index} variant="secondary" className="bg-secondary/40 backdrop-blur-sm">
+            <Badge key={index} variant="secondary" className="bg-secondary/80 backdrop-blur-sm">
               {tag}
             </Badge>
           ))}
@@ -109,8 +108,6 @@ const NewProjectForm = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically create a new project and add it to your projects array
-    // For now, we'll just close the dialog
     onClose();
   };
   
@@ -358,7 +355,7 @@ const Projects = () => {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input 
             placeholder="Search projects" 
-            className="pl-9 bg-background/50 backdrop-blur-sm"
+            className="pl-9 bg-background/80 backdrop-blur-sm"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -370,7 +367,7 @@ const Projects = () => {
       </div>
       
       <Tabs defaultValue="all">
-        <TabsList className="mb-6 bg-secondary/50 backdrop-blur-sm">
+        <TabsList className="mb-6 bg-secondary/80 backdrop-blur-sm">
           <TabsTrigger value="all">All Projects</TabsTrigger>
           <TabsTrigger value="active">Active</TabsTrigger>
           <TabsTrigger value="completed">Completed</TabsTrigger>
@@ -410,7 +407,6 @@ const Projects = () => {
         </TabsContent>
       </Tabs>
       
-      {/* New Project Dialog */}
       <NewProjectForm 
         isOpen={showNewProjectDialog} 
         onClose={() => setShowNewProjectDialog(false)} 
