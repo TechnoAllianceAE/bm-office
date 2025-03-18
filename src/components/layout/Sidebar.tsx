@@ -4,7 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { 
   Home, Clock, Briefcase, Users, FileText, Settings, ChevronLeft, ChevronRight, Calendar, BarChart3,
   Sparkles, Database, Wrench, Building, ShoppingCart, LayoutDashboard, HeartHandshake, Share2, Mail,
-  GraduationCap, UserSquare2
+  GraduationCap
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -27,7 +27,6 @@ const mainNavItems: NavItem[] = [
   { name: 'BM HR', path: '/hr', icon: FileText },
   { name: 'Calendar', path: '/calendar', icon: Calendar },
   { name: 'Mailbox', path: '/mailbox', icon: Mail },
-  { name: 'CRM', path: '/crm', icon: UserSquare2 },
   { name: 'AI Assistant', path: '/ai-assistant', icon: Sparkles },
   { name: 'AI Workflow', path: '/ai-workflow', icon: Share2 },
   { name: 'DMS', path: '/dms', icon: Database },

@@ -31,7 +31,6 @@ import NotFound from "./pages/NotFound";
 import LMS from "./pages/LMS";
 import CourseView from "./pages/CourseView";
 import Claims from "./pages/Claims";
-import CRM from "./pages/CRM";
 
 const queryClient = new QueryClient();
 
@@ -125,7 +124,6 @@ const App = () => {
                     <Route path="/lms" element={<LMS />} />
                     <Route path="/lms/course/:id" element={<CourseView />} />
                     <Route path="/claims" element={<Claims />} />
-                    <Route path="/crm" element={<CRM />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </PageTransition>
