@@ -104,7 +104,7 @@ const Analytics = () => {
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="bg-white/50 border border-gray-200 w-[180px]">
+            <SelectTrigger className="bg-white/90 border border-gray-200 w-[180px]">
               <Calendar className="h-4 w-4 mr-2 text-primary" />
               <SelectValue placeholder="Select time range" />
             </SelectTrigger>
@@ -118,7 +118,7 @@ const Analytics = () => {
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="gap-1 bg-white/50 border border-gray-200">
+              <Button variant="outline" className="gap-1 bg-white/90 border border-gray-200">
                 <Filter className="h-4 w-4 text-primary" />
                 Filter
                 <ChevronDown className="h-3 w-3 opacity-50 ml-1" />
@@ -133,12 +133,12 @@ const Analytics = () => {
             </DropdownMenuContent>
           </DropdownMenu>
           
-          <Button variant="outline" className="gap-1 bg-white/50 border border-gray-200">
+          <Button variant="outline" className="gap-1 bg-white/90 border border-gray-200">
             <RefreshCw className="h-4 w-4 text-primary" />
             Refresh
           </Button>
           
-          <Button variant="outline" className="gap-1 bg-white/50 border border-gray-200">
+          <Button variant="outline" className="gap-1 bg-white/90 border border-gray-200">
             <FileDown className="h-4 w-4 text-primary" />
             Export
           </Button>

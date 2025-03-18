@@ -35,7 +35,7 @@ const AIAssistant = () => {
         <p className="text-muted-foreground">Your intelligent project companion</p>
       </div>
 
-      <Card className="flex-1 flex flex-col bg-card/40 backdrop-blur-md border border-white/10 overflow-hidden">
+      <Card className="flex-1 flex flex-col bg-card/60 backdrop-blur-md border border-white/30 overflow-hidden">
         <div className="flex-none border-b border-border/50 p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
@@ -61,7 +61,7 @@ const AIAssistant = () => {
               <div className={cn(
                 "rounded-lg p-4",
                 message.role === 'assistant' 
-                  ? "bg-secondary/70 backdrop-blur-sm" 
+                  ? "bg-secondary/80 backdrop-blur-sm" 
                   : "bg-primary/10 backdrop-blur-sm"
               )}>
                 {message.content}

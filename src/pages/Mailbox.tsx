@@ -142,33 +142,33 @@ const Mailbox = () => {
                 </TabsList>
                 
                 <div className="space-y-2">
-                  <div className={`flex items-center rounded-md px-3 py-2 cursor-pointer ${currentTab === 'inbox' ? 'bg-white/80' : 'hover:bg-white/60'}`}>
+                  <div className={`flex items-center rounded-md px-3 py-2 cursor-pointer ${currentTab === 'inbox' ? 'bg-white/80' : 'hover:bg-white/70'}`}>
                     <Inbox className="h-4 w-4 mr-2" />
                     <span>Inbox</span>
                     <span className="ml-auto bg-primary/20 text-primary px-2 rounded-full text-xs">14</span>
                   </div>
                   
-                  <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/60">
+                  <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/70">
                     <Star className="h-4 w-4 mr-2 text-yellow-500" />
                     <span>Starred</span>
                   </div>
                   
-                  <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/60">
+                  <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/70">
                     <SendHorizontal className="h-4 w-4 mr-2" />
                     <span>Sent</span>
                   </div>
                   
-                  <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/60">
+                  <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/70">
                     <File className="h-4 w-4 mr-2" />
                     <span>Drafts</span>
                   </div>
                   
-                  <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/60">
+                  <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/70">
                     <AlertCircle className="h-4 w-4 mr-2" />
                     <span>Spam</span>
                   </div>
                   
-                  <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/60">
+                  <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/70">
                     <Trash2 className="h-4 w-4 mr-2" />
                     <span>Trash</span>
                   </div>
@@ -177,22 +177,22 @@ const Mailbox = () => {
                 <div className="mt-6">
                   <h3 className="text-sm font-medium mb-2">Labels</h3>
                   <div className="space-y-2">
-                    <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/60">
+                    <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/70">
                       <span className="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
                       <span>Work</span>
                     </div>
                     
-                    <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/60">
+                    <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/70">
                       <span className="w-2 h-2 rounded-full bg-green-500 mr-2"></span>
                       <span>Personal</span>
                     </div>
                     
-                    <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/60">
+                    <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/70">
                       <span className="w-2 h-2 rounded-full bg-red-500 mr-2"></span>
                       <span>Important</span>
                     </div>
                     
-                    <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/60">
+                    <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/70">
                       <span className="w-2 h-2 rounded-full bg-purple-500 mr-2"></span>
                       <span>Updates</span>
                     </div>
@@ -225,7 +225,7 @@ const Mailbox = () => {
                     key={email.id}
                     onClick={() => handleEmailSelect(email.id)}
                     className={`border-b border-white/10 p-4 cursor-pointer transition-colors ${
-                      selectedEmail === email.id ? 'bg-white/80' : 'hover:bg-white/60'
+                      selectedEmail === email.id ? 'bg-white/80' : 'hover:bg-white/70'
                     } ${!email.isRead ? 'font-medium' : ''}`}
                   >
                     <div className="flex items-start justify-between">
