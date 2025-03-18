@@ -150,7 +150,7 @@ const Analytics = () => {
         <DashboardWidget
           title="Total Projects"
           icon={<BarChart3 className="h-5 w-5 text-primary" />}
-          className="bg-white/30 backdrop-blur-sm"
+          className="bg-white/70 backdrop-blur-sm"
         >
           <div className="flex flex-col">
             <div className="text-3xl font-bold">126</div>
@@ -164,7 +164,7 @@ const Analytics = () => {
         <DashboardWidget
           title="Average Hours"
           icon={<Clock className="h-5 w-5 text-primary" />}
-          className="bg-white/30 backdrop-blur-sm"
+          className="bg-white/70 backdrop-blur-sm"
         >
           <div className="flex flex-col">
             <div className="text-3xl font-bold">35.2</div>
@@ -178,7 +178,7 @@ const Analytics = () => {
         <DashboardWidget
           title="Team Efficiency"
           icon={<Zap className="h-5 w-5 text-primary" />}
-          className="bg-white/30 backdrop-blur-sm"
+          className="bg-white/70 backdrop-blur-sm"
         >
           <div className="flex flex-col">
             <div className="text-3xl font-bold">92%</div>
@@ -192,7 +192,7 @@ const Analytics = () => {
         <DashboardWidget
           title="Active Servers"
           icon={<Server className="h-5 w-5 text-primary" />}
-          className="bg-white/30 backdrop-blur-sm"
+          className="bg-white/70 backdrop-blur-sm"
         >
           <div className="flex flex-col">
             <div className="text-3xl font-bold">5/5</div>
@@ -206,7 +206,7 @@ const Analytics = () => {
       </div>
 
       {/* Main content tabs with improved styling */}
-      <Card className="p-0 overflow-hidden bg-white/30 backdrop-blur-sm border border-white/20">
+      <Card className="p-0 overflow-hidden bg-white/70 backdrop-blur-sm border border-white/20">
         <Tabs defaultValue="projects" className="w-full">
           <div className="border-b">
             <div className="p-4">
@@ -467,7 +467,7 @@ const Analytics = () => {
                   <h3 className="text-lg font-medium mb-4">Server Status</h3>
                   <div className="space-y-4">
                     {serverStatusData.map((server) => (
-                      <div key={server.name} className="p-3 bg-white/30 rounded-md">
+                      <div key={server.name} className="p-3 bg-white/70 rounded-md">
                         <div className="flex justify-between items-center mb-2">
                           <div className="flex items-center">
                             <div className={`w-2 h-2 rounded-full ${STATUS_COLORS[server.status]} mr-2`}></div>
