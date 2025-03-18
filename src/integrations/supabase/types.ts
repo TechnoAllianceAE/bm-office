@@ -9,7 +9,101 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      email_accounts: {
+        Row: {
+          created_at: string | null
+          email_address: string
+          id: string
+          imap_host: string
+          imap_port: number
+          password: string
+          use_ssl: boolean | null
+          user_id: string
+          username: string
+        }
+        Insert: {
+          created_at?: string | null
+          email_address: string
+          id?: string
+          imap_host: string
+          imap_port: number
+          password: string
+          use_ssl?: boolean | null
+          user_id: string
+          username: string
+        }
+        Update: {
+          created_at?: string | null
+          email_address?: string
+          id?: string
+          imap_host?: string
+          imap_port?: number
+          password?: string
+          use_ssl?: boolean | null
+          user_id?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      emails: {
+        Row: {
+          account_id: string
+          content: string | null
+          created_at: string | null
+          folder: string
+          has_attachments: boolean | null
+          id: string
+          is_read: boolean | null
+          is_starred: boolean | null
+          label: string | null
+          message_id: string | null
+          received_date: string | null
+          sender: string
+          sender_email: string
+          subject: string | null
+        }
+        Insert: {
+          account_id: string
+          content?: string | null
+          created_at?: string | null
+          folder?: string
+          has_attachments?: boolean | null
+          id?: string
+          is_read?: boolean | null
+          is_starred?: boolean | null
+          label?: string | null
+          message_id?: string | null
+          received_date?: string | null
+          sender: string
+          sender_email: string
+          subject?: string | null
+        }
+        Update: {
+          account_id?: string
+          content?: string | null
+          created_at?: string | null
+          folder?: string
+          has_attachments?: boolean | null
+          id?: string
+          is_read?: boolean | null
+          is_starred?: boolean | null
+          label?: string | null
+          message_id?: string | null
+          received_date?: string | null
+          sender?: string
+          sender_email?: string
+          subject?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "emails_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "email_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
