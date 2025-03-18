@@ -178,7 +178,7 @@ const MIS = () => {
       </div>
       
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-        <TabsList className="bg-white/30 backdrop-blur-sm">
+        <TabsList className="bg-white/90 backdrop-blur-sm">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="reports">Financial Reports</TabsTrigger>
           <TabsTrigger value="expenses">Expenses</TabsTrigger>
@@ -190,7 +190,7 @@ const MIS = () => {
             <DashboardWidget
               title="Total Budget Allocation"
               icon={<LayoutDashboard className="h-5 w-5" />}
-              className="bg-white/30 backdrop-blur-sm"
+              className="bg-white/90 backdrop-blur-sm"
             >
               <div className="flex flex-col items-center justify-center text-center h-full">
                 <div className="text-4xl font-bold my-2">$1,245,000</div>
@@ -204,7 +204,7 @@ const MIS = () => {
             <DashboardWidget
               title="Department Expenditure"
               icon={<PieChart className="h-5 w-5" />}
-              className="bg-white/30 backdrop-blur-sm"
+              className="bg-white/90 backdrop-blur-sm"
             >
               <div className="h-[200px]">
                 <ResponsiveContainer width="100%" height="100%">
@@ -232,7 +232,7 @@ const MIS = () => {
             <DashboardWidget
               title="Quarterly Trends"
               icon={<LineChart className="h-5 w-5" />}
-              className="bg-white/30 backdrop-blur-sm"
+              className="bg-white/90 backdrop-blur-sm"
             >
               <div className="h-[200px]">
                 <ResponsiveContainer width="100%" height="100%">
@@ -248,7 +248,7 @@ const MIS = () => {
             </DashboardWidget>
           </div>
           
-          <Card className="p-0 overflow-hidden bg-white/30 backdrop-blur-sm">
+          <Card className="p-0 overflow-hidden bg-white/90 backdrop-blur-sm">
             <div className="p-4 border-b">
               <h2 className="font-medium">Detailed Analytics</h2>
             </div>
@@ -334,7 +334,7 @@ const MIS = () => {
             <DashboardWidget
               title="Total Fee Collection"
               icon={<DollarSign className="h-5 w-5" />}
-              className="bg-white/30 backdrop-blur-sm"
+              className="bg-white/90 backdrop-blur-sm"
             >
               <div className="flex flex-col items-center justify-center text-center h-full">
                 <div className="text-3xl font-bold my-2">$843,000</div>
@@ -348,7 +348,7 @@ const MIS = () => {
             <DashboardWidget
               title="Tuition Fees"
               icon={<FileText className="h-5 w-5" />}
-              className="bg-white/30 backdrop-blur-sm"
+              className="bg-white/90 backdrop-blur-sm"
             >
               <div className="flex flex-col items-center justify-center text-center h-full">
                 <div className="text-3xl font-bold my-2">$596,000</div>
@@ -362,7 +362,7 @@ const MIS = () => {
             <DashboardWidget
               title="Hostel & Transport"
               icon={<Building className="h-5 w-5" />}
-              className="bg-white/30 backdrop-blur-sm"
+              className="bg-white/90 backdrop-blur-sm"
             >
               <div className="flex flex-col items-center justify-center text-center h-full">
                 <div className="text-3xl font-bold my-2">$247,000</div>
@@ -376,7 +376,7 @@ const MIS = () => {
             <DashboardWidget
               title="Due Payments"
               icon={<AlertCircle className="h-5 w-5" />}
-              className="bg-white/30 backdrop-blur-sm"
+              className="bg-white/90 backdrop-blur-sm"
             >
               <div className="flex flex-col items-center justify-center text-center h-full">
                 <div className="text-3xl font-bold my-2">$373,000</div>
@@ -389,7 +389,7 @@ const MIS = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-2">
-              <Card className="p-0 overflow-hidden bg-white/30 backdrop-blur-sm">
+              <Card className="p-0 overflow-hidden bg-white/90 backdrop-blur-sm">
                 <div className="p-4 border-b flex justify-between items-center">
                   <h2 className="font-medium">Fee Collection Trends</h2>
                   <Select defaultValue="6months">
@@ -428,7 +428,7 @@ const MIS = () => {
             </div>
             
             <div className="md:col-span-1">
-              <Card className="p-0 overflow-hidden bg-white/30 backdrop-blur-sm h-full">
+              <Card className="p-0 overflow-hidden bg-white/90 backdrop-blur-sm h-full">
                 <div className="p-4 border-b">
                   <h2 className="font-medium">Collection Breakdown</h2>
                 </div>
@@ -501,7 +501,7 @@ const MIS = () => {
             </div>
           </div>
           
-          <Card className="p-0 overflow-hidden bg-white/30 backdrop-blur-sm">
+          <Card className="p-0 overflow-hidden bg-white/90 backdrop-blur-sm">
             <div className="p-4 border-b flex justify-between items-center">
               <h2 className="font-medium">Organization Fee Summary</h2>
               <div className="flex gap-2">
@@ -556,7 +556,7 @@ const MIS = () => {
             <DashboardWidget
               title="Total Expenses"
               icon={<DollarSign className="h-5 w-5" />}
-              className="bg-white/30 backdrop-blur-sm"
+              className="bg-white/90 backdrop-blur-sm"
             >
               <div className="flex flex-col items-center justify-center text-center h-full">
                 <div className="text-3xl font-bold my-2">$421,000</div>
@@ -570,7 +570,7 @@ const MIS = () => {
             <DashboardWidget
               title="Monthly Average"
               icon={<FileBarChart className="h-5 w-5" />}
-              className="bg-white/30 backdrop-blur-sm"
+              className="bg-white/90 backdrop-blur-sm"
             >
               <div className="flex flex-col items-center justify-center text-center h-full">
                 <div className="text-3xl font-bold my-2">$70,166</div>
@@ -583,7 +583,7 @@ const MIS = () => {
             <DashboardWidget
               title="Pending Expenses"
               icon={<ClockIcon className="h-5 w-5" />}
-              className="bg-white/30 backdrop-blur-sm"
+              className="bg-white/90 backdrop-blur-sm"
             >
               <div className="flex flex-col items-center justify-center text-center h-full">
                 <div className="text-3xl font-bold my-2">$78,000</div>
@@ -596,7 +596,7 @@ const MIS = () => {
             <DashboardWidget
               title="Budget Utilization"
               icon={<PieChart className="h-5 w-5" />}
-              className="bg-white/30 backdrop-blur-sm"
+              className="bg-white/90 backdrop-blur-sm"
             >
               <div className="flex flex-col items-center justify-center text-center h-full">
                 <div className="text-3xl font-bold my-2">65.3%</div>
@@ -609,7 +609,7 @@ const MIS = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-2">
-              <Card className="p-0 overflow-hidden bg-white/30 backdrop-blur-sm">
+              <Card className="p-0 overflow-hidden bg-white/90 backdrop-blur-sm">
                 <div className="p-4 border-b flex justify-between items-center">
                   <h2 className="font-medium">Expense Distribution by Category</h2>
                   <Select defaultValue="6months">
@@ -653,7 +653,7 @@ const MIS = () => {
             </div>
             
             <div className="md:col-span-1">
-              <Card className="p-0 overflow-hidden bg-white/30 backdrop-blur-sm h-full">
+              <Card className="p-0 overflow-hidden bg-white/90 backdrop-blur-sm h-full">
                 <div className="p-4 border-b">
                   <h2 className="font-medium">Expense Breakdown</h2>
                 </div>
@@ -735,7 +735,7 @@ const MIS = () => {
             </div>
           </div>
           
-          <Card className="p-0 overflow-hidden bg-white/30 backdrop-blur-sm">
+          <Card className="p-0 overflow-hidden bg-white/90 backdrop-blur-sm">
             <div className="p-4 border-b flex justify-between items-center">
               <h2 className="font-medium">Recent Expenses</h2>
               <div className="flex gap-2">
@@ -790,7 +790,7 @@ const MIS = () => {
             <DashboardWidget
               title="Pending Approvals"
               icon={<ClockIcon className="h-5 w-5" />}
-              className="bg-white/30 backdrop-blur-sm"
+              className="bg-white/90 backdrop-blur-sm"
             >
               <div className="flex flex-col items-center justify-center text-center h-full">
                 <div className="text-4xl font-bold my-2">2</div>
@@ -803,7 +803,7 @@ const MIS = () => {
             <DashboardWidget
               title="Approved Requests"
               icon={<CheckCircle2 className="h-5 w-5" />}
-              className="bg-white/30 backdrop-blur-sm"
+              className="bg-white/90 backdrop-blur-sm"
             >
               <div className="flex flex-col items-center justify-center text-center h-full">
                 <div className="text-4xl font-bold my-2">12</div>
@@ -816,7 +816,7 @@ const MIS = () => {
             <DashboardWidget
               title="Total Waivers"
               icon={<FileText className="h-5 w-5" />}
-              className="bg-white/30 backdrop-blur-sm"
+              className="bg-white/90 backdrop-blur-sm"
             >
               <div className="flex flex-col items-center justify-center text-center h-full">
                 <div className="text-4xl font-bold my-2">$123,450</div>
@@ -827,7 +827,7 @@ const MIS = () => {
             </DashboardWidget>
           </div>
           
-          <Card className="p-0 overflow-hidden bg-white/30 backdrop-blur-sm">
+          <Card className="p-0 overflow-hidden bg-white/90 backdrop-blur-sm">
             <div className="p-4 border-b flex justify-between items-center">
               <h2 className="font-medium">Special Requests for Approval</h2>
               <div className="flex gap-2">
@@ -938,7 +938,7 @@ const MIS = () => {
                   
                   <div>
                     <p className="text-sm text-muted-foreground">Reason</p>
-                    <p className="bg-white/30 p-2 rounded-md mt-1">{selectedRequest.reason}</p>
+                    <p className="bg-white/90 p-2 rounded-md mt-1">{selectedRequest.reason}</p>
                   </div>
                   
                   <div>
