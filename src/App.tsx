@@ -43,7 +43,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isLoading } = useAuth();
   
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div className="flex items-center justify-center min-h-screen">
+      <div className="text-center">
+        <div className="spinner animate-spin h-12 w-12 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+        <p className="text-lg font-medium">Loading...</p>
+      </div>
+    </div>;
   }
   
   if (!isAuthenticated) {
@@ -56,7 +61,9 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const AppContent = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const isMobile = useIsMobile();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading, userRole } = useAuth();
+  
+  console.log('AppContent render state:', { isAuthenticated, isLoading, userRole });
   
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -106,6 +113,18 @@ const AppContent = () => {
       }
     };
   }, []);
+  
+  // Show loading state if authentication is still being determined
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="spinner animate-spin h-12 w-12 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-lg font-medium">Loading...</p>
+        </div>
+      </div>
+    );
+  }
   
   if (!isAuthenticated) {
     return (

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Session, User } from '@supabase/supabase-js';
@@ -42,22 +43,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session retrieved:', session?.user?.id);
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        getUserRole(session.user.id)
-          .then(() => setIsLoading(false))
-          .catch((error) => {
-            console.error('Error fetching user role on init:', error);
-            setIsLoading(false);
-          });
-      } else {
+    const initializeAuth = async () => {
+      try {
+        setIsLoading(true);
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log('Initial session retrieved:', session?.user?.id);
+        
+        if (session?.user) {
+          setSession(session);
+          setUser(session.user);
+          const role = await getUserRole(session.user.id);
+          console.log('User role initialized:', role);
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+      } finally {
         setIsLoading(false);
       }
-    });
+    };
+
+    initializeAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
@@ -67,7 +72,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (session?.user) {
           try {
-            await getUserRole(session.user.id);
+            const role = await getUserRole(session.user.id);
+            console.log('User role after auth change:', role);
           } catch (error) {
             console.error('Error fetching user role on auth change:', error);
           } finally {
@@ -154,6 +160,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(false);
     }
   };
+
+  console.log('Current auth state:', { 
+    isAuthenticated: !!user, 
+    userRole, 
+    isLoading 
+  });
 
   return (
     <AuthContext.Provider
