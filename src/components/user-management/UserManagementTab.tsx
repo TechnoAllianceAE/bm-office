@@ -39,14 +39,19 @@ export const UserManagementTab = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
+      console.log('Fetching users...');
       const { data, error, count } = await supabase
         .from('app_users')
         .select('*', { count: 'exact' })
         .range((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage - 1)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error details:', error);
+        throw error;
+      }
       
+      console.log('Users data:', data);
       setUsers(data || []);
       
       if (count) {
@@ -66,17 +71,27 @@ export const UserManagementTab = () => {
 
   const fetchRoles = async () => {
     try {
+      console.log('Fetching roles...');
       const { data, error } = await supabase
         .from('roles')
         .select('name');
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching roles:', error);
+        throw error;
+      }
       
+      console.log('Roles data:', data);
       if (data) {
         setRoles(data.map(role => role.name));
       }
     } catch (error) {
       console.error('Error fetching roles:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load roles",
+      });
     }
   };
 
@@ -91,6 +106,7 @@ export const UserManagementTab = () => {
     }
 
     try {
+      console.log('Adding user with role:', newUser.role);
       // Sign up user with Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: newUser.email,
@@ -105,15 +121,40 @@ export const UserManagementTab = () => {
       if (authError) throw authError;
 
       if (authData.user) {
-        // The trigger will add the user to app_users table automatically,
-        // but with default role 'User'. We need to update the role if different
-        if (newUser.role !== 'User') {
+        console.log('User created in auth:', authData.user);
+        
+        // Check if app_users entry already exists (should be created by trigger)
+        const { data: existingUser, error: checkError } = await supabase
+          .from('app_users')
+          .select('*')
+          .eq('user_id', authData.user.id)
+          .maybeSingle();
+
+        if (checkError) throw checkError;
+        
+        if (existingUser) {
+          console.log('User exists in app_users, updating role:', newUser.role);
+          // Update the role if user exists
           const { error: updateError } = await supabase
             .from('app_users')
             .update({ role: newUser.role })
             .eq('user_id', authData.user.id);
 
           if (updateError) throw updateError;
+        } else {
+          console.log('User does not exist in app_users, creating entry with role:', newUser.role);
+          // Create app_users entry manually if trigger didn't work
+          const { error: insertError } = await supabase
+            .from('app_users')
+            .insert({
+              user_id: authData.user.id,
+              full_name: newUser.fullName,
+              email: newUser.email,
+              role: newUser.role,
+              status: 'Active'
+            });
+
+          if (insertError) throw insertError;
         }
 
         toast({
@@ -147,6 +188,7 @@ export const UserManagementTab = () => {
     }
 
     try {
+      console.log('Updating user:', editUser);
       const { error } = await supabase
         .from('app_users')
         .update({ 
@@ -191,27 +233,21 @@ export const UserManagementTab = () => {
     }
 
     try {
+      console.log('Deleting user with ID:', userId, 'Auth ID:', userAuthId);
+      
+      // Delete from app_users first
+      const { error: appUserError } = await supabase
+        .from('app_users')
+        .delete()
+        .eq('id', userId);
+      
+      if (appUserError) throw appUserError;
+      
+      // If we have an auth ID, try to delete from auth.users
       if (userAuthId) {
-        // For super admin users, we can delete them from auth, which will cascade
-        const { error } = await supabase.auth.admin.deleteUser(userAuthId);
-
-        if (error) {
-          // Fallback to just deleting from app_users if admin API fails
-          const { error: appUserError } = await supabase
-            .from('app_users')
-            .delete()
-            .eq('id', userId);
-          
-          if (appUserError) throw appUserError;
-        }
-      } else {
-        // If no auth ID, just delete from app_users
-        const { error } = await supabase
-          .from('app_users')
-          .delete()
-          .eq('id', userId);
-          
-        if (error) throw error;
+        // Note: This usually requires admin privileges or service role
+        // Using admin API directly may not work with regular client
+        console.log('Auth user deletion would require admin API');
       }
 
       toast({
@@ -318,9 +354,13 @@ export const UserManagementTab = () => {
                       <SelectValue placeholder="Select a role" />
                     </SelectTrigger>
                     <SelectContent>
-                      {roles.map(role => (
-                        <SelectItem key={role} value={role}>{role}</SelectItem>
-                      ))}
+                      {roles.length > 0 ? (
+                        roles.map(role => (
+                          <SelectItem key={role} value={role}>{role}</SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="User">User</SelectItem>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -501,9 +541,16 @@ export const UserManagementTab = () => {
                   <SelectValue placeholder="Select a role" />
                 </SelectTrigger>
                 <SelectContent>
-                  {roles.map(role => (
-                    <SelectItem key={role} value={role}>{role}</SelectItem>
-                  ))}
+                  {roles.length > 0 ? (
+                    roles.map(role => (
+                      <SelectItem key={role} value={role}>{role}</SelectItem>
+                    ))
+                  ) : (
+                    <>
+                      <SelectItem value="Admin">Admin</SelectItem>
+                      <SelectItem value="User">User</SelectItem>
+                    </>
+                  )}
                 </SelectContent>
               </Select>
             </div>
