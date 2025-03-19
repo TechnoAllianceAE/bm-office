@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Session, User } from '@supabase/supabase-js';
@@ -21,7 +20,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Function to fetch and set user role
   const getUserRole = async (userId: string) => {
     console.log('Fetching role for user:', userId);
     try {
@@ -44,7 +42,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       console.log('Initial session retrieved:', session?.user?.id);
       setSession(session);
@@ -62,7 +59,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     });
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.id);
@@ -95,7 +91,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { user } = await signInWithCredentials(email, password);
       
       if (user) {
-        // Explicitly check for Super Admin status
         const userRole = await getUserRole(user.id);
         console.log('User role after sign in:', userRole);
         
@@ -133,15 +128,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setIsLoading(true);
       
-      // First, clear local state regardless of API call outcome
       setSession(null);
       setUser(null);
       setUserRole(null);
       
-      // Then attempt to sign out from Supabase
       await signOutUser();
       
-      // Return success - user is considered signed out locally regardless of API result
       return;
     } catch (error) {
       console.error('Error in signOut function:', error);
@@ -151,7 +143,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const createSuperAdmin = async (email: string, password: string, fullName: string) => {
+  const createSuperAdmin = async (email: string, password: string, fullName: string): Promise<User> => {
     try {
       setIsLoading(true);
       return await createSuperAdminUser(email, password, fullName);

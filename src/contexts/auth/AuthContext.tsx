@@ -11,7 +11,7 @@ export interface AuthContextType {
   signUp: (email: string, password: string, fullName: string) => Promise<void>;
   signOut: () => Promise<void>;
   isAuthenticated: boolean;
-  createSuperAdmin: (email: string, password: string, fullName: string) => Promise<void>;
+  createSuperAdmin: (email: string, password: string, fullName: string) => Promise<User>;
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -23,7 +23,7 @@ export const AuthContext = createContext<AuthContextType>({
   signUp: async () => {},
   signOut: async () => {},
   isAuthenticated: false,
-  createSuperAdmin: async () => {},
+  createSuperAdmin: async () => { return {} as User; },
 });
 
 export const useAuth = () => useContext(AuthContext);
