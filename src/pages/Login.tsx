@@ -58,8 +58,6 @@ export default function Login() {
   const navigate = useNavigate();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSuperAdminLoading, setIsSuperAdminLoading] = useState(false);
-  const [isLoginSubmitting, setIsLoginSubmitting] = useState(false);
-  const [isSignupSubmitting, setIsSignupSubmitting] = useState(false);
 
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -91,24 +89,18 @@ export default function Login() {
 
   const onLoginSubmit = async (values: z.infer<typeof loginSchema>) => {
     try {
-      setIsLoginSubmitting(true);
       await signIn(values.email, values.password);
     } catch (error) {
       console.error('Login error:', error);
-    } finally {
-      setIsLoginSubmitting(false);
     }
   };
 
   const onSignupSubmit = async (values: z.infer<typeof signupSchema>) => {
     try {
-      setIsSignupSubmitting(true);
       await signUp(values.email, values.password, values.fullName);
       setActiveTab('login');
     } catch (error) {
       console.error('Signup error:', error);
-    } finally {
-      setIsSignupSubmitting(false);
     }
   };
 
@@ -182,8 +174,8 @@ export default function Login() {
                       </FormItem>
                     )}
                   />
-                  <Button type="submit" className="w-full" disabled={isLoginSubmitting}>
-                    {isLoginSubmitting ? 'Signing in...' : 'Sign In'}
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? 'Signing in...' : 'Sign In'}
                   </Button>
                 </form>
               </Form>
@@ -243,8 +235,8 @@ export default function Login() {
                       </FormItem>
                     )}
                   />
-                  <Button type="submit" className="w-full" disabled={isSignupSubmitting}>
-                    {isSignupSubmitting ? 'Signing up...' : 'Sign Up'}
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? 'Signing up...' : 'Sign Up'}
                   </Button>
                 </form>
               </Form>
