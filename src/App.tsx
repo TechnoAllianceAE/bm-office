@@ -4,11 +4,15 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Navbar } from "./components/layout/Navbar";
 import { Sidebar } from "./components/layout/Sidebar";
 import { PageTransition } from "./components/layout/PageTransition";
 import { useIsMobile } from "./hooks/use-mobile";
+import { supabase } from "@/integrations/supabase/client";
+
+// Auth
+import Login from "./pages/Login";
 
 // Pages
 import Dashboard from "./pages/Dashboard";
@@ -38,7 +42,24 @@ const queryClient = new QueryClient();
 
 const App = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
   const isMobile = useIsMobile();
+  
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
   
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -90,50 +111,65 @@ const App = () => {
     };
   }, []);
   
+  // Protected route component
+  const ProtectedRoute = ({ children }) => {
+    if (loading) return <div className="flex items-center justify-center h-screen">Loading...</div>;
+    if (!session) return <Navigate to="/login" replace />;
+    return children;
+  };
+  
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <div className="flex min-h-screen w-full">
-            <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-            
-            <main className={`flex-1 transition-all duration-300 ${
-              isSidebarOpen ? "lg:ml-64" : "lg:ml-20"
-            }`}>
-              <Navbar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+          {!session ? (
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="*" element={<Navigate to="/login" replace />} />
+            </Routes>
+          ) : (
+            <div className="flex min-h-screen w-full">
+              <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
               
-              <div className="container px-4 pt-24 pb-12">
-                <PageTransition>
-                  <Routes>
-                    <Route path="/" element={<Dashboard />} />
-                    <Route path="/timesheet" element={<Timesheet />} />
-                    <Route path="/projects" element={<Projects />} />
-                    <Route path="/calendar" element={<Calendar />} />
-                    <Route path="/hr" element={<HR />} />
-                    <Route path="/directory" element={<Directory />} />
-                    <Route path="/mailbox" element={<Mailbox />} />
-                    <Route path="/ai-assistant" element={<AIAssistant />} />
-                    <Route path="/ai-workflow" element={<AIWorkflow />} />
-                    <Route path="/dms" element={<DMS />} />
-                    <Route path="/tools" element={<Tools />} />
-                    <Route path="/analytics" element={<Analytics />} />
-                    <Route path="/settings" element={<SettingsPage />} />
-                    <Route path="/mis" element={<MIS />} />
-                    <Route path="/requisition" element={<Requisition />} />
-                    <Route path="/helpdesk" element={<HelpDesk />} />
-                    <Route path="/lms" element={<LMS />} />
-                    <Route path="/lms/course/:id" element={<CourseView />} />
-                    <Route path="/claims" element={<Claims />} />
-                    <Route path="/crm" element={<CRM />} />
-                    <Route path="/user-management" element={<UserManagement />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </PageTransition>
-              </div>
-            </main>
-          </div>
+              <main className={`flex-1 transition-all duration-300 ${
+                isSidebarOpen ? "lg:ml-64" : "lg:ml-20"
+              }`}>
+                <Navbar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+                
+                <div className="container px-4 pt-24 pb-12">
+                  <PageTransition>
+                    <Routes>
+                      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                      <Route path="/dashboard" element={<Dashboard />} />
+                      <Route path="/timesheet" element={<Timesheet />} />
+                      <Route path="/projects" element={<Projects />} />
+                      <Route path="/calendar" element={<Calendar />} />
+                      <Route path="/hr" element={<HR />} />
+                      <Route path="/directory" element={<Directory />} />
+                      <Route path="/mailbox" element={<Mailbox />} />
+                      <Route path="/ai-assistant" element={<AIAssistant />} />
+                      <Route path="/ai-workflow" element={<AIWorkflow />} />
+                      <Route path="/dms" element={<DMS />} />
+                      <Route path="/tools" element={<Tools />} />
+                      <Route path="/analytics" element={<Analytics />} />
+                      <Route path="/settings" element={<SettingsPage />} />
+                      <Route path="/mis" element={<MIS />} />
+                      <Route path="/requisition" element={<Requisition />} />
+                      <Route path="/helpdesk" element={<HelpDesk />} />
+                      <Route path="/lms" element={<LMS />} />
+                      <Route path="/lms/course/:id" element={<CourseView />} />
+                      <Route path="/claims" element={<Claims />} />
+                      <Route path="/crm" element={<CRM />} />
+                      <Route path="/user-management" element={<UserManagement />} />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </PageTransition>
+                </div>
+              </main>
+            </div>
+          )}
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>

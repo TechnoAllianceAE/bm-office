@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -7,87 +7,299 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { ShieldPlus, Search, Edit, Trash } from 'lucide-react';
-
-// Mock data for roles
-const mockRoles = [
-  { id: 1, name: 'Admin', description: 'Full access to all systems', userCount: 3 },
-  { id: 2, name: 'Manager', description: 'Can manage teams and projects', userCount: 8 },
-  { id: 3, name: 'User', description: 'Standard access to applications', userCount: 24 },
-  { id: 4, name: 'Guest', description: 'Limited access to view-only resources', userCount: 5 },
-];
-
-// Mock data for permissions
-const mockApplications = [
-  { id: 1, name: 'Dashboard', key: 'dashboard' },
-  { id: 2, name: 'Timesheet', key: 'timesheet' },
-  { id: 3, name: 'Projects', key: 'projects' },
-  { id: 4, name: 'HR Portal', key: 'hr' },
-  { id: 5, name: 'Directory', key: 'directory' },
-  { id: 6, name: 'Mailbox', key: 'mailbox' },
-  { id: 7, name: 'AI Assistant', key: 'ai-assistant' },
-  { id: 8, name: 'DMS', key: 'dms' },
-  { id: 9, name: 'Analytics', key: 'analytics' },
-  { id: 10, name: 'Settings', key: 'settings' },
-];
-
-// Mock permissions for each role
-const mockPermissions = {
-  'Admin': mockApplications.reduce((acc, app) => ({ ...acc, [app.key]: { view: true, edit: true, create: true, delete: true } }), {}),
-  'Manager': mockApplications.reduce((acc, app) => ({ 
-    ...acc, 
-    [app.key]: { 
-      view: true, 
-      edit: app.key !== 'settings' && app.key !== 'analytics',
-      create: app.key !== 'settings' && app.key !== 'analytics',
-      delete: app.key !== 'settings' && app.key !== 'analytics' && app.key !== 'hr'
-    } 
-  }), {}),
-  'User': mockApplications.reduce((acc, app) => ({ 
-    ...acc, 
-    [app.key]: { 
-      view: app.key !== 'settings' && app.key !== 'analytics',
-      edit: app.key === 'timesheet' || app.key === 'projects',
-      create: app.key === 'timesheet',
-      delete: false
-    } 
-  }), {}),
-  'Guest': mockApplications.reduce((acc, app) => ({ 
-    ...acc, 
-    [app.key]: { 
-      view: ['dashboard', 'directory'].includes(app.key),
-      edit: false,
-      create: false,
-      delete: false
-    } 
-  }), {}),
-};
+import { ShieldPlus, Search, Edit, Trash, Check } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/context/AuthContext';
 
 export const RoleManagementTab = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  const [selectedRole, setSelectedRole] = useState(null);
   const [isAddRoleOpen, setIsAddRoleOpen] = useState(false);
   const [newRole, setNewRole] = useState({ name: '', description: '' });
+  const [roles, setRoles] = useState([]);
+  const [applications, setApplications] = useState([]);
+  const [permissions, setPermissions] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const { toast } = useToast();
+  const { isAdmin } = useAuth();
   
+  useEffect(() => {
+    fetchRoles();
+    fetchApplications();
+  }, []);
+
+  useEffect(() => {
+    if (selectedRole) {
+      fetchPermissions(selectedRole.id);
+    }
+  }, [selectedRole]);
+
+  const fetchRoles = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('roles')
+        .select('*')
+        .order('name');
+
+      if (error) throw error;
+      
+      setRoles(data || []);
+      
+      // If no role is selected and we have roles, select the first one
+      if (!selectedRole && data && data.length > 0) {
+        setSelectedRole(data[0]);
+      }
+    } catch (error) {
+      console.error('Error fetching roles:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load roles",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchApplications = async () => {
+    // For now we'll use a static list of applications
+    // In a real app, this could be fetched from a database
+    const appList = [
+      { id: 1, name: 'Dashboard', key: 'dashboard' },
+      { id: 2, name: 'Timesheet', key: 'timesheet' },
+      { id: 3, name: 'Projects', key: 'projects' },
+      { id: 4, name: 'HR Portal', key: 'hr' },
+      { id: 5, name: 'Directory', key: 'directory' },
+      { id: 6, name: 'Mailbox', key: 'mailbox' },
+      { id: 7, name: 'AI Assistant', key: 'ai-assistant' },
+      { id: 8, name: 'DMS', key: 'dms' },
+      { id: 9, name: 'Analytics', key: 'analytics' },
+      { id: 10, name: 'Settings', key: 'settings' },
+    ];
+    setApplications(appList);
+  };
+
+  const fetchPermissions = async (roleId) => {
+    try {
+      const { data, error } = await supabase
+        .from('permissions')
+        .select('*')
+        .eq('role_id', roleId);
+
+      if (error) throw error;
+      
+      // Convert array to object with application as key
+      const permObj = {};
+      data.forEach(perm => {
+        permObj[perm.application] = {
+          view: perm.can_view,
+          create: perm.can_create,
+          edit: perm.can_edit,
+          delete: perm.can_delete,
+          id: perm.id
+        };
+      });
+      
+      setPermissions(permObj);
+    } catch (error) {
+      console.error('Error fetching permissions:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load permissions",
+      });
+    }
+  };
+
+  const fetchRoleUserCount = async (roleId) => {
+    try {
+      const { count, error } = await supabase
+        .from('app_users')
+        .select('id', { count: 'exact' })
+        .eq('role', roleId);
+
+      if (error) throw error;
+      
+      return count || 0;
+    } catch (error) {
+      console.error('Error counting users by role:', error);
+      return 0;
+    }
+  };
+
+  const handleAddRole = async () => {
+    if (!isAdmin) {
+      toast({
+        variant: "destructive",
+        title: "Permission Denied",
+        description: "Only administrators can add roles",
+      });
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('roles')
+        .insert([{ 
+          name: newRole.name,
+          description: newRole.description
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Role created successfully",
+      });
+      
+      await fetchRoles();
+      
+      // Select the newly created role
+      if (data) {
+        setSelectedRole(data);
+      }
+    } catch (error) {
+      console.error('Error adding role:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to create role",
+      });
+    } finally {
+      setNewRole({ name: '', description: '' });
+      setIsAddRoleOpen(false);
+    }
+  };
+
+  const handleDeleteRole = async (roleId) => {
+    if (!isAdmin) {
+      toast({
+        variant: "destructive",
+        title: "Permission Denied",
+        description: "Only administrators can delete roles",
+      });
+      return;
+    }
+
+    if (!confirm("Are you sure you want to delete this role? All associated permissions will also be deleted.")) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('roles')
+        .delete()
+        .eq('id', roleId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Role deleted successfully",
+      });
+      
+      await fetchRoles();
+      
+      // If the deleted role was selected, clear selection
+      if (selectedRole && selectedRole.id === roleId) {
+        setSelectedRole(null);
+      }
+    } catch (error) {
+      console.error('Error deleting role:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to delete role",
+      });
+    }
+  };
+
+  const handlePermissionChange = async (application, permission, checked) => {
+    if (!isAdmin) {
+      toast({
+        variant: "destructive",
+        title: "Permission Denied",
+        description: "Only administrators can modify permissions",
+      });
+      return;
+    }
+
+    if (!selectedRole) return;
+
+    // Update local state first for UI responsiveness
+    setPermissions(prev => {
+      const newPermissions = { ...prev };
+      
+      if (!newPermissions[application]) {
+        newPermissions[application] = {
+          view: false,
+          create: false,
+          edit: false,
+          delete: false
+        };
+      }
+      
+      newPermissions[application][permission] = checked;
+      return newPermissions;
+    });
+  };
+
+  const savePermissions = async () => {
+    if (!isAdmin || !selectedRole) return;
+    
+    setSaving(true);
+    
+    try {
+      // Convert permissions object to array of permission objects
+      const permissionsToUpsert = Object.entries(permissions).map(([app, perms]) => ({
+        role_id: selectedRole.id,
+        application: app,
+        can_view: perms.view,
+        can_create: perms.create,
+        can_edit: perms.edit,
+        can_delete: perms.delete,
+        id: perms.id // Will be undefined for new permissions
+      }));
+      
+      // Use upsert to insert or update permissions
+      const { error } = await supabase
+        .from('permissions')
+        .upsert(permissionsToUpsert, { 
+          onConflict: 'role_id,application',
+          ignoreDuplicates: false
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Permissions saved successfully",
+      });
+      
+      // Refresh permissions to get the new IDs
+      fetchPermissions(selectedRole.id);
+    } catch (error) {
+      console.error('Error saving permissions:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to save permissions",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   // Filter roles based on search term
-  const filteredRoles = mockRoles.filter(role => 
+  const filteredRoles = roles.filter(role => 
     role.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    role.description.toLowerCase().includes(searchTerm.toLowerCase())
+    (role.description && role.description.toLowerCase().includes(searchTerm.toLowerCase()))
   );
-
-  const handleAddRole = () => {
-    // In a real application, this would call an API to add the role
-    console.log('Adding new role:', newRole);
-    // Reset form and close dialog
-    setNewRole({ name: '', description: '' });
-    setIsAddRoleOpen(false);
-  };
-
-  const handlePermissionChange = (application: string, permission: string, checked: boolean) => {
-    console.log(`Changed ${permission} permission for ${application} to ${checked} for role ${selectedRole}`);
-    // In a real app, this would update permissions in your backend
-  };
 
   return (
     <div className="space-y-6">
@@ -107,7 +319,7 @@ export const RoleManagementTab = () => {
             
             <Dialog open={isAddRoleOpen} onOpenChange={setIsAddRoleOpen}>
               <DialogTrigger asChild>
-                <Button size="sm">
+                <Button size="sm" disabled={!isAdmin}>
                   <ShieldPlus className="h-4 w-4 mr-2" />
                   Add Role
                 </Button>
@@ -160,36 +372,64 @@ export const RoleManagementTab = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Role</TableHead>
-                  <TableHead className="hidden md:table-cell">Users</TableHead>
                   <TableHead className="w-[60px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredRoles.map((role) => (
-                  <TableRow 
-                    key={role.id} 
-                    className={selectedRole === role.name ? "bg-primary/10" : ""}
-                    onClick={() => setSelectedRole(role.name)}
-                  >
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{role.name}</div>
-                        <div className="text-xs text-muted-foreground hidden md:block">{role.description}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">{role.userCount}</TableCell>
-                    <TableCell>
-                      <div className="flex space-x-1">
-                        <Button variant="ghost" size="icon">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon">
-                          <Trash className="h-4 w-4" />
-                        </Button>
-                      </div>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={2} className="h-24 text-center">
+                      Loading...
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : filteredRoles.length > 0 ? (
+                  filteredRoles.map((role) => (
+                    <TableRow 
+                      key={role.id} 
+                      className={selectedRole && selectedRole.id === role.id ? "bg-primary/10" : ""}
+                      onClick={() => setSelectedRole(role)}
+                    >
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{role.name}</div>
+                          <div className="text-xs text-muted-foreground">{role.description}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex space-x-1">
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            disabled={!isAdmin}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // Edit role functionality would go here
+                            }}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            disabled={!isAdmin || role.name === 'Admin'} // Don't allow deleting the Admin role
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteRole(role.id);
+                            }}
+                          >
+                            <Trash className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={2} className="h-24 text-center">
+                      No roles found.
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </div>
@@ -200,7 +440,18 @@ export const RoleManagementTab = () => {
           {selectedRole ? (
             <Card className="bg-card/40 backdrop-blur-md border border-white/10">
               <CardContent className="pt-6">
-                <h3 className="text-lg font-medium mb-4">Permissions for {selectedRole} Role</h3>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-medium">Permissions for {selectedRole.name} Role</h3>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={savePermissions}
+                    disabled={saving || !isAdmin}
+                  >
+                    {saving ? 'Saving...' : 'Save Permissions'}
+                    {!saving && <Check className="ml-2 h-4 w-4" />}
+                  </Button>
+                </div>
                 
                 <div className="rounded-md border bg-card/40 backdrop-blur-md border-white/10 overflow-hidden">
                   <Table>
@@ -214,41 +465,41 @@ export const RoleManagementTab = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {mockApplications.map((app) => (
+                      {applications.map((app) => (
                         <TableRow key={app.id}>
                           <TableCell className="font-medium">{app.name}</TableCell>
                           <TableCell className="text-center">
                             <Switch 
-                              checked={mockPermissions[selectedRole][app.key].view}
+                              checked={permissions[app.key]?.view || false}
                               onCheckedChange={(checked) => handlePermissionChange(app.key, 'view', checked)}
+                              disabled={!isAdmin}
                             />
                           </TableCell>
                           <TableCell className="text-center">
                             <Switch 
-                              checked={mockPermissions[selectedRole][app.key].create}
+                              checked={permissions[app.key]?.create || false}
                               onCheckedChange={(checked) => handlePermissionChange(app.key, 'create', checked)}
+                              disabled={!isAdmin}
                             />
                           </TableCell>
                           <TableCell className="text-center">
                             <Switch 
-                              checked={mockPermissions[selectedRole][app.key].edit}
+                              checked={permissions[app.key]?.edit || false}
                               onCheckedChange={(checked) => handlePermissionChange(app.key, 'edit', checked)}
+                              disabled={!isAdmin}
                             />
                           </TableCell>
                           <TableCell className="text-center">
                             <Switch 
-                              checked={mockPermissions[selectedRole][app.key].delete}
+                              checked={permissions[app.key]?.delete || false}
                               onCheckedChange={(checked) => handlePermissionChange(app.key, 'delete', checked)}
+                              disabled={!isAdmin}
                             />
                           </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
                   </Table>
-                </div>
-                
-                <div className="flex justify-end mt-4">
-                  <Button>Save Permissions</Button>
                 </div>
               </CardContent>
             </Card>

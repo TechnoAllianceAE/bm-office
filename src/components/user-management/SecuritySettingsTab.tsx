@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -8,7 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription } from '@/components/ui/form';
-import { Chrome, Mail, Linkedin } from 'lucide-react';
+import { Chrome, Mail, Linkedin, Save, Check } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/context/AuthContext';
 
 export const SecuritySettingsTab = () => {
   const [passwordLength, setPasswordLength] = useState(12);
@@ -16,7 +20,7 @@ export const SecuritySettingsTab = () => {
     uppercase: true,
     lowercase: true,
     numbers: true,
-    symbols: true,
+    symbols: false,
     expiration: '90',
     historyCount: '5',
     lockoutThreshold: '5',
@@ -30,6 +34,65 @@ export const SecuritySettingsTab = () => {
     allowLocalLogin: true,
     enforceSSO: false,
   });
+  
+  const [securitySettings, setSecuritySettings] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const { toast } = useToast();
+  const { isAdmin } = useAuth();
+
+  useEffect(() => {
+    fetchSecuritySettings();
+  }, []);
+
+  const fetchSecuritySettings = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('security_settings')
+        .select('*')
+        .limit(1)
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows returned" error
+        throw error;
+      }
+      
+      if (data) {
+        setSecuritySettings(data);
+        
+        // Update local state based on DB data
+        setPasswordLength(data.min_password_length || 12);
+        setPasswordSettings({
+          uppercase: data.require_uppercase || false,
+          lowercase: data.require_lowercase || false,
+          numbers: data.require_numbers || false,
+          symbols: data.require_special_chars || false,
+          expiration: data.password_expiry_days?.toString() || '90',
+          historyCount: '5',
+          lockoutThreshold: data.max_login_attempts?.toString() || '5',
+          lockoutDuration: '30',
+        });
+        
+        setSsoSettings({
+          googleEnabled: data.google_sso_enabled || false,
+          microsoftEnabled: data.microsoft_sso_enabled || false,
+          linkedinEnabled: data.linkedin_sso_enabled || false,
+          allowLocalLogin: true,
+          enforceSSO: false,
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching security settings:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load security settings",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const updatePasswordSetting = (setting, value) => {
     setPasswordSettings(prev => ({ ...prev, [setting]: value }));
@@ -38,6 +101,65 @@ export const SecuritySettingsTab = () => {
   const updateSSOSetting = (setting, value) => {
     setSsoSettings(prev => ({ ...prev, [setting]: value }));
   };
+
+  const saveSettings = async () => {
+    if (!isAdmin) {
+      toast({
+        variant: "destructive",
+        title: "Permission Denied",
+        description: "Only administrators can modify security settings",
+      });
+      return;
+    }
+
+    setSaving(true);
+    
+    try {
+      const settingsToUpsert = {
+        min_password_length: passwordLength,
+        require_uppercase: passwordSettings.uppercase,
+        require_lowercase: passwordSettings.lowercase,
+        require_numbers: passwordSettings.numbers,
+        require_special_chars: passwordSettings.symbols,
+        password_expiry_days: parseInt(passwordSettings.expiration),
+        max_login_attempts: parseInt(passwordSettings.lockoutThreshold),
+        google_sso_enabled: ssoSettings.googleEnabled,
+        microsoft_sso_enabled: ssoSettings.microsoftEnabled,
+        linkedin_sso_enabled: ssoSettings.linkedinEnabled,
+        id: securitySettings?.id // Will be null for first record
+      };
+      
+      // Use upsert to ensure we only have one settings record
+      const { data, error } = await supabase
+        .from('security_settings')
+        .upsert(settingsToUpsert)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Security settings saved successfully",
+      });
+      
+      // Update local state with the saved settings
+      setSecuritySettings(data);
+    } catch (error) {
+      console.error('Error saving security settings:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to save security settings",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return <div className="flex justify-center p-8">Loading security settings...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -69,6 +191,7 @@ export const SecuritySettingsTab = () => {
                     max={24}
                     step={1}
                     onValueChange={(value) => setPasswordLength(value[0])}
+                    disabled={!isAdmin}
                     className="w-full"
                   />
                 </div>
@@ -82,6 +205,7 @@ export const SecuritySettingsTab = () => {
                       id="uppercase" 
                       checked={passwordSettings.uppercase}
                       onCheckedChange={(checked) => updatePasswordSetting('uppercase', checked)}
+                      disabled={!isAdmin}
                     />
                   </div>
                   
@@ -93,6 +217,7 @@ export const SecuritySettingsTab = () => {
                       id="lowercase" 
                       checked={passwordSettings.lowercase}
                       onCheckedChange={(checked) => updatePasswordSetting('lowercase', checked)}
+                      disabled={!isAdmin}
                     />
                   </div>
                   
@@ -104,6 +229,7 @@ export const SecuritySettingsTab = () => {
                       id="numbers" 
                       checked={passwordSettings.numbers}
                       onCheckedChange={(checked) => updatePasswordSetting('numbers', checked)}
+                      disabled={!isAdmin}
                     />
                   </div>
                   
@@ -115,6 +241,7 @@ export const SecuritySettingsTab = () => {
                       id="symbols" 
                       checked={passwordSettings.symbols}
                       onCheckedChange={(checked) => updatePasswordSetting('symbols', checked)}
+                      disabled={!isAdmin}
                     />
                   </div>
                 </div>
@@ -134,6 +261,7 @@ export const SecuritySettingsTab = () => {
                   <Select 
                     value={passwordSettings.expiration}
                     onValueChange={(value) => updatePasswordSetting('expiration', value)}
+                    disabled={!isAdmin}
                   >
                     <SelectTrigger className="bg-background/50">
                       <SelectValue placeholder="Select expiration period" />
@@ -153,6 +281,7 @@ export const SecuritySettingsTab = () => {
                   <Select 
                     value={passwordSettings.historyCount}
                     onValueChange={(value) => updatePasswordSetting('historyCount', value)}
+                    disabled={!isAdmin}
                   >
                     <SelectTrigger className="bg-background/50">
                       <SelectValue placeholder="Select history count" />
@@ -174,6 +303,7 @@ export const SecuritySettingsTab = () => {
                   <Select 
                     value={passwordSettings.lockoutThreshold}
                     onValueChange={(value) => updatePasswordSetting('lockoutThreshold', value)}
+                    disabled={!isAdmin}
                   >
                     <SelectTrigger className="bg-background/50">
                       <SelectValue placeholder="Select threshold" />
@@ -192,6 +322,7 @@ export const SecuritySettingsTab = () => {
                   <Select 
                     value={passwordSettings.lockoutDuration}
                     onValueChange={(value) => updatePasswordSetting('lockoutDuration', value)}
+                    disabled={!isAdmin}
                   >
                     <SelectTrigger className="bg-background/50">
                       <SelectValue placeholder="Select duration" />
@@ -217,6 +348,7 @@ export const SecuritySettingsTab = () => {
                 icon={<Chrome className="h-6 w-6" />}
                 enabled={ssoSettings.googleEnabled}
                 onToggle={(enabled) => updateSSOSetting('googleEnabled', enabled)}
+                isAdmin={isAdmin}
               />
               
               <SSOProviderCard 
@@ -224,6 +356,7 @@ export const SecuritySettingsTab = () => {
                 icon={<Mail className="h-6 w-6" />}
                 enabled={ssoSettings.microsoftEnabled}
                 onToggle={(enabled) => updateSSOSetting('microsoftEnabled', enabled)}
+                isAdmin={isAdmin}
               />
               
               <SSOProviderCard 
@@ -231,6 +364,7 @@ export const SecuritySettingsTab = () => {
                 icon={<Linkedin className="h-6 w-6" />}
                 enabled={ssoSettings.linkedinEnabled}
                 onToggle={(enabled) => updateSSOSetting('linkedinEnabled', enabled)}
+                isAdmin={isAdmin}
               />
             </div>
             
@@ -253,6 +387,7 @@ export const SecuritySettingsTab = () => {
                     id="allow-local-login" 
                     checked={ssoSettings.allowLocalLogin}
                     onCheckedChange={(checked) => updateSSOSetting('allowLocalLogin', checked)}
+                    disabled={!isAdmin}
                   />
                 </div>
                 
@@ -267,6 +402,7 @@ export const SecuritySettingsTab = () => {
                     id="enforce-sso" 
                     checked={ssoSettings.enforceSSO}
                     onCheckedChange={(checked) => updateSSOSetting('enforceSSO', checked)}
+                    disabled={!isAdmin}
                   />
                 </div>
               </CardContent>
@@ -291,26 +427,26 @@ export const SecuritySettingsTab = () => {
                       Require all users to set up multi-factor authentication
                     </p>
                   </div>
-                  <Switch id="require-mfa" />
+                  <Switch id="require-mfa" disabled={!isAdmin} />
                 </div>
                 
                 <div className="space-y-2">
                   <Label className="text-base font-medium">Allowed Authentication Methods</Label>
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2">
-                      <Switch id="authenticator-app" defaultChecked />
+                      <Switch id="authenticator-app" defaultChecked disabled={!isAdmin} />
                       <Label htmlFor="authenticator-app">Authenticator App</Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Switch id="sms" defaultChecked />
+                      <Switch id="sms" defaultChecked disabled={!isAdmin} />
                       <Label htmlFor="sms">SMS</Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Switch id="email" defaultChecked />
+                      <Switch id="email" defaultChecked disabled={!isAdmin} />
                       <Label htmlFor="email">Email</Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Switch id="security-key" />
+                      <Switch id="security-key" disabled={!isAdmin} />
                       <Label htmlFor="security-key">Security Key (WebAuthn)</Label>
                     </div>
                   </div>
@@ -320,11 +456,11 @@ export const SecuritySettingsTab = () => {
                   <Label htmlFor="recovery-options" className="text-base font-medium">Recovery Options</Label>
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2">
-                      <Switch id="backup-codes" defaultChecked />
+                      <Switch id="backup-codes" defaultChecked disabled={!isAdmin} />
                       <Label htmlFor="backup-codes">Backup Codes</Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Switch id="recovery-email" defaultChecked />
+                      <Switch id="recovery-email" defaultChecked disabled={!isAdmin} />
                       <Label htmlFor="recovery-email">Recovery Email</Label>
                     </div>
                   </div>
@@ -333,7 +469,7 @@ export const SecuritySettingsTab = () => {
               
               <div>
                 <Label htmlFor="mfa-grace-period" className="text-base font-medium">MFA Grace Period</Label>
-                <Select defaultValue="7">
+                <Select defaultValue="7" disabled={!isAdmin}>
                   <SelectTrigger className="mt-2 bg-background/50">
                     <SelectValue placeholder="Select grace period" />
                   </SelectTrigger>
@@ -356,13 +492,16 @@ export const SecuritySettingsTab = () => {
       </Tabs>
       
       <div className="flex justify-end">
-        <Button>Save Security Settings</Button>
+        <Button onClick={saveSettings} disabled={saving || !isAdmin}>
+          {saving ? 'Saving...' : 'Save Security Settings'}
+          {!saving && <Save className="ml-2 h-4 w-4" />}
+        </Button>
       </div>
     </div>
   );
 };
 
-const SSOProviderCard = ({ provider, icon, enabled, onToggle }) => {
+const SSOProviderCard = ({ provider, icon, enabled, onToggle, isAdmin }) => {
   const [isConfiguring, setIsConfiguring] = useState(false);
   
   return (
@@ -376,6 +515,7 @@ const SSOProviderCard = ({ provider, icon, enabled, onToggle }) => {
           <Switch 
             checked={enabled} 
             onCheckedChange={onToggle}
+            disabled={!isAdmin}
           />
         </div>
         
@@ -389,6 +529,7 @@ const SSOProviderCard = ({ provider, icon, enabled, onToggle }) => {
                     id={`${provider.toLowerCase()}-client-id`}
                     placeholder="Enter client ID"
                     className="bg-background/50"
+                    disabled={!isAdmin}
                   />
                 </div>
                 <div className="space-y-2">
@@ -398,13 +539,14 @@ const SSOProviderCard = ({ provider, icon, enabled, onToggle }) => {
                     type="password"
                     placeholder="Enter client secret"
                     className="bg-background/50"
+                    disabled={!isAdmin}
                   />
                 </div>
                 <div className="flex justify-end space-x-2 mt-2">
                   <Button size="sm" variant="outline" onClick={() => setIsConfiguring(false)}>
                     Cancel
                   </Button>
-                  <Button size="sm" onClick={() => setIsConfiguring(false)}>
+                  <Button size="sm" onClick={() => setIsConfiguring(false)} disabled={!isAdmin}>
                     Save
                   </Button>
                 </div>
@@ -419,6 +561,7 @@ const SSOProviderCard = ({ provider, icon, enabled, onToggle }) => {
                   size="sm" 
                   className="w-full"
                   onClick={() => setIsConfiguring(true)}
+                  disabled={!isAdmin}
                 >
                   Configure
                 </Button>
