@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -9,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription } from '@/components/ui/form';
-import { Google, Mail, Linkedin } from 'lucide-react';
+import { Chrome, Mail, Linkedin } from 'lucide-react';
 
 export const SecuritySettingsTab = () => {
   const [passwordLength, setPasswordLength] = useState(12);
@@ -215,7 +214,7 @@ export const SecuritySettingsTab = () => {
             <div className="grid gap-4 md:grid-cols-3">
               <SSOProviderCard 
                 provider="Google"
-                icon={<Google className="h-6 w-6" />}
+                icon={<Chrome className="h-6 w-6" />}
                 enabled={ssoSettings.googleEnabled}
                 onToggle={(enabled) => updateSSOSetting('googleEnabled', enabled)}
               />
@@ -436,7 +435,6 @@ const SSOProviderCard = ({ provider, icon, enabled, onToggle }) => {
   );
 };
 
-// Helper function to determine password strength
 const getPasswordStrength = (length) => {
   if (length < 8) return "Weak";
   if (length < 12) return "Medium";
