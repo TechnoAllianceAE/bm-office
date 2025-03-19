@@ -8,50 +8,18 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { ShieldPlus, Search, Edit, Trash, Check } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 
-// Define types for our data structures
-interface Role {
-  id: string;
-  name: string;
-  description: string | null;
-}
-
-// Define Permission interface with explicit boolean types
-interface Permission {
-  view: boolean;
-  create: boolean;
-  edit: boolean;
-  delete: boolean;
-  id?: string;
-}
-
-interface PermissionsObject {
-  [key: string]: Permission;
-}
-
-// Define the database permission structure
-interface DbPermission {
-  id: string;
-  role_id: string;
-  application: string;
-  can_view: boolean;
-  can_create: boolean;
-  can_edit: boolean;
-  can_delete: boolean;
-}
-
 export const RoleManagementTab = () => {
-  
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
+  const [selectedRole, setSelectedRole] = useState(null);
   const [isAddRoleOpen, setIsAddRoleOpen] = useState(false);
   const [newRole, setNewRole] = useState({ name: '', description: '' });
-  const [roles, setRoles] = useState<Role[]>([]);
-  const [applications, setApplications] = useState<{id: number; name: string; key: string}[]>([]);
-  const [permissions, setPermissions] = useState<PermissionsObject>({});
+  const [roles, setRoles] = useState([]);
+  const [applications, setApplications] = useState([]);
+  const [permissions, setPermissions] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
@@ -80,6 +48,7 @@ export const RoleManagementTab = () => {
       
       setRoles(data || []);
       
+      // If no role is selected and we have roles, select the first one
       if (!selectedRole && data && data.length > 0) {
         setSelectedRole(data[0]);
       }
@@ -96,6 +65,8 @@ export const RoleManagementTab = () => {
   };
 
   const fetchApplications = async () => {
+    // For now we'll use a static list of applications
+    // In a real app, this could be fetched from a database
     const appList = [
       { id: 1, name: 'Dashboard', key: 'dashboard' },
       { id: 2, name: 'Timesheet', key: 'timesheet' },
@@ -111,7 +82,7 @@ export const RoleManagementTab = () => {
     setApplications(appList);
   };
 
-  const fetchPermissions = async (roleId: string) => {
+  const fetchPermissions = async (roleId) => {
     try {
       const { data, error } = await supabase
         .from('permissions')
@@ -120,15 +91,14 @@ export const RoleManagementTab = () => {
 
       if (error) throw error;
       
-      const permObj: PermissionsObject = {};
-      
-      // Explicitly type the data from database
-      (data as DbPermission[]).forEach(perm => {
+      // Convert array to object with application as key
+      const permObj = {};
+      data.forEach(perm => {
         permObj[perm.application] = {
-          view: perm.can_view || false,
-          create: perm.can_create || false,
-          edit: perm.can_edit || false,
-          delete: perm.can_delete || false,
+          view: perm.can_view,
+          create: perm.can_create,
+          edit: perm.can_edit,
+          delete: perm.can_delete,
           id: perm.id
         };
       });
@@ -144,7 +114,7 @@ export const RoleManagementTab = () => {
     }
   };
 
-  const fetchRoleUserCount = async (roleId: string) => {
+  const fetchRoleUserCount = async (roleId) => {
     try {
       const { count, error } = await supabase
         .from('app_users')
@@ -189,10 +159,11 @@ export const RoleManagementTab = () => {
       
       await fetchRoles();
       
+      // Select the newly created role
       if (data) {
         setSelectedRole(data);
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error adding role:', error);
       toast({
         variant: "destructive",
@@ -205,7 +176,7 @@ export const RoleManagementTab = () => {
     }
   };
 
-  const handleDeleteRole = async (roleId: string) => {
+  const handleDeleteRole = async (roleId) => {
     if (!isAdmin) {
       toast({
         variant: "destructive",
@@ -234,6 +205,7 @@ export const RoleManagementTab = () => {
       
       await fetchRoles();
       
+      // If the deleted role was selected, clear selection
       if (selectedRole && selectedRole.id === roleId) {
         setSelectedRole(null);
       }
@@ -247,7 +219,7 @@ export const RoleManagementTab = () => {
     }
   };
 
-  const handlePermissionChange = (application: string, permissionType: keyof Permission, checked: boolean) => {
+  const handlePermissionChange = async (application, permission, checked) => {
     if (!isAdmin) {
       toast({
         variant: "destructive",
@@ -259,6 +231,7 @@ export const RoleManagementTab = () => {
 
     if (!selectedRole) return;
 
+    // Update local state first for UI responsiveness
     setPermissions(prev => {
       const newPermissions = { ...prev };
       
@@ -271,7 +244,7 @@ export const RoleManagementTab = () => {
         };
       }
       
-      newPermissions[application][permissionType] = checked;
+      newPermissions[application][permission] = checked;
       return newPermissions;
     });
   };
@@ -282,6 +255,7 @@ export const RoleManagementTab = () => {
     setSaving(true);
     
     try {
+      // Convert permissions object to array of permission objects
       const permissionsToUpsert = Object.entries(permissions).map(([app, perms]) => ({
         role_id: selectedRole.id,
         application: app,
@@ -289,9 +263,10 @@ export const RoleManagementTab = () => {
         can_create: perms.create,
         can_edit: perms.edit,
         can_delete: perms.delete,
-        id: perms.id
+        id: perms.id // Will be undefined for new permissions
       }));
       
+      // Use upsert to insert or update permissions
       const { error } = await supabase
         .from('permissions')
         .upsert(permissionsToUpsert, { 
@@ -306,6 +281,7 @@ export const RoleManagementTab = () => {
         description: "Permissions saved successfully",
       });
       
+      // Refresh permissions to get the new IDs
       fetchPermissions(selectedRole.id);
     } catch (error) {
       console.error('Error saving permissions:', error);
@@ -319,15 +295,16 @@ export const RoleManagementTab = () => {
     }
   };
 
+  // Filter roles based on search term
   const filteredRoles = roles.filter(role => 
     role.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     (role.description && role.description.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
-    
     <div className="space-y-6">
       <div className="flex flex-col lg:flex-row gap-6">
+        {/* Left side - Roles List */}
         <div className="lg:w-1/3 space-y-4">
           <div className="flex justify-between items-center">
             <div className="relative">
@@ -434,7 +411,7 @@ export const RoleManagementTab = () => {
                           <Button 
                             variant="ghost" 
                             size="icon"
-                            disabled={!isAdmin || role.name === 'Admin'}
+                            disabled={!isAdmin || role.name === 'Admin'} // Don't allow deleting the Admin role
                             onClick={(e) => {
                               e.stopPropagation();
                               handleDeleteRole(role.id);
@@ -458,6 +435,7 @@ export const RoleManagementTab = () => {
           </div>
         </div>
 
+        {/* Right side - Permissions Matrix */}
         <div className="lg:w-2/3">
           {selectedRole ? (
             <Card className="bg-card/40 backdrop-blur-md border border-white/10">
