@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -143,20 +142,22 @@ const AppContent = () => {
     };
   }, []);
   
-  // Show loading state if authentication is still being determined
+  // Show loading state while determining authentication
   if (isLoading) {
     return <LoadingScreen />;
   }
   
+  // Render login page for unauthenticated users
   if (!isAuthenticated) {
     return (
       <Routes>
-        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+        <Route path="/login" element={<Login />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     );
   }
   
+  // Render app for authenticated users
   return (
     <div className="flex min-h-screen w-full">
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />

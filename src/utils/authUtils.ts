@@ -68,7 +68,10 @@ export const signInWithCredentials = async (email: string, password: string) => 
   }
 
   if (!data.user) {
-    throw new Error('Sign in successful but no user data returned');
+    const noUserError = new Error('Sign in successful but no user data returned');
+    console.error(noUserError);
+    toast.error('Authentication error');
+    throw noUserError;
   }
 
   return { user: data.user, session: data.session };

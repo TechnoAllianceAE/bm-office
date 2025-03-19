@@ -93,9 +93,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signIn = async (email: string, password: string): Promise<User | null> => {
     try {
       setIsLoading(true);
-      const { user } = await signInWithCredentials(email, password);
+      const { user, session } = await signInWithCredentials(email, password);
       
       if (user) {
+        setUser(user);
+        setSession(session);
         await getUserRole(user.id);
         
         toast.success('Login successful', {
@@ -103,11 +105,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             ? 'Welcome, Super Admin!' 
             : 'Welcome back!'
         });
-      } else {
-        toast.success('Login successful');
+        
+        navigate('/');
       }
       
-      navigate('/');
       return user;
     } catch (error) {
       console.error('Error signing in:', error);
