@@ -1,65 +1,50 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Card, CardContent } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Shield, Plus, X, Check, Trash, Edit, RefreshCw } from 'lucide-react';
+import { 
+  Dialog, DialogContent, DialogDescription, DialogHeader, 
+  DialogTitle, DialogTrigger, DialogFooter 
+} from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { ShieldPlus, Search, Edit, Trash, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
-
-// Define interfaces for better type safety
-interface Role {
-  id: string;
-  name: string;
-  description?: string;
-}
-
-interface Application {
-  id: number;
-  name: string;
-  key: string;
-}
-
-interface Permission {
-  view: boolean;
-  create: boolean;
-  edit: boolean;
-  delete: boolean;
-  id?: string;
-}
-
-interface PermissionsMap {
-  [applicationKey: string]: Permission;
-}
+import { Role, Application, Permission, PermissionRecord, PermissionsMap } from './interfaces';
 
 export const RoleManagementTab = () => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [applications, setApplications] = useState<Application[]>([
+    { name: 'Dashboard', description: 'Main dashboard access' },
+    { name: 'Users', description: 'User management' },
+    { name: 'Projects', description: 'Project management' },
+    { name: 'Reports', description: 'Reports and analytics' },
+    { name: 'Settings', description: 'System settings' },
+  ]);
+  
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [isAddRoleOpen, setIsAddRoleOpen] = useState(false);
+  const [isEditRoleOpen, setIsEditRoleOpen] = useState(false);
   const [newRole, setNewRole] = useState({ name: '', description: '' });
-  const [roles, setRoles] = useState<Role[]>([]);
-  const [applications, setApplications] = useState<Application[]>([]);
+  const [editRole, setEditRole] = useState({ id: '', name: '', description: '' });
   const [permissions, setPermissions] = useState<PermissionsMap>({});
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const { toast } = useToast();
   const { isAdmin } = useAuth();
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
     fetchRoles();
-    fetchApplications();
   }, []);
-
+  
   useEffect(() => {
     if (selectedRole) {
       fetchPermissions(selectedRole.id);
     }
   }, [selectedRole]);
-
+  
   const fetchRoles = async () => {
     setLoading(true);
     try {
@@ -67,13 +52,13 @@ export const RoleManagementTab = () => {
         .from('roles')
         .select('*')
         .order('name');
-
+        
       if (error) throw error;
       
       setRoles(data || []);
       
-      // If no role is selected and we have roles, select the first one
-      if (!selectedRole && data && data.length > 0) {
+      // Select the first role by default
+      if (data && data.length > 0 && !selectedRole) {
         setSelectedRole(data[0]);
       }
     } catch (error) {
@@ -87,50 +72,40 @@ export const RoleManagementTab = () => {
       setLoading(false);
     }
   };
-
-  const fetchApplications = async () => {
-    // For now we'll use a static list of applications
-    // In a real app, this could be fetched from a database
-    const appList = [
-      { id: 1, name: 'Dashboard', key: 'dashboard' },
-      { id: 2, name: 'Timesheet', key: 'timesheet' },
-      { id: 3, name: 'Projects', key: 'projects' },
-      { id: 4, name: 'HR Portal', key: 'hr' },
-      { id: 5, name: 'Directory', key: 'directory' },
-      { id: 6, name: 'Mailbox', key: 'mailbox' },
-      { id: 7, name: 'AI Assistant', key: 'ai-assistant' },
-      { id: 8, name: 'DMS', key: 'dms' },
-      { id: 9, name: 'Analytics', key: 'analytics' },
-      { id: 10, name: 'Settings', key: 'settings' },
-    ];
-    setApplications(appList);
-  };
-
+  
   const fetchPermissions = async (roleId: string) => {
     try {
       const { data, error } = await supabase
         .from('permissions')
         .select('*')
         .eq('role_id', roleId);
-
+        
       if (error) throw error;
       
-      // Convert array to object with application as key
-      const permObj: PermissionsMap = {};
+      // Convert the permissions data to the format we need
+      const permissionsMap: PermissionsMap = {};
       
-      if (data) {
-        data.forEach(perm => {
-          permObj[perm.application] = {
-            view: Boolean(perm.can_view),
-            create: Boolean(perm.can_create),
-            edit: Boolean(perm.can_edit),
-            delete: Boolean(perm.can_delete),
-            id: perm.id
-          };
-        });
-      }
+      // Initialize permissions for all applications
+      applications.forEach(app => {
+        permissionsMap[app.name] = {
+          view: false,
+          create: false,
+          edit: false,
+          delete: false
+        };
+      });
       
-      setPermissions(permObj);
+      // Update permissions based on data from database
+      (data as PermissionRecord[]).forEach(permission => {
+        permissionsMap[permission.application] = {
+          view: Boolean(permission.can_view),
+          create: Boolean(permission.can_create),
+          edit: Boolean(permission.can_edit),
+          delete: Boolean(permission.can_delete)
+        };
+      });
+      
+      setPermissions(permissionsMap);
     } catch (error) {
       console.error('Error fetching permissions:', error);
       toast({
@@ -140,410 +115,429 @@ export const RoleManagementTab = () => {
       });
     }
   };
-
-  const fetchRoleUserCount = async (roleId: string) => {
-    try {
-      const { count, error } = await supabase
-        .from('app_users')
-        .select('id', { count: 'exact' })
-        .eq('role', roleId);
-
-      if (error) throw error;
-      
-      return count || 0;
-    } catch (error) {
-      console.error('Error counting users by role:', error);
-      return 0;
-    }
-  };
-
+  
   const handleAddRole = async () => {
-    if (!isAdmin) {
-      toast({
-        variant: "destructive",
-        title: "Permission Denied",
-        description: "Only administrators can add roles",
-      });
-      return;
-    }
-
     try {
       const { data, error } = await supabase
         .from('roles')
-        .insert([{ 
-          name: newRole.name,
-          description: newRole.description
-        }])
-        .select()
+        .insert([
+          { name: newRole.name, description: newRole.description }
+        ])
+        .select('*')
         .single();
-
+        
       if (error) throw error;
-
+      
+      // Add new role to the list
+      setRoles([...roles, data]);
+      
+      // Select the new role
+      setSelectedRole(data);
+      
+      // Reset the form
+      setNewRole({ name: '', description: '' });
+      
       toast({
         title: "Success",
-        description: "Role created successfully",
+        description: "Role added successfully",
       });
-      
-      await fetchRoles();
-      
-      // Select the newly created role
-      if (data) {
-        setSelectedRole(data);
-      }
     } catch (error) {
       console.error('Error adding role:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Failed to create role",
+        description: "Failed to add role",
       });
     } finally {
-      setNewRole({ name: '', description: '' });
       setIsAddRoleOpen(false);
     }
   };
-
-  const handleDeleteRole = async (roleId: string) => {
-    if (!isAdmin) {
-      toast({
-        variant: "destructive",
-        title: "Permission Denied",
-        description: "Only administrators can delete roles",
-      });
-      return;
-    }
-
-    if (!confirm("Are you sure you want to delete this role? All associated permissions will also be deleted.")) {
-      return;
-    }
-
+  
+  const handleEditRole = async () => {
     try {
       const { error } = await supabase
         .from('roles')
-        .delete()
-        .eq('id', roleId);
-
+        .update({
+          name: editRole.name,
+          description: editRole.description
+        })
+        .eq('id', editRole.id);
+        
       if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Role deleted successfully",
-      });
       
-      await fetchRoles();
+      // Update the roles list
+      setRoles(roles.map(role => 
+        role.id === editRole.id 
+          ? { ...role, name: editRole.name, description: editRole.description }
+          : role
+      ));
       
-      // If the deleted role was selected, clear selection
-      if (selectedRole && selectedRole.id === roleId) {
-        setSelectedRole(null);
-      }
-    } catch (error) {
-      console.error('Error deleting role:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to delete role",
-      });
-    }
-  };
-
-  const handlePermissionChange = async (application: string, permissionType: 'view' | 'create' | 'edit' | 'delete', checked: boolean) => {
-    if (!isAdmin) {
-      toast({
-        variant: "destructive",
-        title: "Permission Denied",
-        description: "Only administrators can modify permissions",
-      });
-      return;
-    }
-
-    if (!selectedRole) return;
-
-    // Update local state first for UI responsiveness
-    setPermissions(prev => {
-      const newPermissions = { ...prev };
-      
-      if (!newPermissions[application]) {
-        newPermissions[application] = {
-          view: false,
-          create: false,
-          edit: false,
-          delete: false
-        };
-      }
-      
-      newPermissions[application] = {
-        ...newPermissions[application],
-        [permissionType]: checked
-      };
-      
-      return newPermissions;
-    });
-  };
-
-  const savePermissions = async () => {
-    if (!isAdmin || !selectedRole) return;
-    
-    setSaving(true);
-    
-    try {
-      // Convert permissions object to array of permission objects
-      const permissionsToUpsert = Object.entries(permissions).map(([app, perms]) => ({
-        role_id: selectedRole.id,
-        application: app,
-        can_view: perms.view,
-        can_create: perms.create,
-        can_edit: perms.edit,
-        can_delete: perms.delete,
-        id: perms.id // Will be undefined for new permissions
-      }));
-      
-      // Use upsert to insert or update permissions
-      const { error } = await supabase
-        .from('permissions')
-        .upsert(permissionsToUpsert, { 
-          onConflict: 'role_id,application',
-          ignoreDuplicates: false
+      // Update the selected role if it's the one being edited
+      if (selectedRole && selectedRole.id === editRole.id) {
+        setSelectedRole({
+          ...selectedRole,
+          name: editRole.name,
+          description: editRole.description
         });
-
-      if (error) throw error;
-
+      }
+      
       toast({
         title: "Success",
-        description: "Permissions saved successfully",
+        description: "Role updated successfully",
       });
-      
-      // Refresh permissions to get the new IDs
-      fetchPermissions(selectedRole.id);
     } catch (error) {
-      console.error('Error saving permissions:', error);
+      console.error('Error updating role:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to save permissions",
+        description: "Failed to update role",
       });
     } finally {
-      setSaving(false);
+      setIsEditRoleOpen(false);
     }
   };
-
-  // Filter roles based on search term
-  const filteredRoles = roles.filter(role => 
-    role.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    (role.description && role.description.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
-
+  
+  const handleDeleteRole = async (roleId: string) => {
+    if (confirm("Are you sure you want to delete this role? This will affect users assigned this role.")) {
+      try {
+        const { error } = await supabase
+          .from('roles')
+          .delete()
+          .eq('id', roleId);
+          
+        if (error) throw error;
+        
+        // Remove the role from the list
+        const updatedRoles = roles.filter(role => role.id !== roleId);
+        setRoles(updatedRoles);
+        
+        // If the deleted role was selected, select the first available role or null
+        if (selectedRole && selectedRole.id === roleId) {
+          setSelectedRole(updatedRoles.length > 0 ? updatedRoles[0] : null);
+        }
+        
+        toast({
+          title: "Success",
+          description: "Role deleted successfully",
+        });
+      } catch (error) {
+        console.error('Error deleting role:', error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to delete role",
+        });
+      }
+    }
+  };
+  
+  const handlePermissionChange = async (application: string, permissionType: keyof Permission, value: boolean) => {
+    if (!selectedRole) return;
+    
+    // Update local state first for responsive UI
+    setPermissions({
+      ...permissions,
+      [application]: {
+        ...permissions[application],
+        [permissionType]: value
+      }
+    });
+    
+    // Prepare data for upsert
+    const permissionData = {
+      role_id: selectedRole.id,
+      application: application,
+      can_view: permissionType === 'view' ? value : permissions[application].view,
+      can_create: permissionType === 'create' ? value : permissions[application].create,
+      can_edit: permissionType === 'edit' ? value : permissions[application].edit,
+      can_delete: permissionType === 'delete' ? value : permissions[application].delete
+    };
+    
+    try {
+      // Check if a permission record already exists
+      const { data, error: fetchError } = await supabase
+        .from('permissions')
+        .select('id')
+        .eq('role_id', selectedRole.id)
+        .eq('application', application)
+        .maybeSingle();
+        
+      if (fetchError) throw fetchError;
+      
+      if (data) {
+        // Update existing permission
+        const { error: updateError } = await supabase
+          .from('permissions')
+          .update({
+            can_view: permissionData.can_view,
+            can_create: permissionData.can_create,
+            can_edit: permissionData.can_edit,
+            can_delete: permissionData.can_delete
+          })
+          .eq('id', data.id);
+          
+        if (updateError) throw updateError;
+      } else {
+        // Insert new permission
+        const { error: insertError } = await supabase
+          .from('permissions')
+          .insert([permissionData]);
+          
+        if (insertError) throw insertError;
+      }
+    } catch (error) {
+      console.error('Error updating permission:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update permission",
+      });
+      
+      // Revert the local state change
+      fetchPermissions(selectedRole.id);
+    }
+  };
+  
   return (
     <div className="space-y-6">
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* Left side - Roles List */}
-        <div className="lg:w-1/3 space-y-4">
-          <div className="flex justify-between items-center">
-            <div className="relative">
-              <Search className="absolute left-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search roles..."
-                className="pl-8 bg-background/50 backdrop-blur-sm w-full sm:w-[200px]"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+      <div className="flex justify-between items-center">
+        <div>
+          <h3 className="text-lg font-medium">Roles & Permissions</h3>
+          <p className="text-sm text-muted-foreground">
+            Manage roles and set permissions for different applications
+          </p>
+        </div>
+        
+        <Dialog open={isAddRoleOpen} onOpenChange={setIsAddRoleOpen}>
+          <DialogTrigger asChild>
+            <Button size="sm" disabled={!isAdmin}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Role
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px] bg-card/90 backdrop-blur-md">
+            <DialogHeader>
+              <DialogTitle>Add New Role</DialogTitle>
+              <DialogDescription>
+                Create a new role and define its permissions.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="roleName" className="text-right">
+                  Role Name
+                </Label>
+                <Input
+                  id="roleName"
+                  value={newRole.name}
+                  onChange={(e) => setNewRole({...newRole, name: e.target.value})}
+                  className="col-span-3 bg-background/50"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="roleDescription" className="text-right">
+                  Description
+                </Label>
+                <Input
+                  id="roleDescription"
+                  value={newRole.description}
+                  onChange={(e) => setNewRole({...newRole, description: e.target.value})}
+                  className="col-span-3 bg-background/50"
+                />
+              </div>
             </div>
-            
-            <Dialog open={isAddRoleOpen} onOpenChange={setIsAddRoleOpen}>
-              <DialogTrigger asChild>
-                <Button size="sm" disabled={!isAdmin}>
-                  <ShieldPlus className="h-4 w-4 mr-2" />
-                  Add Role
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px] bg-card/90 backdrop-blur-md">
-                <DialogHeader>
-                  <DialogTitle>Add New Role</DialogTitle>
-                  <DialogDescription>
-                    Create a new role with custom permissions.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="roleName" className="text-right">
-                      Role Name
-                    </Label>
-                    <Input
-                      id="roleName"
-                      value={newRole.name}
-                      onChange={(e) => setNewRole({...newRole, name: e.target.value})}
-                      className="col-span-3 bg-background/50"
-                    />
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsAddRoleOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleAddRole} disabled={!newRole.name}>
+                Add Role
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="bg-card/40 backdrop-blur-md border border-white/10 rounded-lg p-4">
+          <div className="flex justify-between items-center mb-4">
+            <h4 className="font-medium">Available Roles</h4>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={fetchRoles}
+            >
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+          </div>
+          
+          {loading ? (
+            <div className="text-center p-4">Loading roles...</div>
+          ) : roles.length > 0 ? (
+            <div className="space-y-2">
+              {roles.map(role => (
+                <div 
+                  key={role.id}
+                  className={`flex items-center justify-between p-3 rounded-md cursor-pointer ${
+                    selectedRole?.id === role.id 
+                      ? 'bg-primary/10 border border-primary/20' 
+                      : 'hover:bg-muted/60'
+                  }`}
+                  onClick={() => setSelectedRole(role)}
+                >
+                  <div>
+                    <div className="font-medium">{role.name}</div>
+                    {role.description && (
+                      <div className="text-xs text-muted-foreground">{role.description}</div>
+                    )}
                   </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="description" className="text-right">
-                      Description
-                    </Label>
-                    <Input
-                      id="description"
-                      value={newRole.description}
-                      onChange={(e) => setNewRole({...newRole, description: e.target.value})}
-                      className="col-span-3 bg-background/50"
-                    />
+                  <div className="flex space-x-1">
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      disabled={!isAdmin}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditRole({
+                          id: role.id,
+                          name: role.name,
+                          description: role.description || ''
+                        });
+                        setIsEditRoleOpen(true);
+                      }}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      disabled={!isAdmin}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteRole(role.id);
+                      }}
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsAddRoleOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button onClick={handleAddRole}>
-                    Create Role
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
-
-          <div className="rounded-md border bg-card/40 backdrop-blur-md border-white/10 overflow-hidden">
+              ))}
+            </div>
+          ) : (
+            <div className="text-center p-4 text-muted-foreground">
+              No roles found. Create a new role to get started.
+            </div>
+          )}
+        </div>
+        
+        <div className="lg:col-span-2 bg-card/40 backdrop-blur-md border border-white/10 rounded-lg p-4">
+          <h4 className="font-medium mb-4">
+            {selectedRole ? `Permissions for ${selectedRole.name}` : 'Select a role to manage permissions'}
+          </h4>
+          
+          {selectedRole ? (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Role</TableHead>
-                  <TableHead className="w-[60px]">Actions</TableHead>
+                  <TableHead>Application</TableHead>
+                  <TableHead className="text-center">View</TableHead>
+                  <TableHead className="text-center">Create</TableHead>
+                  <TableHead className="text-center">Edit</TableHead>
+                  <TableHead className="text-center">Delete</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={2} className="h-24 text-center">
-                      Loading...
+                {applications.map((app) => (
+                  <TableRow key={app.name}>
+                    <TableCell>
+                      <div>
+                        <div className="font-medium">{app.name}</div>
+                        <div className="text-xs text-muted-foreground">{app.description}</div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Switch 
+                        checked={permissions[app.name]?.view || false} 
+                        onCheckedChange={(value) => handlePermissionChange(app.name, 'view', value)}
+                        disabled={!isAdmin}
+                      />
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Switch 
+                        checked={permissions[app.name]?.create || false} 
+                        onCheckedChange={(value) => handlePermissionChange(app.name, 'create', value)}
+                        disabled={!isAdmin}
+                      />
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Switch 
+                        checked={permissions[app.name]?.edit || false} 
+                        onCheckedChange={(value) => handlePermissionChange(app.name, 'edit', value)}
+                        disabled={!isAdmin}
+                      />
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Switch 
+                        checked={permissions[app.name]?.delete || false} 
+                        onCheckedChange={(value) => handlePermissionChange(app.name, 'delete', value)}
+                        disabled={!isAdmin}
+                      />
                     </TableCell>
                   </TableRow>
-                ) : filteredRoles.length > 0 ? (
-                  filteredRoles.map((role) => (
-                    <TableRow 
-                      key={role.id} 
-                      className={selectedRole && selectedRole.id === role.id ? "bg-primary/10" : ""}
-                      onClick={() => setSelectedRole(role)}
-                    >
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{role.name}</div>
-                          <div className="text-xs text-muted-foreground">{role.description}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-1">
-                          <Button 
-                            variant="ghost" 
-                            size="icon"
-                            disabled={!isAdmin}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              // Edit role functionality would go here
-                            }}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon"
-                            disabled={!isAdmin || role.name === 'Admin'} // Don't allow deleting the Admin role
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteRole(role.id);
-                            }}
-                          >
-                            <Trash className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={2} className="h-24 text-center">
-                      No roles found.
-                    </TableCell>
-                  </TableRow>
-                )}
+                ))}
               </TableBody>
             </Table>
-          </div>
-        </div>
-
-        {/* Right side - Permissions Matrix */}
-        <div className="lg:w-2/3">
-          {selectedRole ? (
-            <Card className="bg-card/40 backdrop-blur-md border border-white/10">
-              <CardContent className="pt-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-medium">Permissions for {selectedRole.name} Role</h3>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={savePermissions}
-                    disabled={saving || !isAdmin}
-                  >
-                    {saving ? 'Saving...' : 'Save Permissions'}
-                    {!saving && <Check className="ml-2 h-4 w-4" />}
-                  </Button>
-                </div>
-                
-                <div className="rounded-md border bg-card/40 backdrop-blur-md border-white/10 overflow-hidden">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Application</TableHead>
-                        <TableHead className="text-center">View</TableHead>
-                        <TableHead className="text-center">Create</TableHead>
-                        <TableHead className="text-center">Edit</TableHead>
-                        <TableHead className="text-center">Delete</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {applications.map((app) => (
-                        <TableRow key={app.id}>
-                          <TableCell className="font-medium">{app.name}</TableCell>
-                          <TableCell className="text-center">
-                            <Switch 
-                              checked={permissions[app.key]?.view || false}
-                              onCheckedChange={(checked) => handlePermissionChange(app.key, 'view', checked)}
-                              disabled={!isAdmin}
-                            />
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <Switch 
-                              checked={permissions[app.key]?.create || false}
-                              onCheckedChange={(checked) => handlePermissionChange(app.key, 'create', checked)}
-                              disabled={!isAdmin}
-                            />
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <Switch 
-                              checked={permissions[app.key]?.edit || false}
-                              onCheckedChange={(checked) => handlePermissionChange(app.key, 'edit', checked)}
-                              disabled={!isAdmin}
-                            />
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <Switch 
-                              checked={permissions[app.key]?.delete || false}
-                              onCheckedChange={(checked) => handlePermissionChange(app.key, 'delete', checked)}
-                              disabled={!isAdmin}
-                            />
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
           ) : (
-            <div className="flex items-center justify-center h-full border rounded-md border-dashed p-8 bg-card/20 backdrop-blur-sm">
-              <div className="text-center">
-                <h3 className="text-lg font-medium mb-2">No Role Selected</h3>
-                <p className="text-muted-foreground">Select a role from the list to view and edit its permissions.</p>
-              </div>
+            <div className="text-center p-8 text-muted-foreground">
+              Select a role from the list to manage its permissions
             </div>
           )}
         </div>
       </div>
+      
+      {/* Edit Role Dialog */}
+      <Dialog open={isEditRoleOpen} onOpenChange={setIsEditRoleOpen}>
+        <DialogContent className="sm:max-w-[425px] bg-card/90 backdrop-blur-md">
+          <DialogHeader>
+            <DialogTitle>Edit Role</DialogTitle>
+            <DialogDescription>
+              Update the role name and description.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="editRoleName" className="text-right">
+                Role Name
+              </Label>
+              <Input
+                id="editRoleName"
+                value={editRole.name}
+                onChange={(e) => setEditRole({...editRole, name: e.target.value})}
+                className="col-span-3 bg-background/50"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="editRoleDescription" className="text-right">
+                Description
+              </Label>
+              <Input
+                id="editRoleDescription"
+                value={editRole.description}
+                onChange={(e) => setEditRole({...editRole, description: e.target.value})}
+                className="col-span-3 bg-background/50"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditRoleOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleEditRole} disabled={!editRole.name}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

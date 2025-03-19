@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
+import { User as AppUser } from './interfaces';
 
 export const UserManagementTab = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -21,8 +22,8 @@ export const UserManagementTab = () => {
   const [isEditUserOpen, setIsEditUserOpen] = useState(false);
   const [newUser, setNewUser] = useState({ email: '', password: '', fullName: '', role: 'User' });
   const [editUser, setEditUser] = useState({ id: '', fullName: '', email: '', role: '', status: '' });
-  const [users, setUsers] = useState([]);
-  const [roles, setRoles] = useState([]);
+  const [users, setUsers] = useState<AppUser[]>([]);
+  const [roles, setRoles] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -127,7 +128,7 @@ export const UserManagementTab = () => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Failed to create user",
+        description: (error as Error).message || "Failed to create user",
       });
     } finally {
       setNewUser({ email: '', password: '', fullName: '', role: 'User' });
@@ -175,7 +176,7 @@ export const UserManagementTab = () => {
     }
   };
 
-  const handleDeleteUser = async (userId, userAuthId) => {
+  const handleDeleteUser = async (userId: string, userAuthId: string | null) => {
     if (!isAdmin) {
       toast({
         variant: "destructive",
@@ -190,17 +191,27 @@ export const UserManagementTab = () => {
     }
 
     try {
-      // For super admin users, we can delete them from auth, which will cascade
-      const { error } = await supabase.auth.admin.deleteUser(userAuthId);
+      if (userAuthId) {
+        // For super admin users, we can delete them from auth, which will cascade
+        const { error } = await supabase.auth.admin.deleteUser(userAuthId);
 
-      if (error) {
-        // Fallback to just deleting from app_users if admin API fails
-        const { error: appUserError } = await supabase
+        if (error) {
+          // Fallback to just deleting from app_users if admin API fails
+          const { error: appUserError } = await supabase
+            .from('app_users')
+            .delete()
+            .eq('id', userId);
+          
+          if (appUserError) throw appUserError;
+        }
+      } else {
+        // If no auth ID, just delete from app_users
+        const { error } = await supabase
           .from('app_users')
           .delete()
           .eq('id', userId);
-        
-        if (appUserError) throw appUserError;
+          
+        if (error) throw error;
       }
 
       toast({
