@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Bell, Search, Menu, User, LogOut, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +21,7 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ isSidebarOpen, toggleSidebar }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [pageTitle, setPageTitle] = useState('Dashboard');
   const isMobile = useIsMobile();
@@ -55,8 +57,12 @@ export const Navbar: React.FC<NavbarProps> = ({ isSidebarOpen, toggleSidebar }) 
   const handleLogout = async () => {
     try {
       await signOut();
+      toast.success('Logged out successfully');
+      navigate('/login');
     } catch (error) {
-      console.error('Error logging out:', error);
+      console.error('Error signing out:', error);
+      // Even if there's an error, force navigate to login page
+      navigate('/login');
     }
   };
 

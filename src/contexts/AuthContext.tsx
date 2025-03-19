@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
@@ -137,16 +136,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     try {
       setIsLoading(true);
-      const { error } = await supabase.auth.signOut();
       
-      if (error) {
-        toast.error('Sign out failed', { description: error.message });
-        throw error;
+      // First, clear local state regardless of API call outcome
+      setSession(null);
+      setUser(null);
+      setUserRole(null);
+      
+      // Then attempt to sign out from Supabase
+      try {
+        const { error } = await supabase.auth.signOut();
+        
+        if (error) {
+          console.warn("Supabase signOut error:", error.message);
+          // Even with error, we'll still consider the user signed out locally
+        }
+      } catch (supabaseError) {
+        console.warn("Supabase signOut exception:", supabaseError);
+        // Even with exception, we'll still consider the user signed out locally
       }
       
-      navigate('/login');
+      // Return success - user is considered signed out locally regardless of API result
+      return;
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error('Error in signOut function:', error);
+      throw error;
     } finally {
       setIsLoading(false);
     }
