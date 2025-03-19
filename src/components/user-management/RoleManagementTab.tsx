@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,7 +19,7 @@ interface Role {
   description: string | null;
 }
 
-// Fix the Permission interface to ensure all properties are boolean
+// Define Permission interface with explicit boolean types
 interface Permission {
   view: boolean;
   create: boolean;
@@ -29,6 +30,17 @@ interface Permission {
 
 interface PermissionsObject {
   [key: string]: Permission;
+}
+
+// Define the database permission structure
+interface DbPermission {
+  id: string;
+  role_id: string;
+  application: string;
+  can_view: boolean;
+  can_create: boolean;
+  can_edit: boolean;
+  can_delete: boolean;
 }
 
 export const RoleManagementTab = () => {
@@ -109,7 +121,9 @@ export const RoleManagementTab = () => {
       if (error) throw error;
       
       const permObj: PermissionsObject = {};
-      data.forEach(perm => {
+      
+      // Explicitly type the data from database
+      (data as DbPermission[]).forEach(perm => {
         permObj[perm.application] = {
           view: perm.can_view || false,
           create: perm.can_create || false,
