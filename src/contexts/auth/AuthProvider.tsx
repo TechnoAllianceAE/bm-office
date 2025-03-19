@@ -21,44 +21,51 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
+  // Function to fetch and set user role
+  const getUserRole = async (userId: string) => {
+    console.log('Fetching role for user:', userId);
+    const role = await fetchUserRole(userId);
+    console.log('User role retrieved:', role);
+    setUserRole(role);
+    return role;
+  };
+
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      setIsLoading(false);
       
       if (session?.user) {
-        // Try to get role from user metadata first
-        if (session.user.user_metadata?.role) {
-          setUserRole(session.user.user_metadata.role);
-        } else {
-          // If not in metadata, try to fetch from database
-          fetchUserRole(session.user.id).then(role => {
-            setUserRole(role);
+        getUserRole(session.user.id)
+          .then(() => setIsLoading(false))
+          .catch((error) => {
+            console.error('Error fetching user role on init:', error);
+            setIsLoading(false);
           });
-        }
+      } else {
+        setIsLoading(false);
       }
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id);
         setSession(session);
         setUser(session?.user ?? null);
-        setIsLoading(false);
         
         if (session?.user) {
-          // Try to get role from user metadata first
-          if (session.user.user_metadata?.role) {
-            setUserRole(session.user.user_metadata.role);
-          } else {
-            // If not in metadata, try to fetch from database
-            const role = await fetchUserRole(session.user.id);
-            setUserRole(role);
+          try {
+            await getUserRole(session.user.id);
+          } catch (error) {
+            console.error('Error fetching user role on auth change:', error);
+          } finally {
+            setIsLoading(false);
           }
         } else {
           setUserRole(null);
+          setIsLoading(false);
         }
       }
     );
@@ -73,15 +80,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(true);
       const { user } = await signInWithCredentials(email, password);
       
-      // Check if this user is a Super Admin
       if (user) {
-        const isSuperAdmin = await checkSuperAdminStatus(user.id);
-        if (isSuperAdmin) {
-          setUserRole('Super Admin');
-        }
+        // Explicitly check for Super Admin status
+        const userRole = await getUserRole(user.id);
+        console.log('User role after sign in:', userRole);
+        
+        toast.success('Login successful', {
+          description: userRole === 'Super Admin' 
+            ? 'Welcome, Super Admin!' 
+            : 'Welcome back!'
+        });
+      } else {
+        toast.success('Login successful');
       }
       
-      toast.success('Login successful');
       navigate('/');
     } catch (error) {
       console.error('Error signing in:', error);
