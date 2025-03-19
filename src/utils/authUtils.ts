@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -18,7 +19,7 @@ export const fetchUserRole = async (userId: string): Promise<string | null> => {
       
       // If the regular way fails, try using RPC for Super Admin
       // Using Function type assertion to bypass TypeScript errors
-      const adminCall = (supabase as AnyRecord).rpc as Function;
+      const adminCall = (supabase.rpc as Function);
       const adminResult = await adminCall('is_super_admin', { user_id_param: userId });
       
       const adminData = adminResult.data;
@@ -129,7 +130,7 @@ export const createSuperAdminUser = async (email: string, password: string, full
 export const checkSuperAdminStatus = async (userId: string): Promise<boolean> => {
   try {
     // Using Function type assertion to bypass TypeScript errors
-    const rpcCall = (supabase as AnyRecord).rpc as Function;
+    const rpcCall = (supabase.rpc as Function);
     const result = await rpcCall('is_super_admin', { user_id_param: userId });
     
     const data = result.data;
