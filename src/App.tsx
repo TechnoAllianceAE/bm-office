@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -38,7 +39,7 @@ import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
-// Loading component
+// Modified loading screen with debug info
 const LoadingScreen = () => (
   <div className="flex items-center justify-center min-h-screen">
     <div className="text-center space-y-4">
@@ -48,8 +49,12 @@ const LoadingScreen = () => (
   </div>
 );
 
-// Protected route component
+// Modified ProtectedRoute to bypass authentication
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  // TEMPORARILY BYPASSING AUTH CHECK
+  return <>{children}</>;
+  
+  /* Original code commented out
   const { isAuthenticated, isLoading } = useAuth();
   
   useEffect(() => {
@@ -65,10 +70,15 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
   
   return <>{children}</>;
+  */
 };
 
-// Public route component - redirects to home if authenticated
+// Modified PublicRoute to bypass authentication
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
+  // TEMPORARILY BYPASSING AUTH CHECK
+  return <>{children}</>;
+  
+  /* Original code commented out
   const { isAuthenticated, isLoading } = useAuth();
   
   useEffect(() => {
@@ -84,12 +94,20 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   }
   
   return <>{children}</>;
+  */
 };
 
 const AppContent = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const isMobile = useIsMobile();
+  
+  // TEMPORARILY HARDCODED AUTH STATE
+  const isAuthenticated = true;
+  const isLoading = false;
+  
+  /* Original code commented out
   const { isAuthenticated, isLoading } = useAuth();
+  */
   
   console.log('AppContent render state:', { isAuthenticated, isLoading });
   
@@ -142,55 +160,48 @@ const AppContent = () => {
     };
   }, []);
   
-  // Render consistent app structure with routes based on auth state
+  // Always render full app structure, skipping authentication checks
   return (
     <>
-      {isAuthenticated ? (
-        <div className="flex min-h-screen w-full">
-          <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+      <div className="flex min-h-screen w-full">
+        <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+        
+        <main className={`flex-1 transition-all duration-300 ${
+          isSidebarOpen ? "lg:ml-64" : "lg:ml-20"
+        }`}>
+          <Navbar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
           
-          <main className={`flex-1 transition-all duration-300 ${
-            isSidebarOpen ? "lg:ml-64" : "lg:ml-20"
-          }`}>
-            <Navbar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-            
-            <div className="container px-4 pt-24 pb-12">
-              <PageTransition>
-                <Routes>
-                  <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                  <Route path="/timesheet" element={<ProtectedRoute><Timesheet /></ProtectedRoute>} />
-                  <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
-                  <Route path="/calendar" element={<ProtectedRoute><Calendar /></ProtectedRoute>} />
-                  <Route path="/hr" element={<ProtectedRoute><HR /></ProtectedRoute>} />
-                  <Route path="/directory" element={<ProtectedRoute><Directory /></ProtectedRoute>} />
-                  <Route path="/mailbox" element={<ProtectedRoute><Mailbox /></ProtectedRoute>} />
-                  <Route path="/ai-assistant" element={<ProtectedRoute><AIAssistant /></ProtectedRoute>} />
-                  <Route path="/ai-workflow" element={<ProtectedRoute><AIWorkflow /></ProtectedRoute>} />
-                  <Route path="/dms" element={<ProtectedRoute><DMS /></ProtectedRoute>} />
-                  <Route path="/tools" element={<ProtectedRoute><Tools /></ProtectedRoute>} />
-                  <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
-                  <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
-                  <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                  <Route path="/mis" element={<ProtectedRoute><MIS /></ProtectedRoute>} />
-                  <Route path="/requisition" element={<ProtectedRoute><Requisition /></ProtectedRoute>} />
-                  <Route path="/helpdesk" element={<ProtectedRoute><HelpDesk /></ProtectedRoute>} />
-                  <Route path="/lms" element={<ProtectedRoute><LMS /></ProtectedRoute>} />
-                  <Route path="/lms/course/:id" element={<ProtectedRoute><CourseView /></ProtectedRoute>} />
-                  <Route path="/claims" element={<ProtectedRoute><Claims /></ProtectedRoute>} />
-                  <Route path="/user-management" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
-                  <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </PageTransition>
-            </div>
-          </main>
-        </div>
-      ) : (
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-      )}
+          <div className="container px-4 pt-24 pb-12">
+            <PageTransition>
+              <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/timesheet" element={<Timesheet />} />
+                <Route path="/projects" element={<Projects />} />
+                <Route path="/calendar" element={<Calendar />} />
+                <Route path="/hr" element={<HR />} />
+                <Route path="/directory" element={<Directory />} />
+                <Route path="/mailbox" element={<Mailbox />} />
+                <Route path="/ai-assistant" element={<AIAssistant />} />
+                <Route path="/ai-workflow" element={<AIWorkflow />} />
+                <Route path="/dms" element={<DMS />} />
+                <Route path="/tools" element={<Tools />} />
+                <Route path="/analytics" element={<Analytics />} />
+                <Route path="/settings" element={<SettingsPage />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/mis" element={<MIS />} />
+                <Route path="/requisition" element={<Requisition />} />
+                <Route path="/helpdesk" element={<HelpDesk />} />
+                <Route path="/lms" element={<LMS />} />
+                <Route path="/lms/course/:id" element={<CourseView />} />
+                <Route path="/claims" element={<Claims />} />
+                <Route path="/user-management" element={<UserManagement />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </PageTransition>
+          </div>
+        </main>
+      </div>
     </>
   );
 };

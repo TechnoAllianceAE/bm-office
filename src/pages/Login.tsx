@@ -1,10 +1,26 @@
 
 import { LoginCard } from '@/components/auth/LoginCard';
-import { useAuth } from '@/contexts/auth/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
+  const navigate = useNavigate();
+  // Skip authentication - instantly redirect to Dashboard
+  useEffect(() => {
+    // This will redirect to dashboard immediately
+    navigate('/', { replace: true });
+  }, [navigate]);
+  
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 backdrop-blur-lg p-4">
+      <div className="text-center">
+        <p>Redirecting to Dashboard...</p>
+      </div>
+    </div>
+  );
+  
+  /* Original code commented out
   const { isLoading, isAuthenticated } = useAuth();
   const [showSkeleton, setShowSkeleton] = useState(true);
   
@@ -33,4 +49,5 @@ export default function Login() {
       )}
     </div>
   );
+  */
 }

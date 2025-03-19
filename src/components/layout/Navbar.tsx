@@ -1,9 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Bell, Search, Menu, User, LogOut, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { 
   DropdownMenu,
@@ -24,7 +24,16 @@ export const Navbar: React.FC<NavbarProps> = ({ isSidebarOpen, toggleSidebar }) 
   const [scrolled, setScrolled] = useState(false);
   const [pageTitle, setPageTitle] = useState('Dashboard');
   const isMobile = useIsMobile();
+  
+  // TEMPORARILY HARDCODED USER DATA
+  const mockUser = {
+    email: 'demo@example.com',
+  };
+  const mockUserRole = 'Admin';
+
+  /* Original code commented out
   const { user, signOut, userRole } = useAuth();
+  */
 
   useEffect(() => {
     const path = location.pathname;
@@ -52,6 +61,11 @@ export const Navbar: React.FC<NavbarProps> = ({ isSidebarOpen, toggleSidebar }) 
   }, []);
 
   const handleLogout = async () => {
+    // TEMPORARILY SIMPLIFIED LOGOUT
+    toast.success('Logged out successfully');
+    navigate('/login');
+    
+    /* Original code commented out
     try {
       await signOut();
       toast.success('Logged out successfully');
@@ -60,6 +74,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isSidebarOpen, toggleSidebar }) 
       console.error('Error signing out:', error);
       navigate('/login');
     }
+    */
   };
 
   return (
@@ -106,9 +121,9 @@ export const Navbar: React.FC<NavbarProps> = ({ isSidebarOpen, toggleSidebar }) 
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <div className="flex flex-col space-y-1 p-2">
-                <p className="text-sm font-medium">{user?.email}</p>
+                <p className="text-sm font-medium">{mockUser.email}</p>
                 <p className="text-xs text-muted-foreground">
-                  {userRole || "User"}
+                  {mockUserRole}
                 </p>
               </div>
               <DropdownMenuSeparator />

@@ -3,7 +3,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useAuth } from '@/contexts/AuthContext';
 import { menuItems, categoryOrder } from '@/config/sidebar-menu';
 import { SidebarCategory } from './SidebarCategory';
 
@@ -14,7 +13,9 @@ interface SidebarProps {
 
 export const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
   const isMobile = useIsMobile();
-  const { userRole } = useAuth();
+  
+  // TEMPORARILY REMOVED ROLE CHECKS
+  // const { userRole } = useAuth();
   
   const handleToggleSidebar = () => {
     if (isMobile) {
@@ -22,7 +23,7 @@ export const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
     }
   };
   
-  // Filter menu items - now all items will be visible as we removed role restrictions
+  // Display all menu items without role filtering
   const filteredMenuItems = menuItems;
   
   // Group menu items by category
