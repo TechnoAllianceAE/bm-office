@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -247,7 +246,7 @@ export const RoleManagementTab = () => {
     }
   };
 
-  const handlePermissionChange = async (application: string, permissionType: keyof Permission, checked: boolean) => {
+  const handlePermissionChange = async (application: string, permissionType: 'view' | 'create' | 'edit' | 'delete', checked: boolean) => {
     if (!isAdmin) {
       toast({
         variant: "destructive",
@@ -272,7 +271,11 @@ export const RoleManagementTab = () => {
         };
       }
       
-      newPermissions[application][permissionType] = checked;
+      newPermissions[application] = {
+        ...newPermissions[application],
+        [permissionType]: checked
+      };
+      
       return newPermissions;
     });
   };
