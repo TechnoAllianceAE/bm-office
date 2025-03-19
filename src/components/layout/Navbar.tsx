@@ -30,9 +30,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isSidebarOpen, toggleSidebar }) 
     else if (path.includes('ai-workflow')) setPageTitle('AI Workflow');
     else if (path.includes('mis')) setPageTitle('MIS Dashboard');
     else if (path.includes('requisition')) setPageTitle('Requisition');
-    else if (path.includes('crm')) setPageTitle('Customer Relationship Management');
-    else if (path.includes('user-management')) setPageTitle('User Management');
-    else setPageTitle('BM Enterprise');
+    else setPageTitle('BM Office');
   }, [location]);
 
   // Add shadow on scroll
