@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
@@ -43,7 +44,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(false);
       
       if (session?.user) {
-        fetchUserRole(session.user.id);
+        // Try to get role from user metadata first
+        if (session.user.user_metadata?.role) {
+          setUserRole(session.user.user_metadata.role);
+        } else {
+          // If not in metadata, try to fetch from database
+          fetchUserRole(session.user.id);
+        }
       }
     });
 
@@ -55,7 +62,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsLoading(false);
         
         if (session?.user) {
-          fetchUserRole(session.user.id);
+          // Try to get role from user metadata first
+          if (session.user.user_metadata?.role) {
+            setUserRole(session.user.user_metadata.role);
+          } else {
+            // If not in metadata, try to fetch from database
+            fetchUserRole(session.user.id);
+          }
         } else {
           setUserRole(null);
         }
@@ -69,6 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchUserRole = async (userId: string) => {
     try {
+      // First try the regular way
       const { data, error } = await supabase
         .from('app_users')
         .select('role')
@@ -77,23 +91,52 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('Error fetching user role:', error);
+        
+        // If the regular way fails, try using RPC for Super Admin
+        const { data: adminData, error: adminError } = await supabase
+          .rpc('is_super_admin', { user_id_param: userId });
+        
+        if (adminError) {
+          console.error('Error checking if user is Super Admin:', adminError);
+          return;
+        }
+        
+        if (adminData === true) {
+          setUserRole('Super Admin');
+          return;
+        }
+        
+        // Default to User role if all checks fail
+        setUserRole('User');
         return;
       }
 
       setUserRole(data?.role || null);
     } catch (error) {
       console.error('Error fetching user role:', error);
+      // Default to User role if all checks fail
+      setUserRole('User');
     }
   };
 
   const signIn = async (email: string, password: string) => {
     try {
       setIsLoading(true);
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       
       if (error) {
         toast.error('Login failed', { description: error.message });
         throw error;
+      }
+      
+      // Check if this user is a Super Admin
+      if (data.user) {
+        const { data: adminData, error: adminError } = await supabase
+          .rpc('is_super_admin', { user_id_param: data.user.id });
+          
+        if (!adminError && adminData === true) {
+          setUserRole('Super Admin');
+        }
       }
       
       toast.success('Login successful');
