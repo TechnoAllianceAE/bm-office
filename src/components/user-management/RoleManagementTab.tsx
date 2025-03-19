@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,6 +31,7 @@ interface PermissionsObject {
 }
 
 export const RoleManagementTab = () => {
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [isAddRoleOpen, setIsAddRoleOpen] = useState(false);
@@ -310,6 +310,7 @@ export const RoleManagementTab = () => {
   );
 
   return (
+    
     <div className="space-y-6">
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="lg:w-1/3 space-y-4">
