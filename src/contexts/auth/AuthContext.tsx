@@ -7,8 +7,8 @@ export interface AuthContextType {
   user: User | null;
   userRole: string | null;
   isLoading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, fullName: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<User | null>;
+  signUp: (email: string, password: string, fullName: string) => Promise<{ user: User | null; session: Session | null }>;
   signOut: () => Promise<void>;
   isAuthenticated: boolean;
   createSuperAdmin: (email: string, password: string, fullName: string) => Promise<User>;
@@ -19,8 +19,8 @@ export const AuthContext = createContext<AuthContextType>({
   user: null,
   userRole: null,
   isLoading: true,
-  signIn: async () => {},
-  signUp: async () => {},
+  signIn: async () => null,
+  signUp: async () => ({ user: null, session: null }),
   signOut: async () => {},
   isAuthenticated: false,
   createSuperAdmin: async () => { return {} as User; },
