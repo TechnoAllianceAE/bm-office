@@ -1,7 +1,9 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { User } from '@supabase/supabase-js';
 import { toast } from 'sonner';
+
+// Helper type for type assertions
+type AnyRecord = Record<string, any>;
 
 export const fetchUserRole = async (userId: string): Promise<string | null> => {
   try {
@@ -16,16 +18,23 @@ export const fetchUserRole = async (userId: string): Promise<string | null> => {
       console.error('Error fetching user role:', error);
       
       // If the regular way fails, try using RPC for Super Admin
-      const { data: adminData, error: adminError } = await supabase
-        .rpc('is_super_admin', { user_id_param: userId } as any);
-      
-      if (adminError) {
-        console.error('Error checking if user is Super Admin:', adminError);
-        return null;
-      }
-      
-      if (adminData === true) {
-        return 'Super Admin';
+      try {
+        // Using a properly typed RPC call
+        const { data: adminData, error: adminError } = await supabase.rpc<boolean>(
+          'is_super_admin', 
+          { user_id_param: userId }
+        );
+        
+        if (adminError) {
+          console.error('Error checking if user is Super Admin:', adminError);
+          return null;
+        }
+        
+        if (adminData === true) {
+          return 'Super Admin';
+        }
+      } catch (rpcError) {
+        console.error('Error in RPC call:', rpcError);
       }
       
       // Default to User role if all checks fail
@@ -41,33 +50,48 @@ export const fetchUserRole = async (userId: string): Promise<string | null> => {
 };
 
 export const signInWithCredentials = async (email: string, password: string) => {
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-  
-  if (error) {
-    toast.error('Login failed', { description: error.message });
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({ 
+      email, 
+      password 
+    });
+    
+    if (error) {
+      toast.error('Login failed', { description: error.message });
+      throw error;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error signing in:', error);
     throw error;
   }
-  
-  return data;
 };
 
 export const signUpWithCredentials = async (email: string, password: string, fullName: string) => {
-  const { error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: { full_name: fullName }
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { full_name: fullName }
+      }
+    });
+    
+    if (error) {
+      toast.error('Sign up failed', { description: error.message });
+      throw error;
     }
-  });
-  
-  if (error) {
-    toast.error('Sign up failed', { description: error.message });
+    
+    toast.success('Sign up successful', { 
+      description: 'Please check your email for verification link'
+    });
+    
+    return data;
+  } catch (error) {
+    console.error('Error signing up:', error);
     throw error;
   }
-  
-  toast.success('Sign up successful', { 
-    description: 'Please check your email for verification link'
-  });
 };
 
 export const signOutUser = async () => {
@@ -84,20 +108,20 @@ export const signOutUser = async () => {
 
 export const createSuperAdminUser = async (email: string, password: string, fullName: string) => {
   try {
-    const response = await supabase.functions.invoke('create-super-admin', {
+    const { data, error } = await supabase.functions.invoke('create-super-admin', {
       body: { email, password, fullName }
     });
     
-    if (response.error) {
-      console.error('Super Admin creation error:', response.error);
+    if (error) {
+      console.error('Super Admin creation error:', error);
       toast.error('Failed to create Super Admin', { 
-        description: response.error.message || 'Unknown error occurred'
+        description: error.message || 'Unknown error occurred'
       });
-      throw new Error(response.error.message || 'Failed to create Super Admin');
+      throw new Error(error.message || 'Failed to create Super Admin');
     }
     
     toast.success('Super Admin created successfully');
-    return response.data;
+    return data;
   } catch (error) {
     console.error('Error in createSuperAdminUser:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
@@ -108,8 +132,11 @@ export const createSuperAdminUser = async (email: string, password: string, full
 
 export const checkSuperAdminStatus = async (userId: string): Promise<boolean> => {
   try {
-    const { data, error } = await supabase
-      .rpc('is_super_admin', { user_id_param: userId } as any);
+    // Using a properly typed RPC call
+    const { data, error } = await supabase.rpc<boolean>(
+      'is_super_admin', 
+      { user_id_param: userId }
+    );
     
     if (error) {
       console.error('Error checking if user is Super Admin:', error);
