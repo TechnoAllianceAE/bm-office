@@ -18,6 +18,7 @@ interface Role {
   description: string | null;
 }
 
+// Fix the Permission interface to ensure all properties are boolean
 interface Permission {
   view: boolean;
   create: boolean;
