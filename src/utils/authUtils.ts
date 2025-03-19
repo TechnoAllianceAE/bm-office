@@ -47,50 +47,53 @@ export const fetchUserRole = async (userId: string): Promise<string | null> => {
 };
 
 export const signInWithCredentials = async (email: string, password: string) => {
-  // Using type assertion to bypass TypeScript errors
-  const authClient = (supabase.auth as AnyRecord);
-  const signInMethod = authClient.signInWithPassword as Function;
-  
-  const { data, error } = await signInMethod({ email, password });
-  
-  if (error) {
-    toast.error('Login failed', { description: error.message });
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({ 
+      email, 
+      password 
+    });
+    
+    if (error) {
+      toast.error('Login failed', { description: error.message });
+      throw error;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error signing in:', error);
     throw error;
   }
-  
-  return data;
 };
 
 export const signUpWithCredentials = async (email: string, password: string, fullName: string) => {
-  // Using type assertion to bypass TypeScript errors
-  const authClient = (supabase.auth as AnyRecord);
-  const signUpMethod = authClient.signUp as Function;
-  
-  const { error } = await signUpMethod({
-    email,
-    password,
-    options: {
-      data: { full_name: fullName }
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { full_name: fullName }
+      }
+    });
+    
+    if (error) {
+      toast.error('Sign up failed', { description: error.message });
+      throw error;
     }
-  });
-  
-  if (error) {
-    toast.error('Sign up failed', { description: error.message });
+    
+    toast.success('Sign up successful', { 
+      description: 'Please check your email for verification link'
+    });
+    
+    return data;
+  } catch (error) {
+    console.error('Error signing up:', error);
     throw error;
   }
-  
-  toast.success('Sign up successful', { 
-    description: 'Please check your email for verification link'
-  });
 };
 
 export const signOutUser = async () => {
   try {
-    // Using type assertion to bypass TypeScript errors
-    const authClient = (supabase.auth as AnyRecord);
-    const signOutMethod = authClient.signOut as Function;
-    
-    const { error } = await signOutMethod();
+    const { error } = await supabase.auth.signOut();
     
     if (error) {
       console.warn("Supabase signOut error:", error.message);
@@ -102,23 +105,20 @@ export const signOutUser = async () => {
 
 export const createSuperAdminUser = async (email: string, password: string, fullName: string) => {
   try {
-    const functionsClient = (supabase as AnyRecord).functions;
-    const invokeMethod = functionsClient.invoke as Function;
-    
-    const response = await invokeMethod('create-super-admin', {
+    const { data, error } = await supabase.functions.invoke('create-super-admin', {
       body: { email, password, fullName }
     });
     
-    if (response.error) {
-      console.error('Super Admin creation error:', response.error);
+    if (error) {
+      console.error('Super Admin creation error:', error);
       toast.error('Failed to create Super Admin', { 
-        description: response.error.message || 'Unknown error occurred'
+        description: error.message || 'Unknown error occurred'
       });
-      throw new Error(response.error.message || 'Failed to create Super Admin');
+      throw new Error(error.message || 'Failed to create Super Admin');
     }
     
     toast.success('Super Admin created successfully');
-    return response.data;
+    return data;
   } catch (error) {
     console.error('Error in createSuperAdminUser:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
