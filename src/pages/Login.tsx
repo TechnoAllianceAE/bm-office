@@ -24,7 +24,8 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { User, Lock } from 'lucide-react';
+import { User, Lock, Shield } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address' }),
@@ -41,10 +42,22 @@ const signupSchema = z.object({
   path: ['confirmPassword'],
 });
 
+const superAdminSchema = z.object({
+  fullName: z.string().min(2, { message: 'Full name must be at least 2 characters' }),
+  email: z.string().email({ message: 'Please enter a valid email address' }),
+  password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
+  confirmPassword: z.string(),
+}).refine(data => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ['confirmPassword'],
+});
+
 export default function Login() {
   const [activeTab, setActiveTab] = useState('login');
-  const { signIn, signUp, isLoading } = useAuth();
+  const { signIn, signUp, isLoading, createSuperAdmin } = useAuth();
   const navigate = useNavigate();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isSuperAdminLoading, setIsSuperAdminLoading] = useState(false);
 
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -56,6 +69,16 @@ export default function Login() {
 
   const signupForm = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
+    defaultValues: {
+      fullName: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
+  });
+
+  const superAdminForm = useForm<z.infer<typeof superAdminSchema>>({
+    resolver: zodResolver(superAdminSchema),
     defaultValues: {
       fullName: '',
       email: '',
@@ -78,6 +101,19 @@ export default function Login() {
       setActiveTab('login');
     } catch (error) {
       console.error('Signup error:', error);
+    }
+  };
+
+  const onSuperAdminSubmit = async (values: z.infer<typeof superAdminSchema>) => {
+    try {
+      setIsSuperAdminLoading(true);
+      await createSuperAdmin(values.email, values.password, values.fullName);
+      superAdminForm.reset();
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error('Super Admin creation error:', error);
+    } finally {
+      setIsSuperAdminLoading(false);
     }
   };
 
@@ -207,8 +243,99 @@ export default function Login() {
             </TabsContent>
           </Tabs>
         </CardContent>
-        <CardFooter className="text-center text-sm text-muted-foreground">
-          <p className="w-full">Protected by BM Office Security</p>
+        <CardFooter className="flex flex-col gap-4">
+          <p className="w-full text-center text-sm text-muted-foreground">
+            Protected by BM Office Security
+          </p>
+          
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm" className="w-full">
+                <Shield className="h-4 w-4 mr-2" />
+                Create Super Admin
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Create Super Admin Account</DialogTitle>
+                <DialogDescription>
+                  Super Admin has full access to all system features including user management.
+                </DialogDescription>
+              </DialogHeader>
+              
+              <Form {...superAdminForm}>
+                <form onSubmit={superAdminForm.handleSubmit(onSuperAdminSubmit)} className="space-y-4">
+                  <FormField
+                    control={superAdminForm.control}
+                    name="fullName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Full Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Admin Name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={superAdminForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input placeholder="admin@example.com" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={superAdminForm.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl>
+                          <Input type="password" placeholder="••••••" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={superAdminForm.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Confirm Password</FormLabel>
+                        <FormControl>
+                          <Input type="password" placeholder="••••••" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <DialogFooter>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setIsDialogOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      type="submit"
+                      disabled={isSuperAdminLoading}
+                    >
+                      {isSuperAdminLoading ? 'Creating...' : 'Create Super Admin'}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
         </CardFooter>
       </Card>
     </div>

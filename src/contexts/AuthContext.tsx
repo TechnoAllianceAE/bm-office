@@ -14,6 +14,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, fullName: string) => Promise<void>;
   signOut: () => Promise<void>;
   isAuthenticated: boolean;
+  createSuperAdmin: (email: string, password: string, fullName: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -25,6 +26,7 @@ const AuthContext = createContext<AuthContextType>({
   signUp: async () => {},
   signOut: async () => {},
   isAuthenticated: false,
+  createSuperAdmin: async () => {},
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -150,6 +152,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const createSuperAdmin = async (email: string, password: string, fullName: string) => {
+    try {
+      setIsLoading(true);
+      
+      const response = await supabase.functions.invoke('create-super-admin', {
+        body: JSON.stringify({ email, password, fullName }),
+      });
+      
+      if (response.error) {
+        toast.error('Failed to create Super Admin', { description: response.error.message });
+        throw new Error(response.error.message);
+      }
+      
+      toast.success('Super Admin created successfully');
+      return response.data;
+    } catch (error) {
+      console.error('Error creating Super Admin:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -161,6 +186,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signUp,
         signOut,
         isAuthenticated: !!user,
+        createSuperAdmin,
       }}
     >
       {children}

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -14,7 +15,7 @@ interface SidebarProps {
 type MenuItem = {
   title: string;
   path: string;
-  icon: React.LucideIcon;
+  icon: React.ElementType;
   roles?: string[];
 };
 

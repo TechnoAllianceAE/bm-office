@@ -1,1 +1,6 @@
+
 project_id = "daawhxrxhvdxqhtuvimj"
+
+[api]
+enabled = true
+port = 8080
