@@ -244,6 +244,57 @@ export type Database = {
         }
         Relationships: []
       }
+      user_settings: {
+        Row: {
+          animations_enabled: boolean
+          auto_hide_sidebar: boolean
+          background_image: string
+          blur_level: string
+          compact_mode: boolean
+          created_at: string
+          custom_background_url: string | null
+          email_notifications: boolean
+          id: string
+          project_updates: boolean
+          push_notifications: boolean
+          timesheet_reminders: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          animations_enabled?: boolean
+          auto_hide_sidebar?: boolean
+          background_image?: string
+          blur_level?: string
+          compact_mode?: boolean
+          created_at?: string
+          custom_background_url?: string | null
+          email_notifications?: boolean
+          id?: string
+          project_updates?: boolean
+          push_notifications?: boolean
+          timesheet_reminders?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          animations_enabled?: boolean
+          auto_hide_sidebar?: boolean
+          background_image?: string
+          blur_level?: string
+          compact_mode?: boolean
+          created_at?: string
+          custom_background_url?: string | null
+          email_notifications?: boolean
+          id?: string
+          project_updates?: boolean
+          push_notifications?: boolean
+          timesheet_reminders?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -251,7 +302,7 @@ export type Database = {
     Functions: {
       get_user_role: {
         Args: {
-          user_id: string
+          user_uid: string
         }
         Returns: string
       }
