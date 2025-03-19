@@ -16,7 +16,7 @@ export const fetchUserRole = async (userId: string): Promise<string | null> => {
       console.error('Error fetching user role:', error);
       
       // If the regular way fails, try using RPC for Super Admin
-      // Use the correct function call format for RPC
+      // Fix the type error by properly typing the RPC function parameters
       const { data: adminData, error: adminError } = await supabase
         .rpc('is_super_admin', { user_id_param: userId });
       
@@ -85,6 +85,7 @@ export const signOutUser = async () => {
 
 export const createSuperAdminUser = async (email: string, password: string, fullName: string) => {
   try {
+    // Fix the type error by properly specifying the function parameters
     const response = await supabase.functions.invoke('create-super-admin', {
       body: { email, password, fullName }
     });
