@@ -16,6 +16,7 @@ export const fetchUserRole = async (userId: string): Promise<string | null> => {
       console.error('Error fetching user role:', error);
       
       // If the regular way fails, try using RPC for Super Admin
+      // Use the correct function call format for RPC
       const { data: adminData, error: adminError } = await supabase
         .rpc('is_super_admin', { user_id_param: userId });
       
@@ -83,27 +84,42 @@ export const signOutUser = async () => {
 };
 
 export const createSuperAdminUser = async (email: string, password: string, fullName: string) => {
-  const response = await supabase.functions.invoke('create-super-admin', {
-    body: JSON.stringify({ email, password, fullName }),
-  });
-  
-  if (response.error) {
-    toast.error('Failed to create Super Admin', { description: response.error.message });
-    throw new Error(response.error.message);
+  try {
+    const response = await supabase.functions.invoke('create-super-admin', {
+      body: { email, password, fullName }
+    });
+    
+    if (response.error) {
+      console.error('Super Admin creation error:', response.error);
+      toast.error('Failed to create Super Admin', { 
+        description: response.error.message || 'Unknown error occurred'
+      });
+      throw new Error(response.error.message || 'Failed to create Super Admin');
+    }
+    
+    toast.success('Super Admin created successfully');
+    return response.data;
+  } catch (error) {
+    console.error('Error in createSuperAdminUser:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    toast.error('Failed to create Super Admin', { description: errorMessage });
+    throw error;
   }
-  
-  toast.success('Super Admin created successfully');
-  return response.data;
 };
 
 export const checkSuperAdminStatus = async (userId: string): Promise<boolean> => {
-  const { data, error } = await supabase
-    .rpc('is_super_admin', { user_id_param: userId });
-  
-  if (error) {
-    console.error('Error checking if user is Super Admin:', error);
+  try {
+    const { data, error } = await supabase
+      .rpc('is_super_admin', { user_id_param: userId });
+    
+    if (error) {
+      console.error('Error checking if user is Super Admin:', error);
+      return false;
+    }
+    
+    return data === true;
+  } catch (error) {
+    console.error('Error in checkSuperAdminStatus:', error);
     return false;
   }
-  
-  return data === true;
 };

@@ -25,7 +25,20 @@ serve(async (req) => {
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const { email, password, fullName } = await req.json();
+    
+    // Parse request body
+    let body;
+    try {
+      body = await req.json();
+    } catch (error) {
+      console.error('Failed to parse request body:', error);
+      return new Response(
+        JSON.stringify({ error: 'Invalid request body', details: String(error) }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { email, password, fullName } = body;
 
     if (!email || !password || !fullName) {
       return new Response(
@@ -44,7 +57,7 @@ serve(async (req) => {
     if (userCheckError) {
       console.error('Error checking existing user:', userCheckError);
       return new Response(
-        JSON.stringify({ error: 'Error checking existing user' }),
+        JSON.stringify({ error: 'Error checking existing user', details: userCheckError }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -63,7 +76,7 @@ serve(async (req) => {
       if (createUserError) {
         console.error('Error creating user:', createUserError);
         return new Response(
-          JSON.stringify({ error: 'Error creating user' }),
+          JSON.stringify({ error: 'Error creating user', details: createUserError }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
@@ -71,73 +84,47 @@ serve(async (req) => {
       userId = userData.user.id;
     }
 
-    // Update user's role to Super Admin
-    const { error: updateRoleError } = await supabase
+    // Ensure app_users entry exists
+    const { data: appUserData, error: appUserCheckError } = await supabase
       .from('app_users')
-      .update({ role: 'Super Admin' })
-      .eq('user_id', userId);
-
-    if (updateRoleError) {
-      console.error('Error updating user role:', updateRoleError);
-      return new Response(
-        JSON.stringify({ error: 'Error updating user role' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Create permissions for all applications
-    const { data: rolesData, error: rolesError } = await supabase
-      .from('roles')
-      .select('id, name')
-      .eq('name', 'Super Admin')
-      .single();
-
-    if (rolesError) {
-      console.error('Error getting Super Admin role:', rolesError);
-      return new Response(
-        JSON.stringify({ error: 'Error getting Super Admin role' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const applications = [
-      'Dashboard', 'Timesheet', 'Projects', 'Calendar', 'HR', 'Directory', 
-      'Mailbox', 'AI Assistant', 'AI Workflow', 'DMS', 'Tools', 'Analytics', 
-      'MIS', 'Requisition', 'Help Desk', 'LMS', 'Settings', 'User Management'
-    ];
-
-    const permissionsToInsert = applications.map(app => ({
-      role_id: rolesData.id,
-      application: app,
-      can_view: true,
-      can_create: true,
-      can_edit: true,
-      can_delete: true
-    }));
-
-    // Check if permissions already exist
-    const { data: existingPermissions, error: permCheckError } = await supabase
-      .from('permissions')
       .select('*')
-      .eq('role_id', rolesData.id);
-
-    if (permCheckError) {
-      console.error('Error checking existing permissions:', permCheckError);
-      return new Response(
-        JSON.stringify({ error: 'Error checking existing permissions' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      .eq('user_id', userId)
+      .maybeSingle();
+      
+    if (appUserCheckError) {
+      console.error('Error checking app_user entry:', appUserCheckError);
     }
-
-    if (existingPermissions.length === 0) {
-      const { error: permError } = await supabase
-        .from('permissions')
-        .insert(permissionsToInsert);
-
-      if (permError) {
-        console.error('Error creating permissions:', permError);
+      
+    if (!appUserData) {
+      // Create app_users entry if it doesn't exist
+      const { error: insertError } = await supabase
+        .from('app_users')
+        .insert({ 
+          user_id: userId, 
+          email, 
+          full_name: fullName,
+          role: 'Super Admin',
+          status: 'Active'
+        });
+        
+      if (insertError) {
+        console.error('Error creating app_user entry:', insertError);
         return new Response(
-          JSON.stringify({ error: 'Error creating permissions' }),
+          JSON.stringify({ error: 'Error creating app_user entry', details: insertError }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    } else {
+      // Update existing user's role to Super Admin
+      const { error: updateRoleError } = await supabase
+        .from('app_users')
+        .update({ role: 'Super Admin' })
+        .eq('user_id', userId);
+
+      if (updateRoleError) {
+        console.error('Error updating user role:', updateRoleError);
+        return new Response(
+          JSON.stringify({ error: 'Error updating user role', details: updateRoleError }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
@@ -157,7 +144,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Unexpected error:', error);
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ error: 'Internal server error', details: String(error) }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

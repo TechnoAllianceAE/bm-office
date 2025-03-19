@@ -1,4 +1,5 @@
 
+// This file implements an RPC endpoint to check if a user is a Super Admin
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.1";
 
@@ -19,7 +20,10 @@ serve(async (req) => {
     
     if (!supabaseUrl || !supabaseServiceKey) {
       return new Response(
-        JSON.stringify({ error: 'Server configuration error' }),
+        JSON.stringify({ 
+          error: 'Server configuration error',
+          details: 'Missing environment variables' 
+        }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -34,18 +38,16 @@ serve(async (req) => {
       );
     }
 
-    // Check if user exists and is a Super Admin
     const { data, error } = await supabase
       .from('app_users')
       .select('role')
       .eq('user_id', userId)
-      .eq('role', 'Super Admin')
       .maybeSingle();
 
     if (error) {
-      console.error('Error checking user role:', error);
+      console.error('Error fetching user role:', error);
       return new Response(
-        JSON.stringify({ error: 'Error checking user role' }),
+        JSON.stringify({ error: 'Error fetching user role', details: error }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -53,10 +55,7 @@ serve(async (req) => {
     const isSuperAdmin = data?.role === 'Super Admin';
 
     return new Response(
-      JSON.stringify({ 
-        isSuperAdmin,
-        userId 
-      }),
+      JSON.stringify({ isSuperAdmin }),
       { 
         status: 200, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -65,7 +64,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Unexpected error:', error);
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ error: 'Internal server error', details: String(error) }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
