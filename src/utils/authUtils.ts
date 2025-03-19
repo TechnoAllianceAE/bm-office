@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { toast } from 'sonner';
@@ -11,14 +10,14 @@ export const fetchUserRole = async (userId: string): Promise<string | null> => {
       .select('role')
       .eq('user_id', userId)
       .maybeSingle();
-
+    
     if (error) {
       console.error('Error fetching user role:', error);
       
       // If the regular way fails, try using RPC for Super Admin
       // Fix the type error by properly typing the RPC function parameters
       const { data: adminData, error: adminError } = await supabase
-        .rpc('is_super_admin', { user_id_param: userId });
+        .rpc('is_super_admin', { user_id_param: userId } as { user_id_param: string });
       
       if (adminError) {
         console.error('Error checking if user is Super Admin:', adminError);
@@ -32,7 +31,7 @@ export const fetchUserRole = async (userId: string): Promise<string | null> => {
       // Default to User role if all checks fail
       return 'User';
     }
-
+    
     return data?.role || null;
   } catch (error) {
     console.error('Error fetching user role:', error);
@@ -111,7 +110,7 @@ export const createSuperAdminUser = async (email: string, password: string, full
 export const checkSuperAdminStatus = async (userId: string): Promise<boolean> => {
   try {
     const { data, error } = await supabase
-      .rpc('is_super_admin', { user_id_param: userId });
+      .rpc('is_super_admin', { user_id_param: userId } as { user_id_param: string });
     
     if (error) {
       console.error('Error checking if user is Super Admin:', error);
