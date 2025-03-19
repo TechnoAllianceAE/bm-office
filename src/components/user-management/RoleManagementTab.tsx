@@ -12,14 +12,39 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 
+// Define interfaces for better type safety
+interface Role {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+interface Application {
+  id: number;
+  name: string;
+  key: string;
+}
+
+interface Permission {
+  view: boolean;
+  create: boolean;
+  edit: boolean;
+  delete: boolean;
+  id?: string;
+}
+
+interface PermissionsMap {
+  [applicationKey: string]: Permission;
+}
+
 export const RoleManagementTab = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedRole, setSelectedRole] = useState(null);
+  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [isAddRoleOpen, setIsAddRoleOpen] = useState(false);
   const [newRole, setNewRole] = useState({ name: '', description: '' });
-  const [roles, setRoles] = useState([]);
-  const [applications, setApplications] = useState([]);
-  const [permissions, setPermissions] = useState({});
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [permissions, setPermissions] = useState<PermissionsMap>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
@@ -82,7 +107,7 @@ export const RoleManagementTab = () => {
     setApplications(appList);
   };
 
-  const fetchPermissions = async (roleId) => {
+  const fetchPermissions = async (roleId: string) => {
     try {
       const { data, error } = await supabase
         .from('permissions')
@@ -92,16 +117,19 @@ export const RoleManagementTab = () => {
       if (error) throw error;
       
       // Convert array to object with application as key
-      const permObj = {};
-      data.forEach(perm => {
-        permObj[perm.application] = {
-          view: perm.can_view,
-          create: perm.can_create,
-          edit: perm.can_edit,
-          delete: perm.can_delete,
-          id: perm.id
-        };
-      });
+      const permObj: PermissionsMap = {};
+      
+      if (data) {
+        data.forEach(perm => {
+          permObj[perm.application] = {
+            view: Boolean(perm.can_view),
+            create: Boolean(perm.can_create),
+            edit: Boolean(perm.can_edit),
+            delete: Boolean(perm.can_delete),
+            id: perm.id
+          };
+        });
+      }
       
       setPermissions(permObj);
     } catch (error) {
@@ -114,7 +142,7 @@ export const RoleManagementTab = () => {
     }
   };
 
-  const fetchRoleUserCount = async (roleId) => {
+  const fetchRoleUserCount = async (roleId: string) => {
     try {
       const { count, error } = await supabase
         .from('app_users')
@@ -176,7 +204,7 @@ export const RoleManagementTab = () => {
     }
   };
 
-  const handleDeleteRole = async (roleId) => {
+  const handleDeleteRole = async (roleId: string) => {
     if (!isAdmin) {
       toast({
         variant: "destructive",
@@ -219,7 +247,7 @@ export const RoleManagementTab = () => {
     }
   };
 
-  const handlePermissionChange = async (application, permission, checked) => {
+  const handlePermissionChange = async (application: string, permissionType: keyof Permission, checked: boolean) => {
     if (!isAdmin) {
       toast({
         variant: "destructive",
@@ -244,7 +272,7 @@ export const RoleManagementTab = () => {
         };
       }
       
-      newPermissions[application][permission] = checked;
+      newPermissions[application][permissionType] = checked;
       return newPermissions;
     });
   };
