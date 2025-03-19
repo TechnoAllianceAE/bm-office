@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session } from '@supabase/supabase-js';
+import { useToast } from '@/components/ui/use-toast';
 
 type AuthContextType = {
   session: Session | null;
@@ -20,6 +21,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     // Get initial session
@@ -44,6 +46,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     });
 
+    // Check if there are any roles in the system, if not, create default roles
+    checkAndCreateDefaultRoles();
+
     return () => subscription.unsubscribe();
   }, []);
 
@@ -59,6 +64,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) {
         console.error('Error fetching user profile:', error);
         setUser(null);
+        setIsAdmin(false);
       } else {
         setUser(data);
         setIsAdmin(data.role === 'Admin');
@@ -76,20 +82,90 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Check if there are any roles in the system, if not create default roles
+  const checkAndCreateDefaultRoles = async () => {
+    try {
+      // Check if roles table has data
+      const { data: roles, error: rolesError } = await supabase
+        .from('roles')
+        .select('id')
+        .limit(1);
+
+      if (rolesError) throw rolesError;
+
+      // If no roles exist, create default roles
+      if (roles.length === 0) {
+        console.log('No roles found, creating default roles...');
+        
+        // Insert default roles
+        await supabase
+          .from('roles')
+          .insert([
+            { name: 'Admin', description: 'Full system access' },
+            { name: 'Manager', description: 'Department management access' },
+            { name: 'User', description: 'Basic system access' }
+          ]);
+
+        toast({
+          title: "Default roles created",
+          description: "Admin, Manager, and User roles have been created.",
+        });
+      }
+    } catch (error) {
+      console.error('Error checking/creating default roles:', error);
+    }
+  };
+
   const signIn = async (email: string, password: string) => {
-    return supabase.auth.signInWithPassword({ email, password });
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      
+      if (error) throw error;
+      
+      return data;
+    } catch (error: any) {
+      console.error('Sign in error:', error);
+      throw error;
+    }
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
-    return supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+          }
         }
+      });
+      
+      if (error) throw error;
+      
+      // Check if this is the first user, if yes, make them an admin
+      const { count, error: countError } = await supabase
+        .from('app_users')
+        .select('*', { count: 'exact', head: true });
+        
+      if (!countError && count === 1) {
+        // This is the first user, make them an admin
+        await supabase
+          .from('app_users')
+          .update({ role: 'Admin' })
+          .eq('email', email);
+          
+        toast({
+          title: "Admin account created",
+          description: "As the first user, you have been assigned the Admin role.",
+        });
       }
-    });
+      
+      return data;
+    } catch (error: any) {
+      console.error('Sign up error:', error);
+      throw error;
+    }
   };
 
   const signOut = async () => {
