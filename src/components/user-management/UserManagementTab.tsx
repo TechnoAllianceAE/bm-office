@@ -28,7 +28,7 @@ export function UserManagementTab() {
     try {
       const { data, error } = await supabase
         .from('roles')
-        .select('id, name');
+        .select('id, name, description, created_at');
       
       if (error) {
         console.error('Error fetching roles:', error);
