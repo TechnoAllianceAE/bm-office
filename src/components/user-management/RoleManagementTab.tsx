@@ -48,39 +48,88 @@ export const RoleManagementTab = () => {
   const fetchRoles = async () => {
     setLoading(true);
     try {
+      console.log('Fetching roles...');
       const { data, error } = await supabase
         .from('roles')
         .select('*')
         .order('name');
         
-      if (error) throw error;
+      if (error) {
+        console.error('Error details:', error);
+        throw error;
+      }
       
+      console.log('Roles data:', data);
       setRoles(data || []);
       
       // Select the first role by default
       if (data && data.length > 0 && !selectedRole) {
         setSelectedRole(data[0]);
+      } else if (data && data.length === 0) {
+        // Create default roles if none exist
+        await createDefaultRoles();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching roles:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to load roles",
+        description: error.message || "Failed to load roles",
       });
     } finally {
       setLoading(false);
     }
   };
+
+  const createDefaultRoles = async () => {
+    try {
+      // Create Admin role
+      const { data: adminRole, error: adminError } = await supabase
+        .from('roles')
+        .insert({ name: 'Admin', description: 'Full system access' })
+        .select()
+        .single();
+        
+      if (adminError) throw adminError;
+
+      // Create User role
+      const { data: userRole, error: userError } = await supabase
+        .from('roles')
+        .insert({ name: 'User', description: 'Basic user access' })
+        .select()
+        .single();
+        
+      if (userError) throw userError;
+
+      console.log('Created default roles');
+      
+      // Fetch roles again
+      fetchRoles();
+      
+    } catch (error: any) {
+      console.error('Error creating default roles:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to create default roles",
+      });
+    }
+  };
   
   const fetchPermissions = async (roleId: string) => {
     try {
+      console.log('Fetching permissions for role:', roleId);
       const { data, error } = await supabase
         .from('permissions')
         .select('*')
         .eq('role_id', roleId);
         
-      if (error) throw error;
+      if (error) {
+        console.error('Error details:', error);
+        throw error;
+      }
+      
+      console.log('Permissions data:', data);
       
       // Convert the permissions data to the format we need
       const permissionsMap: PermissionsMap = {};
@@ -106,27 +155,31 @@ export const RoleManagementTab = () => {
       });
       
       setPermissions(permissionsMap);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching permissions:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to load permissions",
+        description: error.message || "Failed to load permissions",
       });
     }
   };
   
   const handleAddRole = async () => {
     try {
+      console.log('Adding role:', newRole);
       const { data, error } = await supabase
         .from('roles')
-        .insert([
-          { name: newRole.name, description: newRole.description }
-        ])
-        .select('*')
+        .insert([{ name: newRole.name, description: newRole.description }])
+        .select()
         .single();
         
-      if (error) throw error;
+      if (error) {
+        console.error('Error details:', error);
+        throw error;
+      }
+      
+      console.log('Role added:', data);
       
       // Add new role to the list
       setRoles([...roles, data]);
@@ -141,12 +194,12 @@ export const RoleManagementTab = () => {
         title: "Success",
         description: "Role added successfully",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding role:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to add role",
+        description: error.message || "Failed to add role",
       });
     } finally {
       setIsAddRoleOpen(false);
@@ -155,6 +208,7 @@ export const RoleManagementTab = () => {
   
   const handleEditRole = async () => {
     try {
+      console.log('Editing role:', editRole);
       const { error } = await supabase
         .from('roles')
         .update({
@@ -163,7 +217,10 @@ export const RoleManagementTab = () => {
         })
         .eq('id', editRole.id);
         
-      if (error) throw error;
+      if (error) {
+        console.error('Error details:', error);
+        throw error;
+      }
       
       // Update the roles list
       setRoles(roles.map(role => 
@@ -185,12 +242,12 @@ export const RoleManagementTab = () => {
         title: "Success",
         description: "Role updated successfully",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating role:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to update role",
+        description: error.message || "Failed to update role",
       });
     } finally {
       setIsEditRoleOpen(false);
@@ -200,12 +257,16 @@ export const RoleManagementTab = () => {
   const handleDeleteRole = async (roleId: string) => {
     if (confirm("Are you sure you want to delete this role? This will affect users assigned this role.")) {
       try {
+        console.log('Deleting role:', roleId);
         const { error } = await supabase
           .from('roles')
           .delete()
           .eq('id', roleId);
           
-        if (error) throw error;
+        if (error) {
+          console.error('Error details:', error);
+          throw error;
+        }
         
         // Remove the role from the list
         const updatedRoles = roles.filter(role => role.id !== roleId);
@@ -220,12 +281,12 @@ export const RoleManagementTab = () => {
           title: "Success",
           description: "Role deleted successfully",
         });
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error deleting role:', error);
         toast({
           variant: "destructive",
           title: "Error",
-          description: "Failed to delete role",
+          description: error.message || "Failed to delete role",
         });
       }
     }
@@ -254,17 +315,20 @@ export const RoleManagementTab = () => {
     };
     
     try {
+      console.log('Updating permission:', permissionData);
       // Check if a permission record already exists
       const { data, error: fetchError } = await supabase
         .from('permissions')
         .select('id')
         .eq('role_id', selectedRole.id)
-        .eq('application', application)
-        .maybeSingle();
+        .eq('application', application);
         
-      if (fetchError) throw fetchError;
+      if (fetchError) {
+        console.error('Error checking permission:', fetchError);
+        throw fetchError;
+      }
       
-      if (data) {
+      if (data && data.length > 0) {
         // Update existing permission
         const { error: updateError } = await supabase
           .from('permissions')
@@ -274,23 +338,29 @@ export const RoleManagementTab = () => {
             can_edit: permissionData.can_edit,
             can_delete: permissionData.can_delete
           })
-          .eq('id', data.id);
+          .eq('id', data[0].id);
           
-        if (updateError) throw updateError;
+        if (updateError) {
+          console.error('Error updating permission:', updateError);
+          throw updateError;
+        }
       } else {
         // Insert new permission
         const { error: insertError } = await supabase
           .from('permissions')
           .insert([permissionData]);
           
-        if (insertError) throw insertError;
+        if (insertError) {
+          console.error('Error inserting permission:', insertError);
+          throw insertError;
+        }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating permission:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to update permission",
+        description: error.message || "Failed to update permission",
       });
       
       // Revert the local state change
@@ -308,72 +378,75 @@ export const RoleManagementTab = () => {
           </p>
         </div>
         
-        <Dialog open={isAddRoleOpen} onOpenChange={setIsAddRoleOpen}>
-          <DialogTrigger asChild>
-            <Button size="sm" disabled={!isAdmin}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Role
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px] bg-card/90 backdrop-blur-md">
-            <DialogHeader>
-              <DialogTitle>Add New Role</DialogTitle>
-              <DialogDescription>
-                Create a new role and define its permissions.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="roleName" className="text-right">
-                  Role Name
-                </Label>
-                <Input
-                  id="roleName"
-                  value={newRole.name}
-                  onChange={(e) => setNewRole({...newRole, name: e.target.value})}
-                  className="col-span-3 bg-background/50"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="roleDescription" className="text-right">
-                  Description
-                </Label>
-                <Input
-                  id="roleDescription"
-                  value={newRole.description}
-                  onChange={(e) => setNewRole({...newRole, description: e.target.value})}
-                  className="col-span-3 bg-background/50"
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsAddRoleOpen(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleAddRole} disabled={!newRole.name}>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={fetchRoles}
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
+          
+          <Dialog open={isAddRoleOpen} onOpenChange={setIsAddRoleOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm" disabled={!isAdmin}>
+                <Plus className="h-4 w-4 mr-2" />
                 Add Role
               </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px] bg-card/90 backdrop-blur-md">
+              <DialogHeader>
+                <DialogTitle>Add New Role</DialogTitle>
+                <DialogDescription>
+                  Create a new role and define its permissions.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="roleName" className="text-right">
+                    Role Name
+                  </Label>
+                  <Input
+                    id="roleName"
+                    value={newRole.name}
+                    onChange={(e) => setNewRole({...newRole, name: e.target.value})}
+                    className="col-span-3 bg-background/50"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="roleDescription" className="text-right">
+                    Description
+                  </Label>
+                  <Input
+                    id="roleDescription"
+                    value={newRole.description}
+                    onChange={(e) => setNewRole({...newRole, description: e.target.value})}
+                    className="col-span-3 bg-background/50"
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsAddRoleOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleAddRole} disabled={!newRole.name}>
+                  Add Role
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="bg-card/40 backdrop-blur-md border border-white/10 rounded-lg p-4">
           <div className="flex justify-between items-center mb-4">
             <h4 className="font-medium">Available Roles</h4>
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={fetchRoles}
-            >
-              <RefreshCw className="h-4 w-4" />
-            </Button>
+            {loading && <p className="text-xs text-muted-foreground">Loading...</p>}
           </div>
           
-          {loading ? (
-            <div className="text-center p-4">Loading roles...</div>
-          ) : roles.length > 0 ? (
+          {roles.length > 0 ? (
             <div className="space-y-2">
               {roles.map(role => (
                 <div 
@@ -411,7 +484,7 @@ export const RoleManagementTab = () => {
                     <Button 
                       variant="ghost" 
                       size="icon"
-                      disabled={!isAdmin}
+                      disabled={!isAdmin || role.name === 'Admin' || role.name === 'User'} // Prevent deletion of default roles
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDeleteRole(role.id);
@@ -425,7 +498,7 @@ export const RoleManagementTab = () => {
             </div>
           ) : (
             <div className="text-center p-4 text-muted-foreground">
-              No roles found. Create a new role to get started.
+              {loading ? 'Loading roles...' : 'No roles found. Create a new role to get started.'}
             </div>
           )}
         </div>

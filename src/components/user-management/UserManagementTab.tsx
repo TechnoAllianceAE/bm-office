@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
-import { User, UserPlus, Search, Filter, MoreHorizontal, Trash, Edit } from 'lucide-react';
+import { User, UserPlus, Search, Filter, MoreHorizontal, Trash, Edit, RefreshCw } from 'lucide-react';
 import { 
   Dialog, DialogContent, DialogDescription, DialogHeader, 
   DialogTitle, DialogTrigger, DialogFooter 
@@ -23,7 +23,7 @@ export const UserManagementTab = () => {
   const [newUser, setNewUser] = useState({ email: '', password: '', fullName: '', role: 'User' });
   const [editUser, setEditUser] = useState({ id: '', fullName: '', email: '', role: '', status: '' });
   const [users, setUsers] = useState<AppUser[]>([]);
-  const [roles, setRoles] = useState<string[]>([]);
+  const [roles, setRoles] = useState<string[]>(['Admin', 'User']); // Default roles as fallback
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -40,29 +40,34 @@ export const UserManagementTab = () => {
     setLoading(true);
     try {
       console.log('Fetching users...');
+      // Use range for pagination
+      const from = (currentPage - 1) * itemsPerPage;
+      const to = from + itemsPerPage - 1;
+      
+      // Fetch users with count for pagination
       const { data, error, count } = await supabase
         .from('app_users')
         .select('*', { count: 'exact' })
-        .range((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage - 1)
+        .range(from, to)
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error details:', error);
+        console.error('Error fetching users:', error);
         throw error;
       }
       
       console.log('Users data:', data);
       setUsers(data || []);
       
-      if (count) {
+      if (count !== null) {
         setTotalPages(Math.ceil(count / itemsPerPage));
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching users:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to load users",
+        description: error.message || "Failed to load users",
       });
     } finally {
       setLoading(false);
@@ -82,15 +87,18 @@ export const UserManagementTab = () => {
       }
       
       console.log('Roles data:', data);
-      if (data) {
+      if (data && data.length > 0) {
         setRoles(data.map(role => role.name));
+      } else {
+        // Fallback to default roles if none found in database
+        console.log('Using default roles as fallback');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching roles:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to load roles",
+        description: error.message || "Failed to load roles",
       });
     }
   };
@@ -123,38 +131,32 @@ export const UserManagementTab = () => {
       if (authData.user) {
         console.log('User created in auth:', authData.user);
         
-        // Check if app_users entry already exists (should be created by trigger)
-        const { data: existingUser, error: checkError } = await supabase
+        // Create app_users entry immediately after auth signup
+        const { error: insertError } = await supabase
           .from('app_users')
-          .select('*')
-          .eq('user_id', authData.user.id)
-          .maybeSingle();
+          .insert({
+            user_id: authData.user.id,
+            full_name: newUser.fullName,
+            email: newUser.email,
+            role: newUser.role,
+            status: 'Active'
+          });
 
-        if (checkError) throw checkError;
-        
-        if (existingUser) {
-          console.log('User exists in app_users, updating role:', newUser.role);
-          // Update the role if user exists
-          const { error: updateError } = await supabase
-            .from('app_users')
-            .update({ role: newUser.role })
-            .eq('user_id', authData.user.id);
-
-          if (updateError) throw updateError;
-        } else {
-          console.log('User does not exist in app_users, creating entry with role:', newUser.role);
-          // Create app_users entry manually if trigger didn't work
-          const { error: insertError } = await supabase
-            .from('app_users')
-            .insert({
-              user_id: authData.user.id,
-              full_name: newUser.fullName,
-              email: newUser.email,
-              role: newUser.role,
-              status: 'Active'
-            });
-
-          if (insertError) throw insertError;
+        if (insertError) {
+          console.error('Error creating app_user:', insertError);
+          
+          // If the error is about duplicate entries, try updating instead
+          if (insertError.code === '23505') { // Unique violation
+            console.log('User exists, updating role instead');
+            const { error: updateError } = await supabase
+              .from('app_users')
+              .update({ role: newUser.role })
+              .eq('user_id', authData.user.id);
+              
+            if (updateError) throw updateError;
+          } else {
+            throw insertError;
+          }
         }
 
         toast({
@@ -164,12 +166,12 @@ export const UserManagementTab = () => {
         
         fetchUsers();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding user:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: (error as Error).message || "Failed to create user",
+        description: error.message || "Failed to create user",
       });
     } finally {
       setNewUser({ email: '', password: '', fullName: '', role: 'User' });
@@ -206,12 +208,12 @@ export const UserManagementTab = () => {
       });
       
       fetchUsers();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating user:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to update user",
+        description: error.message || "Failed to update user",
       });
     } finally {
       setIsEditUserOpen(false);
@@ -243,25 +245,18 @@ export const UserManagementTab = () => {
       
       if (appUserError) throw appUserError;
       
-      // If we have an auth ID, try to delete from auth.users
-      if (userAuthId) {
-        // Note: This usually requires admin privileges or service role
-        // Using admin API directly may not work with regular client
-        console.log('Auth user deletion would require admin API');
-      }
-
       toast({
         title: "Success",
         description: "User deleted successfully",
       });
       
       fetchUsers();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting user:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to delete user",
+        description: error.message || "Failed to delete user",
       });
     }
   };
@@ -287,9 +282,14 @@ export const UserManagementTab = () => {
         </div>
         
         <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
-          <Button variant="outline" size="sm" className="bg-background/50 backdrop-blur-sm">
-            <Filter className="h-4 w-4 mr-2" />
-            Filter
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="bg-background/50 backdrop-blur-sm"
+            onClick={fetchUsers}
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
           </Button>
           
           <Dialog open={isAddUserOpen} onOpenChange={setIsAddUserOpen}>
@@ -354,13 +354,9 @@ export const UserManagementTab = () => {
                       <SelectValue placeholder="Select a role" />
                     </SelectTrigger>
                     <SelectContent>
-                      {roles.length > 0 ? (
-                        roles.map(role => (
-                          <SelectItem key={role} value={role}>{role}</SelectItem>
-                        ))
-                      ) : (
-                        <SelectItem value="User">User</SelectItem>
-                      )}
+                      {roles.map(role => (
+                        <SelectItem key={role} value={role}>{role}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -541,16 +537,9 @@ export const UserManagementTab = () => {
                   <SelectValue placeholder="Select a role" />
                 </SelectTrigger>
                 <SelectContent>
-                  {roles.length > 0 ? (
-                    roles.map(role => (
-                      <SelectItem key={role} value={role}>{role}</SelectItem>
-                    ))
-                  ) : (
-                    <>
-                      <SelectItem value="Admin">Admin</SelectItem>
-                      <SelectItem value="User">User</SelectItem>
-                    </>
-                  )}
+                  {roles.map(role => (
+                    <SelectItem key={role} value={role}>{role}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
