@@ -4,7 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { 
   Home, Clock, Briefcase, Users, FileText, Settings, ChevronLeft, ChevronRight, Calendar, BarChart3,
   Sparkles, Database, Wrench, Building, ShoppingCart, LayoutDashboard, HeartHandshake, Share2, Mail,
-  GraduationCap, UserSquare2
+  GraduationCap, UserSquare2, Shield
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -40,6 +40,7 @@ const mainNavItems: NavItem[] = [
 const secondaryNavItems: NavItem[] = [
   { name: 'Directory', path: '/directory', icon: Users },
   { name: 'LMS', path: '/lms', icon: GraduationCap },
+  { name: 'User Management', path: '/user-management', icon: Shield },
   { name: 'Utilities', path: '/tools', icon: Wrench },
   { name: 'Analytics', path: '/analytics', icon: BarChart3 },
   { name: 'Settings', path: '/settings', icon: Settings },
