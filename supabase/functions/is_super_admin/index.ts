@@ -28,14 +28,19 @@ serve(async (req) => {
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const { userId } = await req.json();
+    
+    // Parse the request body to get user_id_param
+    const requestData = await req.json();
+    const userId = requestData.user_id_param;
 
     if (!userId) {
       return new Response(
-        JSON.stringify({ error: 'User ID is required' }),
+        JSON.stringify({ error: 'User ID parameter is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    console.log('Checking Super Admin status for user:', userId);
 
     const { data, error } = await supabase
       .from('app_users')
@@ -52,9 +57,10 @@ serve(async (req) => {
     }
 
     const isSuperAdmin = data?.role === 'Super Admin';
+    console.log('User role:', data?.role, 'Is Super Admin:', isSuperAdmin);
 
     return new Response(
-      JSON.stringify({ isSuperAdmin }),
+      JSON.stringify(isSuperAdmin),
       { 
         status: 200, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 

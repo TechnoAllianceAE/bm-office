@@ -24,15 +24,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Function to fetch and set user role
   const getUserRole = async (userId: string) => {
     console.log('Fetching role for user:', userId);
-    const role = await fetchUserRole(userId);
-    console.log('User role retrieved:', role);
-    setUserRole(role);
-    return role;
+    try {
+      const role = await fetchUserRole(userId);
+      console.log('User role retrieved:', role);
+      
+      if (role) {
+        setUserRole(role);
+        return role;
+      } else {
+        console.warn('No role found for user:', userId);
+        setUserRole('User'); // Default to User role
+        return 'User';
+      }
+    } catch (error) {
+      console.error('Error in getUserRole:', error);
+      setUserRole('User'); // Default to User role
+      return 'User';
+    }
   };
 
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session retrieved:', session?.user?.id);
       setSession(session);
       setUser(session?.user ?? null);
       
