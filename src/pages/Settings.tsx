@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/common/Card';
 import { Button } from '@/components/ui/button';
@@ -6,6 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { useAuth } from '@/contexts/auth/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { Settings, User, Bell, Lock, Palette, Image as ImageIcon, Upload } from 'lucide-react';
 
 // Sample background images
@@ -22,14 +26,145 @@ const backgroundImages = [
   { id: 'aurora', url: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?q=80&w=2070', name: 'Aurora' },
 ];
 
+interface UserSettings {
+  id: string;
+  user_id: string;
+  background_image: string;
+  custom_background_url: string | null;
+  blur_level: string;
+  animations_enabled: boolean;
+  compact_mode: boolean;
+  auto_hide_sidebar: boolean;
+  email_notifications: boolean;
+  push_notifications: boolean;
+  project_updates: boolean;
+  timesheet_reminders: boolean;
+}
+
+const defaultSettings: Omit<UserSettings, 'id' | 'user_id'> = {
+  background_image: 'abstract',
+  custom_background_url: null,
+  blur_level: 'medium',
+  animations_enabled: true,
+  compact_mode: false,
+  auto_hide_sidebar: false,
+  email_notifications: true,
+  push_notifications: true,
+  project_updates: true,
+  timesheet_reminders: true,
+};
+
 const SettingsPage = () => {
-  const [selectedBackground, setSelectedBackground] = useState('abstract');
-  const [customBackgroundUrl, setCustomBackgroundUrl] = useState('');
-  const [blurLevel, setBlurLevel] = useState('medium');
+  const { user } = useAuth();
+  const [settings, setSettings] = useState<Omit<UserSettings, 'id' | 'user_id'>>(defaultSettings);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+  
+  useEffect(() => {
+    if (user) {
+      fetchUserSettings();
+    }
+  }, [user]);
+  
+  const fetchUserSettings = async () => {
+    if (!user) return;
+    
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('user_settings')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') { // Code when no rows returned
+        throw error;
+      }
+      
+      if (data) {
+        const { id, user_id, ...settingsData } = data;
+        setSettings(settingsData);
+        
+        // Apply the saved background immediately
+        applyBackground(
+          settingsData.custom_background_url && settingsData.background_image === 'custom'
+            ? settingsData.custom_background_url
+            : backgroundImages.find(img => img.id === settingsData.background_image)?.url || ''
+        );
+      }
+    } catch (error) {
+      console.error('Error fetching user settings:', error);
+      toast.error('Failed to load settings');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const saveUserSettings = async () => {
+    if (!user) return;
+    
+    setIsSaving(true);
+    try {
+      // Check if settings already exist
+      const { data: existingSettings, error: checkError } = await supabase
+        .from('user_settings')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      if (checkError && checkError.code !== 'PGRST116') {
+        throw checkError;
+      }
+      
+      let error;
+      
+      if (existingSettings) {
+        // Update existing settings
+        const { error: updateError } = await supabase
+          .from('user_settings')
+          .update(settings)
+          .eq('user_id', user.id);
+          
+        error = updateError;
+      } else {
+        // Insert new settings
+        const { error: insertError } = await supabase
+          .from('user_settings')
+          .insert({ 
+            user_id: user.id,
+            ...settings
+          });
+          
+        error = insertError;
+      }
+      
+      if (error) {
+        throw error;
+      }
+      
+      toast.success('Settings saved successfully');
+      setHasChanges(false);
+    } catch (error) {
+      console.error('Error saving user settings:', error);
+      toast.error('Failed to save settings');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  
+  const updateSetting = <K extends keyof typeof settings>(key: K, value: typeof settings[K]) => {
+    setSettings(prev => ({
+      ...prev,
+      [key]: value
+    }));
+    setHasChanges(true);
+  };
   
   // Function to set the background image
   const applyBackground = (imageUrl: string) => {
-    // In a real implementation, this would update global state or context
+    if (!imageUrl) return;
+    
     document.body.style.backgroundImage = `url(${imageUrl})`;
     document.body.style.backgroundSize = 'cover';
     document.body.style.backgroundPosition = 'center';
@@ -37,9 +172,9 @@ const SettingsPage = () => {
     
     // Apply blur based on the selected level
     let blurValue = '0';
-    if (blurLevel === 'light') blurValue = '5px';
-    if (blurLevel === 'medium') blurValue = '10px';
-    if (blurLevel === 'heavy') blurValue = '15px';
+    if (settings.blur_level === 'light') blurValue = '5px';
+    if (settings.blur_level === 'medium') blurValue = '10px';
+    if (settings.blur_level === 'heavy') blurValue = '15px';
     
     // Create a pseudo-element for the blur effect (to avoid blurring the content)
     const styleEl = document.createElement('style');
@@ -73,28 +208,107 @@ const SettingsPage = () => {
   };
   
   // Apply background when selection or blur level changes
-  React.useEffect(() => {
-    const selectedImage = backgroundImages.find(img => img.id === selectedBackground);
+  useEffect(() => {
+    if (isLoading) return; // Skip during initial load
+    
+    const selectedImage = backgroundImages.find(img => img.id === settings.background_image);
     if (selectedImage) {
       applyBackground(selectedImage.url);
-    } else if (customBackgroundUrl) {
-      applyBackground(customBackgroundUrl);
+    } else if (settings.custom_background_url) {
+      applyBackground(settings.custom_background_url);
     }
-  }, [selectedBackground, customBackgroundUrl, blurLevel]);
+  }, [settings.background_image, settings.custom_background_url, settings.blur_level, isLoading]);
   
   const handleCustomBackgroundSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (customBackgroundUrl) {
-      setSelectedBackground('custom');
-      applyBackground(customBackgroundUrl);
+    if (settings.custom_background_url) {
+      updateSetting('background_image', 'custom');
+      applyBackground(settings.custom_background_url);
+    }
+  };
+
+  // Update profile information
+  const [profileData, setProfileData] = useState({
+    fullName: '',
+    jobTitle: '',
+    department: '',
+    bio: ''
+  });
+  
+  useEffect(() => {
+    if (user) {
+      setProfileData({
+        fullName: user.user_metadata?.full_name || '',
+        jobTitle: user.user_metadata?.job_title || '',
+        department: user.user_metadata?.department || '',
+        bio: user.user_metadata?.bio || ''
+      });
+    }
+  }, [user]);
+  
+  const updateProfileField = (field: keyof typeof profileData, value: string) => {
+    setProfileData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    setHasChanges(true);
+  };
+  
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    
+    setIsSaving(true);
+    try {
+      // Update user metadata
+      const { error: updateError } = await supabase.auth.updateUser({
+        data: { 
+          full_name: profileData.fullName,
+          job_title: profileData.jobTitle,
+          department: profileData.department,
+          bio: profileData.bio
+        }
+      });
+      
+      if (updateError) {
+        throw updateError;
+      }
+      
+      // Update app_users table
+      const { error: dbUpdateError } = await supabase
+        .from('app_users')
+        .update({ 
+          full_name: profileData.fullName 
+        })
+        .eq('user_id', user.id);
+      
+      if (dbUpdateError) {
+        throw dbUpdateError;
+      }
+      
+      toast.success('Profile saved successfully');
+      setHasChanges(false);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast.error('Failed to save profile');
+    } finally {
+      setIsSaving(false);
     }
   };
   
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Settings</h1>
-        <p className="text-muted-foreground">Manage your account and application preferences</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-semibold">Settings</h1>
+          <p className="text-muted-foreground">Manage your account and application preferences</p>
+        </div>
+        
+        {hasChanges && (
+          <Button onClick={saveUserSettings} disabled={isSaving}>
+            {isSaving ? 'Saving...' : 'Save Changes'}
+          </Button>
+        )}
       </div>
       
       <Tabs defaultValue="appearance">
@@ -121,33 +335,58 @@ const SettingsPage = () => {
           <Card className="p-6 bg-card/40 backdrop-blur-md border border-white/10">
             <h2 className="text-xl font-semibold mb-4">Profile Information</h2>
             <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
-                  <Input id="name" defaultValue="John Doe" className="bg-background/50 backdrop-blur-sm" />
+              <form onSubmit={handleSaveProfile}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Full Name</Label>
+                    <Input 
+                      id="name" 
+                      value={profileData.fullName} 
+                      onChange={(e) => updateProfileField('fullName', e.target.value)}
+                      className="bg-background/50 backdrop-blur-sm" 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input 
+                      id="email" 
+                      value={user?.email || ''} 
+                      disabled 
+                      className="bg-background/50 backdrop-blur-sm" 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Job Title</Label>
+                    <Input 
+                      id="title" 
+                      value={profileData.jobTitle} 
+                      onChange={(e) => updateProfileField('jobTitle', e.target.value)}
+                      className="bg-background/50 backdrop-blur-sm" 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="department">Department</Label>
+                    <Input 
+                      id="department" 
+                      value={profileData.department} 
+                      onChange={(e) => updateProfileField('department', e.target.value)}
+                      className="bg-background/50 backdrop-blur-sm" 
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" defaultValue="john.doe@example.com" className="bg-background/50 backdrop-blur-sm" />
+                <div className="space-y-2 mt-4">
+                  <Label htmlFor="bio">Bio</Label>
+                  <textarea 
+                    id="bio" 
+                    className="w-full rounded-md bg-background/50 backdrop-blur-sm border border-input p-3 h-24"
+                    value={profileData.bio}
+                    onChange={(e) => updateProfileField('bio', e.target.value)}
+                  />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="title">Job Title</Label>
-                  <Input id="title" defaultValue="Product Manager" className="bg-background/50 backdrop-blur-sm" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="department">Department</Label>
-                  <Input id="department" defaultValue="Product" className="bg-background/50 backdrop-blur-sm" />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="bio">Bio</Label>
-                <textarea 
-                  id="bio" 
-                  className="w-full rounded-md bg-background/50 backdrop-blur-sm border border-input p-3 h-24"
-                  defaultValue="Product manager with 5+ years of experience in technology companies."
-                />
-              </div>
-              <Button>Save Changes</Button>
+                <Button type="submit" className="mt-4" disabled={isSaving}>
+                  {isSaving ? 'Saving...' : 'Save Profile'}
+                </Button>
+              </form>
             </div>
           </Card>
         </TabsContent>
@@ -166,9 +405,9 @@ const SettingsPage = () => {
                     key={image.id}
                     className={`
                       relative aspect-video cursor-pointer rounded-lg overflow-hidden
-                      ${selectedBackground === image.id ? 'ring-2 ring-primary ring-offset-2' : 'hover:opacity-90'}
+                      ${settings.background_image === image.id ? 'ring-2 ring-primary ring-offset-2' : 'hover:opacity-90'}
                     `}
-                    onClick={() => setSelectedBackground(image.id)}
+                    onClick={() => updateSetting('background_image', image.id)}
                   >
                     <img 
                       src={image.url} 
@@ -188,15 +427,18 @@ const SettingsPage = () => {
                   <Input 
                     placeholder="Enter image URL" 
                     className="bg-background/50 backdrop-blur-sm"
-                    value={customBackgroundUrl}
-                    onChange={(e) => setCustomBackgroundUrl(e.target.value)}
+                    value={settings.custom_background_url || ''}
+                    onChange={(e) => updateSetting('custom_background_url', e.target.value)}
                   />
                   <Button type="submit">Apply</Button>
                 </div>
               </form>
               
               <h3 className="text-lg font-medium mb-2">Blur Effect</h3>
-              <RadioGroup value={blurLevel} onValueChange={setBlurLevel}>
+              <RadioGroup 
+                value={settings.blur_level} 
+                onValueChange={(value) => updateSetting('blur_level', value)}
+              >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="none" id="none" />
                   <Label htmlFor="none">None</Label>
@@ -224,21 +466,33 @@ const SettingsPage = () => {
                     <Label htmlFor="animations" className="block">Enable Animations</Label>
                     <span className="text-xs text-muted-foreground">Turn on/off UI animations</span>
                   </div>
-                  <Switch id="animations" defaultChecked />
+                  <Switch 
+                    id="animations" 
+                    checked={settings.animations_enabled}
+                    onCheckedChange={(checked) => updateSetting('animations_enabled', checked)}
+                  />
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
                     <Label htmlFor="compact" className="block">Compact Mode</Label>
                     <span className="text-xs text-muted-foreground">Reduce padding and spacing</span>
                   </div>
-                  <Switch id="compact" />
+                  <Switch 
+                    id="compact" 
+                    checked={settings.compact_mode}
+                    onCheckedChange={(checked) => updateSetting('compact_mode', checked)}
+                  />
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
                     <Label htmlFor="sidebar" className="block">Auto-hide Sidebar</Label>
                     <span className="text-xs text-muted-foreground">Automatically collapse sidebar</span>
                   </div>
-                  <Switch id="sidebar" />
+                  <Switch 
+                    id="sidebar" 
+                    checked={settings.auto_hide_sidebar}
+                    onCheckedChange={(checked) => updateSetting('auto_hide_sidebar', checked)}
+                  />
                 </div>
               </div>
             </div>
@@ -254,28 +508,44 @@ const SettingsPage = () => {
                   <Label htmlFor="email-notifs" className="block">Email Notifications</Label>
                   <span className="text-xs text-muted-foreground">Receive updates via email</span>
                 </div>
-                <Switch id="email-notifs" defaultChecked />
+                <Switch 
+                  id="email-notifs" 
+                  checked={settings.email_notifications}
+                  onCheckedChange={(checked) => updateSetting('email_notifications', checked)}
+                />
               </div>
               <div className="flex items-center justify-between">
                 <div>
                   <Label htmlFor="push-notifs" className="block">Push Notifications</Label>
                   <span className="text-xs text-muted-foreground">Receive notifications in browser</span>
                 </div>
-                <Switch id="push-notifs" defaultChecked />
+                <Switch 
+                  id="push-notifs" 
+                  checked={settings.push_notifications}
+                  onCheckedChange={(checked) => updateSetting('push_notifications', checked)}
+                />
               </div>
               <div className="flex items-center justify-between">
                 <div>
                   <Label htmlFor="project-updates" className="block">Project Updates</Label>
                   <span className="text-xs text-muted-foreground">Get notified about project changes</span>
                 </div>
-                <Switch id="project-updates" defaultChecked />
+                <Switch 
+                  id="project-updates" 
+                  checked={settings.project_updates}
+                  onCheckedChange={(checked) => updateSetting('project_updates', checked)}
+                />
               </div>
               <div className="flex items-center justify-between">
                 <div>
                   <Label htmlFor="timesheet-reminders" className="block">Timesheet Reminders</Label>
                   <span className="text-xs text-muted-foreground">Get reminded to fill timesheets</span>
                 </div>
-                <Switch id="timesheet-reminders" defaultChecked />
+                <Switch 
+                  id="timesheet-reminders" 
+                  checked={settings.timesheet_reminders}
+                  onCheckedChange={(checked) => updateSetting('timesheet_reminders', checked)}
+                />
               </div>
             </div>
           </Card>
@@ -324,4 +594,3 @@ const SettingsPage = () => {
 };
 
 export default SettingsPage;
-

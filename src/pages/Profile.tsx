@@ -1,14 +1,63 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/common/Card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/auth/AuthContext';
 import { UserCog, Mail, User as UserIcon, Calendar, Shield } from 'lucide-react';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 const Profile = () => {
   const { user, userRole } = useAuth();
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setEmail(user.email || '');
+      setFullName(user?.user_metadata?.full_name || '');
+    }
+  }, [user]);
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!user) return;
+    
+    setIsSaving(true);
+    try {
+      // Update user metadata
+      const { error: updateError } = await supabase.auth.updateUser({
+        data: { full_name: fullName }
+      });
+      
+      if (updateError) {
+        throw updateError;
+      }
+      
+      // Update app_users table
+      const { error: dbUpdateError } = await supabase
+        .from('app_users')
+        .update({ 
+          full_name: fullName,
+        })
+        .eq('user_id', user.id);
+      
+      if (dbUpdateError) {
+        throw dbUpdateError;
+      }
+      
+      toast.success('Profile updated successfully');
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast.error('Failed to update profile');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -27,20 +76,21 @@ const Profile = () => {
                 <UserIcon className="h-8 w-8 text-primary" />
               </div>
               <div>
-                <h2 className="text-xl font-semibold">{user?.user_metadata?.full_name || user?.email}</h2>
+                <h2 className="text-xl font-semibold">{fullName || email}</h2>
                 <p className="text-sm text-muted-foreground flex items-center gap-1">
                   <Shield className="h-3 w-3" /> {userRole || 'User'}
                 </p>
               </div>
             </div>
 
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleSaveProfile}>
               <div className="space-y-2">
                 <Label htmlFor="fullName">Full Name</Label>
                 <Input
                   id="fullName"
                   placeholder="Your full name"
-                  defaultValue={user?.user_metadata?.full_name || ''}
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
                 />
               </div>
               
@@ -49,12 +99,14 @@ const Profile = () => {
                 <Input
                   id="email"
                   type="email"
-                  defaultValue={user?.email || ''}
+                  value={email}
                   disabled
                 />
               </div>
 
-              <Button type="submit">Save Changes</Button>
+              <Button type="submit" disabled={isSaving}>
+                {isSaving ? 'Saving...' : 'Save Changes'}
+              </Button>
             </form>
           </div>
         </Card>
