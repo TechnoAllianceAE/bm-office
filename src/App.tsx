@@ -4,11 +4,12 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Navbar } from "./components/layout/Navbar";
 import { Sidebar } from "./components/layout/Sidebar";
 import { PageTransition } from "./components/layout/PageTransition";
 import { useIsMobile } from "./hooks/use-mobile";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 
 // Pages
 import Dashboard from "./pages/Dashboard";
@@ -31,12 +32,30 @@ import NotFound from "./pages/NotFound";
 import LMS from "./pages/LMS";
 import CourseView from "./pages/CourseView";
 import Claims from "./pages/Claims";
+import Login from "./pages/Login";
+import UserManagement from "./pages/UserManagement";
 
 const queryClient = new QueryClient();
 
-const App = () => {
+// Protected route component
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" />;
+  }
+  
+  return <>{children}</>;
+};
+
+const AppContent = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const isMobile = useIsMobile();
+  const { isAuthenticated } = useAuth();
   
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -88,48 +107,66 @@ const App = () => {
     };
   }, []);
   
+  if (!isAuthenticated) {
+    return (
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="*" element={<Navigate to="/login" />} />
+      </Routes>
+    );
+  }
+  
+  return (
+    <div className="flex min-h-screen w-full">
+      <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+      
+      <main className={`flex-1 transition-all duration-300 ${
+        isSidebarOpen ? "lg:ml-64" : "lg:ml-20"
+      }`}>
+        <Navbar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+        
+        <div className="container px-4 pt-24 pb-12">
+          <PageTransition>
+            <Routes>
+              <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/timesheet" element={<ProtectedRoute><Timesheet /></ProtectedRoute>} />
+              <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
+              <Route path="/calendar" element={<ProtectedRoute><Calendar /></ProtectedRoute>} />
+              <Route path="/hr" element={<ProtectedRoute><HR /></ProtectedRoute>} />
+              <Route path="/directory" element={<ProtectedRoute><Directory /></ProtectedRoute>} />
+              <Route path="/mailbox" element={<ProtectedRoute><Mailbox /></ProtectedRoute>} />
+              <Route path="/ai-assistant" element={<ProtectedRoute><AIAssistant /></ProtectedRoute>} />
+              <Route path="/ai-workflow" element={<ProtectedRoute><AIWorkflow /></ProtectedRoute>} />
+              <Route path="/dms" element={<ProtectedRoute><DMS /></ProtectedRoute>} />
+              <Route path="/tools" element={<ProtectedRoute><Tools /></ProtectedRoute>} />
+              <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+              <Route path="/mis" element={<ProtectedRoute><MIS /></ProtectedRoute>} />
+              <Route path="/requisition" element={<ProtectedRoute><Requisition /></ProtectedRoute>} />
+              <Route path="/helpdesk" element={<ProtectedRoute><HelpDesk /></ProtectedRoute>} />
+              <Route path="/lms" element={<ProtectedRoute><LMS /></ProtectedRoute>} />
+              <Route path="/lms/course/:id" element={<ProtectedRoute><CourseView /></ProtectedRoute>} />
+              <Route path="/claims" element={<ProtectedRoute><Claims /></ProtectedRoute>} />
+              <Route path="/user-management" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </PageTransition>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <div className="flex min-h-screen w-full">
-            <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-            
-            <main className={`flex-1 transition-all duration-300 ${
-              isSidebarOpen ? "lg:ml-64" : "lg:ml-20"
-            }`}>
-              <Navbar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-              
-              <div className="container px-4 pt-24 pb-12">
-                <PageTransition>
-                  <Routes>
-                    <Route path="/" element={<Dashboard />} />
-                    <Route path="/timesheet" element={<Timesheet />} />
-                    <Route path="/projects" element={<Projects />} />
-                    <Route path="/calendar" element={<Calendar />} />
-                    <Route path="/hr" element={<HR />} />
-                    <Route path="/directory" element={<Directory />} />
-                    <Route path="/mailbox" element={<Mailbox />} />
-                    <Route path="/ai-assistant" element={<AIAssistant />} />
-                    <Route path="/ai-workflow" element={<AIWorkflow />} />
-                    <Route path="/dms" element={<DMS />} />
-                    <Route path="/tools" element={<Tools />} />
-                    <Route path="/analytics" element={<Analytics />} />
-                    <Route path="/settings" element={<SettingsPage />} />
-                    <Route path="/mis" element={<MIS />} />
-                    <Route path="/requisition" element={<Requisition />} />
-                    <Route path="/helpdesk" element={<HelpDesk />} />
-                    <Route path="/lms" element={<LMS />} />
-                    <Route path="/lms/course/:id" element={<CourseView />} />
-                    <Route path="/claims" element={<Claims />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </PageTransition>
-              </div>
-            </main>
-          </div>
+          <AuthProvider>
+            <AppContent />
+          </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
