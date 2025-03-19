@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Session, User } from '@supabase/supabase-js';
@@ -48,20 +47,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         setIsLoading(true);
         console.log('Initializing auth...');
-        const { data: { session } } = await supabase.auth.getSession();
-        console.log('Initial session retrieved:', session?.user?.id);
+        
+        // Get the initial session
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error getting session:', error);
+          setAuthInitialized(true);
+          setIsLoading(false);
+          return;
+        }
+        
+        console.log('Initial session retrieved:', session?.user?.id || 'No session found');
         
         if (session?.user) {
           setSession(session);
           setUser(session.user);
           await getUserRole(session.user.id);
         }
+        
+        // Whether we have a session or not, auth is initialized
+        setAuthInitialized(true);
+        setIsLoading(false);
       } catch (error) {
         console.error('Error initializing auth:', error);
-      } finally {
-        setIsLoading(false);
         setAuthInitialized(true);
-        console.log('Auth initialization complete');
+        setIsLoading(false);
       }
     };
 
@@ -69,7 +80,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.id);
+        console.log('Auth state changed:', event, session?.user?.id || 'No user');
+        
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -112,6 +124,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return user;
     } catch (error) {
       console.error('Error signing in:', error);
+      setIsLoading(false);
       throw error;
     } finally {
       setIsLoading(false);

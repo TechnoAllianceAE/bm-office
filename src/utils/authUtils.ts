@@ -52,6 +52,9 @@ export const checkSuperAdminStatus = async (userId: string): Promise<boolean> =>
  * Sign in with email and password
  */
 export const signInWithCredentials = async (email: string, password: string) => {
+  // Add a small delay to ensure UI updates are visible
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
