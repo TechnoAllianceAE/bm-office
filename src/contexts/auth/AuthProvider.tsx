@@ -19,6 +19,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [authInitialized, setAuthInitialized] = useState(false);
   const navigate = useNavigate();
 
   const getUserRole = async (userId: string) => {
@@ -46,6 +47,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const initializeAuth = async () => {
       try {
         setIsLoading(true);
+        console.log('Initializing auth...');
         const { data: { session } } = await supabase.auth.getSession();
         console.log('Initial session retrieved:', session?.user?.id);
         
@@ -58,6 +60,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('Error initializing auth:', error);
       } finally {
         setIsLoading(false);
+        setAuthInitialized(true);
+        console.log('Auth initialization complete');
       }
     };
 
@@ -70,17 +74,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          setIsLoading(true);
           try {
             await getUserRole(session.user.id);
           } catch (error) {
             console.error('Error fetching user role on auth change:', error);
-          } finally {
-            setIsLoading(false);
           }
         } else {
           setUserRole(null);
-          setIsLoading(false);
         }
       }
     );
@@ -162,7 +162,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   console.log('Current auth state:', { 
     isAuthenticated: !!user, 
     userRole, 
-    isLoading 
+    isLoading,
+    authInitialized
   });
 
   return (
@@ -171,7 +172,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         session,
         user,
         userRole,
-        isLoading,
+        isLoading: isLoading || !authInitialized,
         signIn,
         signUp,
         signOut,

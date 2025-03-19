@@ -142,62 +142,56 @@ const AppContent = () => {
     };
   }, []);
   
-  // Show loading state while determining authentication
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
-  
-  // Render login page for unauthenticated users
-  if (!isAuthenticated) {
-    return (
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
-      </Routes>
-    );
-  }
-  
-  // Render app for authenticated users
+  // Render consistent app structure with routes based on auth state
   return (
-    <div className="flex min-h-screen w-full">
-      <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-      
-      <main className={`flex-1 transition-all duration-300 ${
-        isSidebarOpen ? "lg:ml-64" : "lg:ml-20"
-      }`}>
-        <Navbar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-        
-        <div className="container px-4 pt-24 pb-12">
-          <PageTransition>
-            <Routes>
-              <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-              <Route path="/timesheet" element={<ProtectedRoute><Timesheet /></ProtectedRoute>} />
-              <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
-              <Route path="/calendar" element={<ProtectedRoute><Calendar /></ProtectedRoute>} />
-              <Route path="/hr" element={<ProtectedRoute><HR /></ProtectedRoute>} />
-              <Route path="/directory" element={<ProtectedRoute><Directory /></ProtectedRoute>} />
-              <Route path="/mailbox" element={<ProtectedRoute><Mailbox /></ProtectedRoute>} />
-              <Route path="/ai-assistant" element={<ProtectedRoute><AIAssistant /></ProtectedRoute>} />
-              <Route path="/ai-workflow" element={<ProtectedRoute><AIWorkflow /></ProtectedRoute>} />
-              <Route path="/dms" element={<ProtectedRoute><DMS /></ProtectedRoute>} />
-              <Route path="/tools" element={<ProtectedRoute><Tools /></ProtectedRoute>} />
-              <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
-              <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
-              <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-              <Route path="/mis" element={<ProtectedRoute><MIS /></ProtectedRoute>} />
-              <Route path="/requisition" element={<ProtectedRoute><Requisition /></ProtectedRoute>} />
-              <Route path="/helpdesk" element={<ProtectedRoute><HelpDesk /></ProtectedRoute>} />
-              <Route path="/lms" element={<ProtectedRoute><LMS /></ProtectedRoute>} />
-              <Route path="/lms/course/:id" element={<ProtectedRoute><CourseView /></ProtectedRoute>} />
-              <Route path="/claims" element={<ProtectedRoute><Claims /></ProtectedRoute>} />
-              <Route path="/user-management" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
-              <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </PageTransition>
+    <>
+      {isAuthenticated ? (
+        <div className="flex min-h-screen w-full">
+          <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+          
+          <main className={`flex-1 transition-all duration-300 ${
+            isSidebarOpen ? "lg:ml-64" : "lg:ml-20"
+          }`}>
+            <Navbar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+            
+            <div className="container px-4 pt-24 pb-12">
+              <PageTransition>
+                <Routes>
+                  <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                  <Route path="/timesheet" element={<ProtectedRoute><Timesheet /></ProtectedRoute>} />
+                  <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
+                  <Route path="/calendar" element={<ProtectedRoute><Calendar /></ProtectedRoute>} />
+                  <Route path="/hr" element={<ProtectedRoute><HR /></ProtectedRoute>} />
+                  <Route path="/directory" element={<ProtectedRoute><Directory /></ProtectedRoute>} />
+                  <Route path="/mailbox" element={<ProtectedRoute><Mailbox /></ProtectedRoute>} />
+                  <Route path="/ai-assistant" element={<ProtectedRoute><AIAssistant /></ProtectedRoute>} />
+                  <Route path="/ai-workflow" element={<ProtectedRoute><AIWorkflow /></ProtectedRoute>} />
+                  <Route path="/dms" element={<ProtectedRoute><DMS /></ProtectedRoute>} />
+                  <Route path="/tools" element={<ProtectedRoute><Tools /></ProtectedRoute>} />
+                  <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+                  <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+                  <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                  <Route path="/mis" element={<ProtectedRoute><MIS /></ProtectedRoute>} />
+                  <Route path="/requisition" element={<ProtectedRoute><Requisition /></ProtectedRoute>} />
+                  <Route path="/helpdesk" element={<ProtectedRoute><HelpDesk /></ProtectedRoute>} />
+                  <Route path="/lms" element={<ProtectedRoute><LMS /></ProtectedRoute>} />
+                  <Route path="/lms/course/:id" element={<ProtectedRoute><CourseView /></ProtectedRoute>} />
+                  <Route path="/claims" element={<ProtectedRoute><Claims /></ProtectedRoute>} />
+                  <Route path="/user-management" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
+                  <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </PageTransition>
+            </div>
+          </main>
         </div>
-      </main>
-    </div>
+      ) : (
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      )}
+    </>
   );
 };
 
