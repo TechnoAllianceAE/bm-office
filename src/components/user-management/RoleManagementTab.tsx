@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { ShieldPlus, Search, Edit, Trash, Check } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 
@@ -67,7 +66,6 @@ export const RoleManagementTab = () => {
       
       setRoles(data || []);
       
-      // If no role is selected and we have roles, select the first one
       if (!selectedRole && data && data.length > 0) {
         setSelectedRole(data[0]);
       }
@@ -84,8 +82,6 @@ export const RoleManagementTab = () => {
   };
 
   const fetchApplications = async () => {
-    // For now we'll use a static list of applications
-    // In a real app, this could be fetched from a database
     const appList = [
       { id: 1, name: 'Dashboard', key: 'dashboard' },
       { id: 2, name: 'Timesheet', key: 'timesheet' },
@@ -110,7 +106,6 @@ export const RoleManagementTab = () => {
 
       if (error) throw error;
       
-      // Convert array to object with application as key
       const permObj: PermissionsObject = {};
       data.forEach(perm => {
         permObj[perm.application] = {
@@ -178,7 +173,6 @@ export const RoleManagementTab = () => {
       
       await fetchRoles();
       
-      // Select the newly created role
       if (data) {
         setSelectedRole(data);
       }
@@ -224,7 +218,6 @@ export const RoleManagementTab = () => {
       
       await fetchRoles();
       
-      // If the deleted role was selected, clear selection
       if (selectedRole && selectedRole.id === roleId) {
         setSelectedRole(null);
       }
@@ -250,7 +243,6 @@ export const RoleManagementTab = () => {
 
     if (!selectedRole) return;
 
-    // Update local state first for UI responsiveness
     setPermissions(prev => {
       const newPermissions = { ...prev };
       
@@ -274,7 +266,6 @@ export const RoleManagementTab = () => {
     setSaving(true);
     
     try {
-      // Convert permissions object to array of permission objects
       const permissionsToUpsert = Object.entries(permissions).map(([app, perms]) => ({
         role_id: selectedRole.id,
         application: app,
@@ -282,10 +273,9 @@ export const RoleManagementTab = () => {
         can_create: perms.create,
         can_edit: perms.edit,
         can_delete: perms.delete,
-        id: perms.id // Will be undefined for new permissions
+        id: perms.id
       }));
       
-      // Use upsert to insert or update permissions
       const { error } = await supabase
         .from('permissions')
         .upsert(permissionsToUpsert, { 
@@ -300,7 +290,6 @@ export const RoleManagementTab = () => {
         description: "Permissions saved successfully",
       });
       
-      // Refresh permissions to get the new IDs
       fetchPermissions(selectedRole.id);
     } catch (error) {
       console.error('Error saving permissions:', error);
@@ -314,7 +303,6 @@ export const RoleManagementTab = () => {
     }
   };
 
-  // Filter roles based on search term
   const filteredRoles = roles.filter(role => 
     role.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     (role.description && role.description.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -323,7 +311,6 @@ export const RoleManagementTab = () => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* Left side - Roles List */}
         <div className="lg:w-1/3 space-y-4">
           <div className="flex justify-between items-center">
             <div className="relative">
@@ -430,7 +417,7 @@ export const RoleManagementTab = () => {
                           <Button 
                             variant="ghost" 
                             size="icon"
-                            disabled={!isAdmin || role.name === 'Admin'} // Don't allow deleting the Admin role
+                            disabled={!isAdmin || role.name === 'Admin'}
                             onClick={(e) => {
                               e.stopPropagation();
                               handleDeleteRole(role.id);
@@ -454,7 +441,6 @@ export const RoleManagementTab = () => {
           </div>
         </div>
 
-        {/* Right side - Permissions Matrix */}
         <div className="lg:w-2/3">
           {selectedRole ? (
             <Card className="bg-card/40 backdrop-blur-md border border-white/10">
