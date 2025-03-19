@@ -18,20 +18,21 @@ export const fetchUserRole = async (userId: string): Promise<string | null> => {
       console.error('Error fetching user role:', error);
       
       // If the regular way fails, try using RPC for Super Admin
-      // Using Function type assertion to bypass TypeScript errors
-      const adminCall = (supabase.rpc as Function);
-      const adminResult = await adminCall('is_super_admin', { user_id_param: userId });
-      
-      const adminData = adminResult.data;
-      const adminError = adminResult.error;
-      
-      if (adminError) {
-        console.error('Error checking if user is Super Admin:', adminError);
-        return null;
-      }
-      
-      if (adminData === true) {
-        return 'Super Admin';
+      try {
+        const { data: adminData, error: adminError } = await supabase.rpc('is_super_admin', { 
+          user_id_param: userId 
+        });
+        
+        if (adminError) {
+          console.error('Error checking if user is Super Admin:', adminError);
+          return null;
+        }
+        
+        if (adminData === true) {
+          return 'Super Admin';
+        }
+      } catch (rpcError) {
+        console.error('Error in RPC call:', rpcError);
       }
       
       // Default to User role if all checks fail
@@ -129,12 +130,9 @@ export const createSuperAdminUser = async (email: string, password: string, full
 
 export const checkSuperAdminStatus = async (userId: string): Promise<boolean> => {
   try {
-    // Using Function type assertion to bypass TypeScript errors
-    const rpcCall = (supabase.rpc as Function);
-    const result = await rpcCall('is_super_admin', { user_id_param: userId });
-    
-    const data = result.data;
-    const error = result.error;
+    const { data, error } = await supabase.rpc('is_super_admin', { 
+      user_id_param: userId 
+    });
     
     if (error) {
       console.error('Error checking if user is Super Admin:', error);

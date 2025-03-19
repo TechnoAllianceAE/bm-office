@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -87,19 +86,21 @@ export function UserManagementTab() {
       
       if (error) {
         console.error('Error fetching roles:', error);
+        toast.error('Failed to load roles', { description: error.message });
         return;
       }
       
+      console.log('Roles fetched successfully:', data);
       setAvailableRoles(data || []);
     } catch (error) {
       console.error('Error fetching roles:', error);
+      toast.error('Failed to load roles');
     }
   };
 
   const fetchUsers = async () => {
     setIsLoading(true);
     try {
-      // Get total count
       const { count, error: countError } = await supabase
         .from('app_users')
         .select('*', { count: 'exact', head: true });
@@ -112,7 +113,6 @@ export function UserManagementTab() {
         setTotalPages(Math.ceil(count / pageSize));
       }
       
-      // Get paginated data
       const from = (currentPage - 1) * pageSize;
       const to = from + pageSize - 1;
       
@@ -138,7 +138,6 @@ export function UserManagementTab() {
   const handleAddUser = async (values: z.infer<typeof userSchema>) => {
     setIsSubmitting(true);
     try {
-      // Create the auth user
       const { data: authData, error: authError } = await supabase.auth.admin.createUser({
         email: values.email,
         password: values.password,
@@ -156,7 +155,6 @@ export function UserManagementTab() {
         return;
       }
       
-      // Update the user's role
       const { error: updateError } = await supabase
         .from('app_users')
         .update({ role: values.role })
@@ -197,6 +195,47 @@ export function UserManagementTab() {
         return 'bg-gray-500/20 text-gray-700 hover:bg-gray-500/30';
     }
   };
+
+  const roleFormField = (
+    <FormField
+      control={form.control}
+      name="role"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>Role</FormLabel>
+          <Select 
+            onValueChange={field.onChange} 
+            defaultValue={field.value}
+          >
+            <FormControl>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a role" />
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent>
+              {availableRoles.length === 0 ? (
+                <SelectItem value="loading" disabled>Loading roles...</SelectItem>
+              ) : (
+                availableRoles.map((role) => (
+                  <SelectItem key={role.id} value={role.name}>
+                    {role.name}
+                  </SelectItem>
+                ))
+              )}
+              {availableRoles.length === 0 && (
+                <>
+                  <SelectItem value="User">User</SelectItem>
+                  <SelectItem value="Admin">Admin</SelectItem>
+                  <SelectItem value="Manager">Manager</SelectItem>
+                </>
+              )}
+            </SelectContent>
+          </Select>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
 
   return (
     <div className="space-y-4">
@@ -284,33 +323,7 @@ export function UserManagementTab() {
                     )}
                   />
                   
-                  <FormField
-                    control={form.control}
-                    name="role"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Role</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a role" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {availableRoles.map((role) => (
-                              <SelectItem key={role.id} value={role.name}>
-                                {role.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {roleFormField}
                   
                   <DialogFooter>
                     <Button 
