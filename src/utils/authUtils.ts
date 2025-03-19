@@ -8,22 +8,21 @@ import { toast } from 'sonner';
 export const fetchUserRole = async (userId: string): Promise<string | null> => {
   try {
     console.log('Fetching role for user ID:', userId);
-    const { data, error } = await supabase
-      .from('app_users')
-      .select('role')
-      .eq('user_id', userId)
-      .maybeSingle();
+    // Now we can safely retrieve the user role using our security definer function
+    const { data, error } = await supabase.rpc('get_user_role_by_id', {
+      user_uid: userId
+    });
 
     if (error) {
       console.error('Error fetching user role:', error);
       return null;
     }
 
-    console.log('Role data:', data);
-    return data?.role || null;
+    console.log('Role data retrieved:', data);
+    return data || 'User'; // Default to User if no role is found
   } catch (error) {
     console.error('Error in fetchUserRole:', error);
-    return null;
+    return 'User'; // Default to User on error
   }
 };
 
@@ -55,73 +54,88 @@ export const signInWithCredentials = async (email: string, password: string) => 
   // Add a small delay to ensure UI updates are visible
   await new Promise(resolve => setTimeout(resolve, 500));
   
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-  if (error) {
-    console.error('Error signing in:', error);
-    let errorMessage = 'Failed to sign in';
-    if (error.message.includes('Invalid login')) {
-      errorMessage = 'Invalid email or password';
+    if (error) {
+      console.error('Error signing in:', error);
+      let errorMessage = 'Failed to sign in';
+      if (error.message.includes('Invalid login')) {
+        errorMessage = 'Invalid email or password';
+      }
+      toast.error(errorMessage);
+      throw error;
     }
-    toast.error(errorMessage);
+
+    if (!data.user) {
+      const noUserError = new Error('Sign in successful but no user data returned');
+      console.error(noUserError);
+      toast.error('Authentication error');
+      throw noUserError;
+    }
+
+    return { user: data.user, session: data.session };
+  } catch (error) {
+    console.error('Sign in error:', error);
     throw error;
   }
-
-  if (!data.user) {
-    const noUserError = new Error('Sign in successful but no user data returned');
-    console.error(noUserError);
-    toast.error('Authentication error');
-    throw noUserError;
-  }
-
-  return { user: data.user, session: data.session };
 };
 
 /**
  * Sign up with email, password, and full name
  */
 export const signUpWithCredentials = async (email: string, password: string, fullName: string) => {
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: {
-        full_name: fullName,
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName,
+        },
       },
-    },
-  });
+    });
 
-  if (error) {
-    console.error('Error signing up:', error);
-    let errorMessage = 'Failed to sign up';
-    if (error.message.includes('already registered')) {
-      errorMessage = 'This email is already registered';
+    if (error) {
+      console.error('Error signing up:', error);
+      let errorMessage = 'Failed to sign up';
+      if (error.message.includes('already registered')) {
+        errorMessage = 'This email is already registered';
+      }
+      toast.error(errorMessage);
+      throw error;
     }
-    toast.error(errorMessage);
+
+    toast.success('Sign up successful', {
+      description: 'Please check your email to confirm your account.',
+    });
+
+    return { user: data.user, session: data.session };
+  } catch (error) {
+    console.error('Sign up error:', error);
     throw error;
   }
-
-  toast.success('Sign up successful', {
-    description: 'Please check your email to confirm your account.',
-  });
-
-  return { user: data.user, session: data.session };
 };
 
 /**
  * Sign out the current user
  */
 export const signOutUser = async () => {
-  const { error } = await supabase.auth.signOut();
-  if (error) {
-    console.error('Error signing out:', error);
-    toast.error('Failed to sign out');
+  try {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error('Error signing out:', error);
+      toast.error('Failed to sign out');
+      throw error;
+    }
+    toast.success('Signed out successfully');
+  } catch (error) {
+    console.error('Sign out error:', error);
     throw error;
   }
-  toast.success('Signed out successfully');
 };
 
 /**

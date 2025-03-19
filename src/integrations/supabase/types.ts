@@ -306,6 +306,12 @@ export type Database = {
         }
         Returns: string
       }
+      get_user_role_by_id: {
+        Args: {
+          user_uid: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

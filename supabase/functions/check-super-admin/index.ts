@@ -38,21 +38,20 @@ serve(async (req) => {
       );
     }
 
-    const { data, error } = await supabase
-      .from('app_users')
-      .select('role')
-      .eq('user_id', userId)
-      .maybeSingle();
+    // Use the RPC function to get the user role safely
+    const { data: userRole, error: roleError } = await supabase.rpc('get_user_role_by_id', {
+      user_uid: userId,
+    });
 
-    if (error) {
-      console.error('Error fetching user role:', error);
+    if (roleError) {
+      console.error('Error fetching user role:', roleError);
       return new Response(
-        JSON.stringify({ error: 'Error fetching user role', details: error }),
+        JSON.stringify({ error: 'Error fetching user role', details: roleError }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const isSuperAdmin = data?.role === 'Super Admin';
+    const isSuperAdmin = userRole === 'Super Admin';
 
     return new Response(
       JSON.stringify({ isSuperAdmin }),

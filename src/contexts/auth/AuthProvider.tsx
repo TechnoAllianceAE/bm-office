@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Session, User } from '@supabase/supabase-js';
@@ -9,8 +10,7 @@ import {
   signInWithCredentials,
   signUpWithCredentials,
   signOutUser,
-  createSuperAdminUser,
-  checkSuperAdminStatus
+  createSuperAdminUser
 } from '@/utils/authUtils';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
