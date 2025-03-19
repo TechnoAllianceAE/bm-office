@@ -121,7 +121,6 @@ const menuItems: MenuItem[] = [
     title: "User Management",
     path: "/user-management",
     icon: UserCog,
-    roles: ["Super Admin", "Admin"],
     category: "System"
   },
   {
@@ -143,10 +142,8 @@ export const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
     }
   };
   
-  // Filter menu items based on user role
-  const filteredMenuItems = menuItems.filter(item => 
-    !item.roles || item.roles.includes(userRole || "")
-  );
+  // Filter menu items - now all items will be visible as we removed role restrictions from User Management
+  const filteredMenuItems = menuItems;
   
   // Group menu items by category
   const groupedMenuItems = filteredMenuItems.reduce<Record<string, MenuItem[]>>((acc, item) => {

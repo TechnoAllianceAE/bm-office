@@ -17,7 +17,7 @@ export const fetchUserRole = async (userId: string): Promise<string | null> => {
       
       // If the regular way fails, try using RPC for Super Admin
       const { data: adminData, error: adminError } = await supabase
-        .rpc('is_super_admin', { user_id_param: userId });
+        .rpc('is_super_admin', { user_id_param: userId } as any);
       
       if (adminError) {
         console.error('Error checking if user is Super Admin:', adminError);
@@ -109,7 +109,7 @@ export const createSuperAdminUser = async (email: string, password: string, full
 export const checkSuperAdminStatus = async (userId: string): Promise<boolean> => {
   try {
     const { data, error } = await supabase
-      .rpc('is_super_admin', { user_id_param: userId });
+      .rpc('is_super_admin', { user_id_param: userId } as any);
     
     if (error) {
       console.error('Error checking if user is Super Admin:', error);

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -34,6 +33,7 @@ import CourseView from "./pages/CourseView";
 import Claims from "./pages/Claims";
 import Login from "./pages/Login";
 import UserManagement from "./pages/UserManagement";
+import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
@@ -62,7 +62,6 @@ const AppContent = () => {
   };
   
   useEffect(() => {
-    // Close sidebar automatically on mobile
     if (isMobile) {
       setIsSidebarOpen(false);
     } else {
@@ -141,6 +140,7 @@ const AppContent = () => {
               <Route path="/tools" element={<ProtectedRoute><Tools /></ProtectedRoute>} />
               <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
               <Route path="/mis" element={<ProtectedRoute><MIS /></ProtectedRoute>} />
               <Route path="/requisition" element={<ProtectedRoute><Requisition /></ProtectedRoute>} />
               <Route path="/helpdesk" element={<ProtectedRoute><HelpDesk /></ProtectedRoute>} />

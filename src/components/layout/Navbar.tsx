@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Bell, Search, Menu, User, LogOut, Settings } from 'lucide-react';
@@ -25,9 +24,8 @@ export const Navbar: React.FC<NavbarProps> = ({ isSidebarOpen, toggleSidebar }) 
   const [scrolled, setScrolled] = useState(false);
   const [pageTitle, setPageTitle] = useState('Dashboard');
   const isMobile = useIsMobile();
-  const { user, signOut } = useAuth();
+  const { user, signOut, userRole } = useAuth();
 
-  // Update page title based on current route
   useEffect(() => {
     const path = location.pathname;
     if (path === '/') setPageTitle('Dashboard');
@@ -41,10 +39,10 @@ export const Navbar: React.FC<NavbarProps> = ({ isSidebarOpen, toggleSidebar }) 
     else if (path.includes('ai-workflow')) setPageTitle('AI Workflow');
     else if (path.includes('mis')) setPageTitle('MIS Dashboard');
     else if (path.includes('requisition')) setPageTitle('Requisition');
+    else if (path.includes('profile')) setPageTitle('My Profile');
     else setPageTitle('BM Office');
   }, [location]);
 
-  // Add shadow on scroll
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
@@ -53,7 +51,6 @@ export const Navbar: React.FC<NavbarProps> = ({ isSidebarOpen, toggleSidebar }) 
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Handle logout
   const handleLogout = async () => {
     try {
       await signOut();
@@ -61,7 +58,6 @@ export const Navbar: React.FC<NavbarProps> = ({ isSidebarOpen, toggleSidebar }) 
       navigate('/login');
     } catch (error) {
       console.error('Error signing out:', error);
-      // Even if there's an error, force navigate to login page
       navigate('/login');
     }
   };
@@ -112,8 +108,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isSidebarOpen, toggleSidebar }) 
               <div className="flex flex-col space-y-1 p-2">
                 <p className="text-sm font-medium">{user?.email}</p>
                 <p className="text-xs text-muted-foreground">
-                  {/* Display role if available */}
-                  {user ? user?.user_metadata?.role || "User" : "Guest"}
+                  {userRole || "User"}
                 </p>
               </div>
               <DropdownMenuSeparator />
