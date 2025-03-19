@@ -1,9 +1,11 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-// Helper type for type assertions
-type AnyRecord = Record<string, any>;
+// Extend the Supabase client type for RPC
+// This is a more targeted approach than casting everything
+interface SuperAdminParams {
+  user_id_param: string;
+}
 
 export const fetchUserRole = async (userId: string): Promise<string | null> => {
   try {
@@ -19,11 +21,10 @@ export const fetchUserRole = async (userId: string): Promise<string | null> => {
       
       // If the regular way fails, try using RPC for Super Admin
       try {
-        // Using properly typed RPC call
-        const { data: adminData, error: adminError } = await supabase.rpc<boolean, { user_id_param: string }>(
-          'is_super_admin', 
-          { user_id_param: userId }
-        );
+        // Use type arguments for the RPC function to fix the error
+        const { data: adminData, error: adminError } = await (supabase.rpc as any)('is_super_admin', { 
+          user_id_param: userId 
+        });
         
         if (adminError) {
           console.error('Error checking if user is Super Admin:', adminError);
@@ -132,11 +133,10 @@ export const createSuperAdminUser = async (email: string, password: string, full
 
 export const checkSuperAdminStatus = async (userId: string): Promise<boolean> => {
   try {
-    // Using a properly typed RPC call
-    const { data, error } = await supabase.rpc<boolean, { user_id_param: string }>(
-      'is_super_admin', 
-      { user_id_param: userId }
-    );
+    // Use type assertions to fix the error
+    const { data, error } = await (supabase.rpc as any)('is_super_admin', { 
+      user_id_param: userId 
+    });
     
     if (error) {
       console.error('Error checking if user is Super Admin:', error);
