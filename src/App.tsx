@@ -10,6 +10,7 @@ import { Sidebar } from "./components/layout/Sidebar";
 import { PageTransition } from "./components/layout/PageTransition";
 import { useIsMobile } from "./hooks/use-mobile";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { Skeleton } from "./components/ui/skeleton";
 
 // Pages
 import Dashboard from "./pages/Dashboard";
@@ -38,21 +39,49 @@ import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
+// Loading component
+const LoadingScreen = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="text-center space-y-4">
+      <div className="spinner animate-spin h-12 w-12 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
+      <p className="text-lg font-medium">Loading...</p>
+    </div>
+  </div>
+);
+
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isLoading } = useAuth();
   
+  useEffect(() => {
+    console.log("ProtectedRoute state:", { isAuthenticated, isLoading });
+  }, [isAuthenticated, isLoading]);
+  
   if (isLoading) {
-    return <div className="flex items-center justify-center min-h-screen">
-      <div className="text-center">
-        <div className="spinner animate-spin h-12 w-12 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
-        <p className="text-lg font-medium">Loading...</p>
-      </div>
-    </div>;
+    return <LoadingScreen />;
   }
   
   if (!isAuthenticated) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" replace />;
+  }
+  
+  return <>{children}</>;
+};
+
+// Public route component - redirects to home if authenticated
+const PublicRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, isLoading } = useAuth();
+  
+  useEffect(() => {
+    console.log("PublicRoute state:", { isAuthenticated, isLoading });
+  }, [isAuthenticated, isLoading]);
+  
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+  
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />;
   }
   
   return <>{children}</>;
@@ -61,9 +90,9 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const AppContent = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const isMobile = useIsMobile();
-  const { isAuthenticated, isLoading, userRole } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   
-  console.log('AppContent render state:', { isAuthenticated, isLoading, userRole });
+  console.log('AppContent render state:', { isAuthenticated, isLoading });
   
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -116,21 +145,14 @@ const AppContent = () => {
   
   // Show loading state if authentication is still being determined
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="spinner animate-spin h-12 w-12 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p className="text-lg font-medium">Loading...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
   
   if (!isAuthenticated) {
     return (
       <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="*" element={<Navigate to="/login" />} />
+        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     );
   }
@@ -168,6 +190,7 @@ const AppContent = () => {
               <Route path="/lms/course/:id" element={<ProtectedRoute><CourseView /></ProtectedRoute>} />
               <Route path="/claims" element={<ProtectedRoute><Claims /></ProtectedRoute>} />
               <Route path="/user-management" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
+              <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </PageTransition>

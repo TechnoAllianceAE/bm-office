@@ -52,8 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (session?.user) {
           setSession(session);
           setUser(session.user);
-          const role = await getUserRole(session.user.id);
-          console.log('User role initialized:', role);
+          await getUserRole(session.user.id);
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
@@ -71,9 +70,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(session?.user ?? null);
         
         if (session?.user) {
+          setIsLoading(true);
           try {
-            const role = await getUserRole(session.user.id);
-            console.log('User role after auth change:', role);
+            await getUserRole(session.user.id);
           } catch (error) {
             console.error('Error fetching user role on auth change:', error);
           } finally {
@@ -97,8 +96,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { user } = await signInWithCredentials(email, password);
       
       if (user) {
-        const userRole = await getUserRole(user.id);
-        console.log('User role after sign in:', userRole);
+        await getUserRole(user.id);
         
         toast.success('Login successful', {
           description: userRole === 'Super Admin' 
@@ -110,6 +108,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       navigate('/');
+      return user;
     } catch (error) {
       console.error('Error signing in:', error);
       throw error;
@@ -121,7 +120,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUp = async (email: string, password: string, fullName: string) => {
     try {
       setIsLoading(true);
-      await signUpWithCredentials(email, password, fullName);
+      const result = await signUpWithCredentials(email, password, fullName);
+      return result;
     } catch (error) {
       console.error('Error signing up:', error);
       throw error;
@@ -133,14 +133,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     try {
       setIsLoading(true);
-      
+      await signOutUser();
       setSession(null);
       setUser(null);
       setUserRole(null);
-      
-      await signOutUser();
-      
-      return;
+      navigate('/login');
     } catch (error) {
       console.error('Error in signOut function:', error);
       throw error;

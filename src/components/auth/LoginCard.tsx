@@ -26,7 +26,7 @@ import { SuperAdminForm, SuperAdminFormValues } from './SuperAdminForm';
 
 export const LoginCard = () => {
   const [activeTab, setActiveTab] = useState('login');
-  const { signIn, signUp, createSuperAdmin } = useAuth();
+  const { signIn, signUp, createSuperAdmin, isLoading } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSuperAdminLoading, setIsSuperAdminLoading] = useState(false);
   const [isLoginSubmitting, setIsLoginSubmitting] = useState(false);
@@ -82,13 +82,13 @@ export const LoginCard = () => {
           <TabsContent value="login">
             <LoginForm 
               onSubmit={onLoginSubmit} 
-              isSubmitting={isLoginSubmitting} 
+              isSubmitting={isLoginSubmitting || isLoading} 
             />
           </TabsContent>
           <TabsContent value="signup">
             <SignupForm 
               onSubmit={onSignupSubmit} 
-              isSubmitting={isSignupSubmitting} 
+              isSubmitting={isSignupSubmitting || isLoading} 
             />
           </TabsContent>
         </Tabs>
