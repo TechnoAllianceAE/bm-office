@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Home, Calendar, User, Users, Settings, BookOpenCheck, LayoutDashboard, ListChecks, FolderKanban, Mail, BrainCircuit, FileSearch2, Package2, Activity, HelpCircle, Shield } from 'lucide-react';
+import { Home, Calendar, User, Users, Settings, BookOpenCheck, LayoutDashboard, ListChecks, FolderKanban, Mail, BrainCircuit, FileSearch2, Package2, Activity, HelpCircle, Shield, UserCog } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 import { useAuth } from '@/contexts/AuthContext';
@@ -119,16 +118,16 @@ const menuItems: MenuItem[] = [
     category: "Tools"
   },
   {
-    title: "Settings",
-    path: "/settings",
-    icon: Settings,
+    title: "User Management",
+    path: "/user-management",
+    icon: UserCog,
+    roles: ["Super Admin", "Admin"],
     category: "System"
   },
   {
-    title: "User Management",
-    path: "/user-management",
-    icon: Shield,
-    roles: ["Super Admin", "Admin"],
+    title: "Settings",
+    path: "/settings",
+    icon: Settings,
     category: "System"
   },
 ];
