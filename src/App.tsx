@@ -14,7 +14,7 @@ import DocumentManager from "./pages/DocumentManager";
 import HandyTools from "./pages/HandyTools";
 import NotFound from "./pages/NotFound";
 import AppLayout from "./components/layout/AppLayout";
-import MailBox from "./pages/MailBox";
+import MailBox from "./pages/Mailbox"; // Fixed casing here
 import Directory from "./pages/Directory";
 import MIS from "./pages/MIS";
 import Requisition from "./pages/Requisition";
