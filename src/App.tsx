@@ -14,7 +14,7 @@ import DocumentManager from "./pages/DocumentManager";
 import HandyTools from "./pages/HandyTools";
 import NotFound from "./pages/NotFound";
 import AppLayout from "./components/layout/AppLayout";
-import MailBox from "./pages/Mailbox"; // Fixed casing here
+import MailBox from "./pages/MailBox"; // Fixed to match the actual file name casing
 import Directory from "./pages/Directory";
 import MIS from "./pages/MIS";
 import Requisition from "./pages/Requisition";
