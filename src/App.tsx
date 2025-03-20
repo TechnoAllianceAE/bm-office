@@ -8,6 +8,9 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Timesheet from "./pages/Timesheet";
 import Projects from "./pages/Projects";
+import NewProject from "./pages/NewProject";
+import ApproveTimesheets from "./pages/ApproveTimesheets";
+import Organization from "./pages/Organization";
 import Analytics from "./pages/Analytics";
 import AIAssistant from "./pages/AIAssistant";
 import DocumentManager from "./pages/DocumentManager";
@@ -19,6 +22,7 @@ import Directory from "./pages/Directory";
 import MIS from "./pages/MIS";
 import Requisition from "./pages/Requisition";
 import Settings from "./pages/Settings";
+import AppBranding from "./pages/AppBranding";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { AuthProvider } from "./contexts/auth/AuthContext";
 import AIWorkflow from "./pages/AIWorkflow";
@@ -51,6 +55,9 @@ const App = () => (
                 <Route path="/mis" element={<MIS />} />
                 <Route path="/timesheet" element={<Timesheet />} />
                 <Route path="/projects" element={<Projects />} />
+                <Route path="/projects/new" element={<NewProject />} />
+                <Route path="/projects/approve-timesheets" element={<ApproveTimesheets />} />
+                <Route path="/projects/organization" element={<Organization />} />
                 <Route path="/ai-assistant" element={<AIAssistant />} />
                 <Route path="/ai-workflow" element={<AIWorkflow />} />
                 <Route path="/requisition" element={<Requisition />} />
@@ -68,6 +75,7 @@ const App = () => (
                 <Route path="/usermanagement" element={<UserManagement />} />
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/settings" element={<Settings />} />
+                <Route path="/settings/branding" element={<AppBranding />} />
                 <Route path="/login" element={<Login />} />
               </Route>
               

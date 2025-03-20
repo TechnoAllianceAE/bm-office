@@ -4,8 +4,8 @@ import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, Activity, Clock, Briefcase, Receipt, Users, 
   LineChart, UserPlus, BarChart, Settings, ChevronLeft, ChevronRight, Menu,
-  Bot, FileText, Wrench,ListChecks, Mail, UserRound,HelpCircle, BookOpenCheck, ClipboardList,
-  Calendar, Building
+  Bot, FileText, Wrench, ListChecks, Mail, UserRound, HelpCircle, BookOpenCheck, ClipboardList,
+  Calendar, Building, PlusCircle, ClipboardCheck, UsersRound
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -22,6 +22,9 @@ const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
   { icon: Clock, label: 'Timesheet', path: '/timesheet' },
   { icon: Briefcase, label: 'Projects', path: '/projects' },
+  { icon: PlusCircle, label: 'New Project', path: '/projects/new' },
+  { icon: ClipboardCheck, label: 'Approve Timesheets', path: '/projects/approve-timesheets' },
+  { icon: UsersRound, label: 'Organization', path: '/projects/organization' },
   { icon: UserRound, label: 'Directory', path: '/directory' },
   { icon: Bot, label: 'AI Assistant', path: '/ai-assistant' },
   { icon: Activity, label: 'Workflow', path: '/ai-workflow' },
