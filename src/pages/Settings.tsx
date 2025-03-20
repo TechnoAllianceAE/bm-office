@@ -1,6 +1,5 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,22 +10,12 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import {
-  Users,
   Bell,
   Mail,
-  Moon,
-  Sun,
-  LayoutGrid,
   Palette,
   Globe,
   Clock,
-  Shield,
-  Eye,
-  PaintBucket,
   FileCode,
-  Building,
-  ChevronRight,
-  Image
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 
@@ -62,35 +51,6 @@ const Settings = () => {
         
         <TabsContent value="appearance">
           <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            <Card className="col-span-full">
-              <CardHeader>
-                <CardTitle>Application Branding</CardTitle>
-                <CardDescription>
-                  Customize your application name and logo
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="rounded-md bg-primary p-2 text-white">
-                      <Building className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <div className="font-medium">Custom Branding</div>
-                      <div className="text-sm text-muted-foreground">Change the name and logo of your application</div>
-                    </div>
-                  </div>
-                  <Link to="/settings/branding">
-                    <Button variant="outline" className="gap-2">
-                      <Image className="h-4 w-4" />
-                      Customize
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-            
             <Card>
               <CardHeader>
                 <CardTitle>Theme</CardTitle>
@@ -99,86 +59,41 @@ const Settings = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 gap-4">
                   <div 
-                    className={`border-2 rounded-md p-2 flex flex-col items-center cursor-pointer transition-all ${theme === 'light' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'}`}
+                    className={`border-2 rounded-md p-4 flex flex-col items-center cursor-pointer transition-all ${theme === 'light' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'}`}
                     onClick={() => setTheme('light')}
                   >
                     <div className="w-full h-12 bg-white border mb-2 rounded"></div>
-                    <div className="text-xs font-medium">Light</div>
+                    <div className="text-sm font-medium">Light</div>
+                    <div className="text-xs text-muted-foreground">Default light theme</div>
                   </div>
                   
                   <div 
-                    className={`border-2 rounded-md p-2 flex flex-col items-center cursor-pointer transition-all ${theme === 'dark' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'}`}
+                    className={`border-2 rounded-md p-4 flex flex-col items-center cursor-pointer transition-all ${theme === 'dark' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'}`}
                     onClick={() => setTheme('dark')}
                   >
                     <div className="w-full h-12 bg-gray-900 border border-gray-700 mb-2 rounded"></div>
-                    <div className="text-xs font-medium">Dark</div>
+                    <div className="text-sm font-medium">Dark</div>
+                    <div className="text-xs text-muted-foreground">Dark mode theme</div>
                   </div>
                   
                   <div 
-                    className={`border-2 rounded-md p-2 flex flex-col items-center cursor-pointer transition-all ${theme === 'purple' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'}`}
+                    className={`border-2 rounded-md p-4 flex flex-col items-center cursor-pointer transition-all ${theme === 'blue' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'}`}
+                    onClick={() => setTheme('blue')}
+                  >
+                    <div className="w-full h-12 bg-gradient-to-b from-[#0066CC] to-[#00A3E0] mb-2 rounded"></div>
+                    <div className="text-sm font-medium">Blue</div>
+                    <div className="text-xs text-muted-foreground">Cool blue theme</div>
+                  </div>
+                  
+                  <div 
+                    className={`border-2 rounded-md p-4 flex flex-col items-center cursor-pointer transition-all ${theme === 'purple' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'}`}
                     onClick={() => setTheme('purple')}
                   >
                     <div className="w-full h-12 bg-gradient-to-b from-[#6A4BFC] to-[#7e69ab] mb-2 rounded"></div>
-                    <div className="text-xs font-medium">Purple</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Mode</CardTitle>
-                <CardDescription>
-                  Select the mode of the interface
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="border-2 border-primary bg-primary/5 rounded-md p-2 flex flex-col items-center cursor-pointer">
-                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mb-2">
-                      <Sun className="h-5 w-5" />
-                    </div>
-                    <div className="text-xs font-medium">Light Mode</div>
-                  </div>
-                  
-                  <div className="border-2 border-muted hover:border-primary/50 rounded-md p-2 flex flex-col items-center cursor-pointer transition-all">
-                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mb-2">
-                      <Moon className="h-5 w-5" />
-                    </div>
-                    <div className="text-xs font-medium">Dark Mode</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Accessibility</CardTitle>
-                <CardDescription>
-                  Configure accessibility preferences
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b pb-3">
-                    <div>
-                      <div className="font-medium">Reduced Motion</div>
-                      <div className="text-sm text-muted-foreground">Disable animations</div>
-                    </div>
-                    <div>
-                      <Button variant="outline" size="sm">Configure</Button>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium">High Contrast</div>
-                      <div className="text-sm text-muted-foreground">Increase visual contrast</div>
-                    </div>
-                    <div>
-                      <Button variant="outline" size="sm">Configure</Button>
-                    </div>
+                    <div className="text-sm font-medium">Purple</div>
+                    <div className="text-xs text-muted-foreground">Rich purple theme</div>
                   </div>
                 </div>
               </CardContent>
@@ -209,34 +124,6 @@ const Settings = () => {
                   </div>
                   <div className="text-sm text-muted-foreground">
                     Date format: MM/DD/YYYY
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Layout</CardTitle>
-                <CardDescription>
-                  Configure the app layout
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="border-2 border-primary bg-primary/5 rounded-md p-2 flex flex-col items-center cursor-pointer">
-                    <div className="w-full h-12 bg-muted flex items-center mb-2 px-2 rounded">
-                      <div className="w-1/4 h-10 bg-primary/20 rounded"></div>
-                      <div className="w-3/4 h-10 ml-1 rounded"></div>
-                    </div>
-                    <div className="text-xs font-medium">Default</div>
-                  </div>
-                  
-                  <div className="border-2 border-muted hover:border-primary/50 rounded-md p-2 flex flex-col items-center cursor-pointer transition-all">
-                    <div className="w-full h-12 bg-muted flex items-center mb-2 px-2 rounded">
-                      <div className="w-10 h-10 bg-primary/20 rounded"></div>
-                      <div className="w-full h-10 ml-1 rounded"></div>
-                    </div>
-                    <div className="text-xs font-medium">Compact</div>
                   </div>
                 </div>
               </CardContent>
