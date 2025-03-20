@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Plus, Save, Play, Download, Upload, Settings, 
   Clock, Mail, Globe, Database, MessageSquare, 
-  ArrowRight, FileText, Image, BarChart, Envelope,
+  ArrowRight, FileText, Image, BarChart, Mail as MailIcon,
   Webhook, ExternalLink, Search, Filter,
   Smartphone, BellRing, Share2
 } from 'lucide-react';
@@ -26,8 +26,22 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
+// Node type definition to properly type the nodes
+type CustomNode = {
+  id: string;
+  type?: string;
+  data: { label: string };
+  position: { x: number; y: number };
+  style: { 
+    background: string; 
+    border: string; 
+    borderRadius: string; 
+    padding: string;
+  };
+};
+
 // Sample node data
-const initialNodes = [
+const initialNodes: CustomNode[] = [
   {
     id: '1',
     type: 'input',
@@ -68,7 +82,7 @@ const triggers = [
 
 // Define action components
 const actions = [
-  { id: 'action-mail', name: 'Send Email', icon: Envelope, description: 'Send automated emails' },
+  { id: 'action-mail', name: 'Send Email', icon: MailIcon, description: 'Send automated emails' },
   { id: 'action-api', name: 'API Call', icon: ExternalLink, description: 'Make external API requests' },
   { id: 'action-database', name: 'Update Database', icon: Database, description: 'Insert or update database records' },
   { id: 'action-message', name: 'Send Message', icon: MessageSquare, description: 'Send messages to communication channels' },
@@ -128,9 +142,10 @@ const AIWorkflow = () => {
       const newX = position.x - reactFlowBounds.left;
       const newY = position.y - reactFlowBounds.top;
 
-      let newNode = {
+      let newNode: CustomNode = {
         id: `node-${Date.now()}`,
         position: { x: newX, y: newY },
+        data: { label: 'New Node' }, // Default label
         style: { 
           background: 'rgba(255, 255, 255, 0.8)', 
           border: '1px solid #ddd', 
@@ -142,13 +157,17 @@ const AIWorkflow = () => {
       // Configure the node based on its type
       if (type.startsWith('trigger-')) {
         const trigger = triggers.find(t => t.id === type);
-        newNode.type = 'input';
-        newNode.data = { label: trigger.name };
-        newNode.style.background = 'rgba(230, 242, 255, 0.8)'; // Light blue for triggers
+        if (trigger) {
+          newNode.type = 'input';
+          newNode.data = { label: trigger.name };
+          newNode.style.background = 'rgba(230, 242, 255, 0.8)'; // Light blue for triggers
+        }
       } else if (type.startsWith('action-')) {
         const action = actions.find(a => a.id === type);
-        newNode.data = { label: action.name };
-        newNode.style.background = 'rgba(230, 255, 238, 0.8)'; // Light green for actions
+        if (action) {
+          newNode.data = { label: action.name };
+          newNode.style.background = 'rgba(230, 255, 238, 0.8)'; // Light green for actions
+        }
       }
 
       setNodes((nds) => nds.concat(newNode));

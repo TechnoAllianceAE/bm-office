@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-type Theme = 'default' | 'coolBlue' | 'purple';
+type Theme = 'default' | 'light' | 'dark' | 'coolBlue' | 'purple';
 
 interface ThemeContextType {
   theme: Theme;
