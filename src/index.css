@@ -89,6 +89,48 @@
     --sidebar-ring: 0 0% 100%;
   }
 
+  /* Purple theme */
+  [data-theme="purple"] {
+    --background: 0 0% 100%;
+    --foreground: 255 30% 20%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 255 30% 20%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 255 30% 20%;
+
+    --primary: 256 90% 65%;  /* Purple #6A4BFC */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 250 95% 76%;  /* Light Purple #9B87F5 */
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 250 20% 95%;
+    --muted-foreground: 255 25% 40%;
+
+    --accent: 256 80% 90%;  /* Accent Purple */
+    --accent-foreground: 255 30% 20%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 250 30% 90%;
+    --input: 250 30% 90%;
+    --ring: 250 70% 60%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 256 90% 65%;  /* Purple Sidebar #6A4BFC */
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 250 95% 76%;  /* Light Purple */
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 256 80% 75%;  /* Accent Purple */
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 256 80% 60%;
+    --sidebar-ring: 0 0% 100%;
+  }
+
   .dark {
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
@@ -144,6 +186,13 @@
   
   [data-theme="coolBlue"] body {
     background-image: linear-gradient(to right, rgba(0, 102, 204, 0.05), rgba(0, 163, 224, 0.1));
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+  }
+  
+  [data-theme="purple"] body {
+    background-image: linear-gradient(135deg, rgba(106, 75, 252, 0.05), rgba(155, 135, 245, 0.08));
     background-size: cover;
     background-position: center;
     background-attachment: fixed;

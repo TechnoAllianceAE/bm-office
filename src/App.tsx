@@ -14,7 +14,7 @@ import DocumentManager from "./pages/DocumentManager";
 import HandyTools from "./pages/HandyTools";
 import NotFound from "./pages/NotFound";
 import AppLayout from "./components/layout/AppLayout";
-import MailBox from "./pages/MailBox"; // Fixed to match the actual file name casing
+import MailBox from "./pages/MailBox"; 
 import Directory from "./pages/Directory";
 import MIS from "./pages/MIS";
 import Requisition from "./pages/Requisition";
@@ -30,6 +30,7 @@ import LMS from "./pages/LMS";
 import Login from "./pages/Login";
 import Calendar from "./pages/Calendar";
 import HelpDesk from "./pages/HelpDesk";
+import Referrals from "./pages/Referrals";
 
 const queryClient = new QueryClient();
 
@@ -55,7 +56,7 @@ const App = () => (
                 <Route path="/requisition" element={<Requisition />} />
                 <Route path="/document-manager" element={<DocumentManager />} />
                 <Route path="/hr" element={<HR />} />
-                <Route path="/referrals" element={<Index />} />
+                <Route path="/referrals" element={<Referrals />} />
                 <Route path="/claims" element={<Claims />} />
                 <Route path="helpdesk" element={<HelpDesk />} />
                 <Route path="/lms" element={<LMS />} />

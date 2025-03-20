@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-type Theme = 'default' | 'coolBlue';
+type Theme = 'default' | 'coolBlue' | 'purple';
 
 interface ThemeContextType {
   theme: Theme;
@@ -14,7 +14,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [theme, setTheme] = useState<Theme>(() => {
     // Get the theme from localStorage if available
     const savedTheme = localStorage.getItem('theme');
-    return (savedTheme as Theme) || 'default';
+    return (savedTheme as Theme) || 'purple'; // Set default theme to purple
   });
 
   useEffect(() => {
