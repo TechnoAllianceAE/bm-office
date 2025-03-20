@@ -1,316 +1,436 @@
 
 import React, { useState } from 'react';
-import { Search, Users, Phone, Mail, MapPin, Filter, Grid, List } from 'lucide-react';
-import { Card } from '@/components/common/Card';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Search, Phone, Mail, Building, MapPin, Users, UserRound, UserPlus } from 'lucide-react';
 
-// Sample employee data with avatar URLs
-const employees = [
-  { 
-    id: 1, 
-    name: 'Alice Smith', 
-    title: 'Product Manager', 
-    department: 'Product', 
-    location: 'New York', 
-    email: 'alice.smith@company.com', 
+type Employee = {
+  id: string;
+  name: string;
+  avatar?: string;
+  role: string;
+  department: string;
+  email: string;
+  phone: string;
+  location: string;
+  manager?: string;
+  joined: string;
+  skills: string[];
+};
+
+const mockEmployees: Employee[] = [
+  {
+    id: '1',
+    name: 'Sarah Johnson',
+    avatar: 'https://i.pravatar.cc/150?img=1',
+    role: 'Senior Product Designer',
+    department: 'Design',
+    email: 'sarah.johnson@company.com',
     phone: '+1 (555) 123-4567',
-    avatar: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=150&h=150&fit=crop&crop=faces' 
+    location: 'San Francisco, CA',
+    manager: 'Michael Chen',
+    joined: 'April 2020',
+    skills: ['UI Design', 'UX Research', 'Figma', 'Design Systems'],
   },
-  { 
-    id: 2, 
-    name: 'Bob Johnson', 
-    title: 'Senior Developer', 
-    department: 'Engineering', 
-    location: 'San Francisco', 
-    email: 'bob.johnson@company.com', 
+  {
+    id: '2',
+    name: 'Robert Williams',
+    avatar: 'https://i.pravatar.cc/150?img=3',
+    role: 'Frontend Developer',
+    department: 'Engineering',
+    email: 'robert.williams@company.com',
     phone: '+1 (555) 234-5678',
-    avatar: 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=150&h=150&fit=crop&crop=faces' 
+    location: 'Austin, TX',
+    manager: 'Angela Smith',
+    joined: 'June 2021',
+    skills: ['React', 'TypeScript', 'Tailwind CSS', 'JavaScript'],
   },
-  { 
-    id: 3, 
-    name: 'Charlie Lee', 
-    title: 'UX Designer', 
-    department: 'Design', 
-    location: 'London', 
-    email: 'charlie.lee@company.com', 
-    phone: '+44 (20) 1234-5678',
-    avatar: 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=150&h=150&fit=crop&crop=faces' 
+  {
+    id: '3',
+    name: 'Jennifer Lopez',
+    avatar: 'https://i.pravatar.cc/150?img=5',
+    role: 'Project Manager',
+    department: 'Operations',
+    email: 'jennifer.lopez@company.com',
+    phone: '+1 (555) 345-6789',
+    location: 'New York, NY',
+    manager: 'David Wilson',
+    joined: 'January 2019',
+    skills: ['Agile', 'Scrum', 'Jira', 'Risk Management'],
   },
-  { 
-    id: 4, 
-    name: 'Diana Wang', 
-    title: 'Marketing Director', 
-    department: 'Marketing', 
-    location: 'Singapore', 
-    email: 'diana.wang@company.com', 
-    phone: '+65 8765-4321',
-    avatar: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=150&h=150&fit=crop&crop=faces' 
+  {
+    id: '4',
+    name: 'Michael Chen',
+    avatar: 'https://i.pravatar.cc/150?img=8',
+    role: 'Design Director',
+    department: 'Design',
+    email: 'michael.chen@company.com',
+    phone: '+1 (555) 456-7890',
+    location: 'San Francisco, CA',
+    joined: 'March 2018',
+    skills: ['Leadership', 'Design Strategy', 'Brand Identity', 'Team Management'],
   },
-  { 
-    id: 5, 
-    name: 'Ethan Brown', 
-    title: 'Finance Manager', 
-    department: 'Finance', 
-    location: 'Chicago', 
-    email: 'ethan.brown@company.com', 
-    phone: '+1 (555) 987-6543',
-    avatar: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=150&h=150&fit=crop&crop=faces' 
+  {
+    id: '5',
+    name: 'Angela Smith',
+    avatar: 'https://i.pravatar.cc/150?img=9',
+    role: 'Engineering Manager',
+    department: 'Engineering',
+    email: 'angela.smith@company.com',
+    phone: '+1 (555) 567-8901',
+    location: 'Austin, TX',
+    manager: 'David Wilson',
+    joined: 'May 2018',
+    skills: ['Full Stack', 'Architecture', 'Mentoring', 'Code Reviews'],
   },
-  { 
-    id: 6, 
-    name: 'Fiona Garcia', 
-    title: 'HR Specialist', 
-    department: 'HR', 
-    location: 'Madrid', 
-    email: 'fiona.garcia@company.com', 
-    phone: '+34 91 234-5678',
-    avatar: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=150&h=150&fit=crop&crop=faces' 
+  {
+    id: '6',
+    name: 'David Wilson',
+    avatar: 'https://i.pravatar.cc/150?img=12',
+    role: 'VP of Operations',
+    department: 'Operations',
+    email: 'david.wilson@company.com',
+    phone: '+1 (555) 678-9012',
+    location: 'New York, NY',
+    joined: 'February 2017',
+    skills: ['Strategic Planning', 'Business Development', 'Team Leadership', 'Finance'],
   },
-  { 
-    id: 7, 
-    name: 'George Kim', 
-    title: 'Sales Representative', 
-    department: 'Sales', 
-    location: 'Seoul', 
-    email: 'george.kim@company.com', 
-    phone: '+82 2-1234-5678',
-    avatar: 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=150&h=150&fit=crop&crop=faces' 
+  {
+    id: '7',
+    name: 'Emily Davis',
+    avatar: 'https://i.pravatar.cc/150?img=10',
+    role: 'Marketing Specialist',
+    department: 'Marketing',
+    email: 'emily.davis@company.com',
+    phone: '+1 (555) 789-0123',
+    location: 'Chicago, IL',
+    manager: 'Karen Taylor',
+    joined: 'August 2021',
+    skills: ['Digital Marketing', 'Content Creation', 'Social Media', 'Analytics'],
   },
-  { 
-    id: 8, 
-    name: 'Hannah Wilson', 
-    title: 'Customer Success Manager', 
-    department: 'Customer Success', 
-    location: 'Toronto', 
-    email: 'hannah.wilson@company.com', 
-    phone: '+1 (416) 123-4567',
-    avatar: 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=150&h=150&fit=crop&crop=faces' 
+  {
+    id: '8',
+    name: 'James Anderson',
+    avatar: 'https://i.pravatar.cc/150?img=11',
+    role: 'Data Scientist',
+    department: 'Engineering',
+    email: 'james.anderson@company.com',
+    phone: '+1 (555) 890-1234',
+    location: 'Seattle, WA',
+    manager: 'Angela Smith',
+    joined: 'November 2020',
+    skills: ['Python', 'Machine Learning', 'Data Analysis', 'Statistics'],
   },
 ];
 
+const departments = [
+  { name: 'All', icon: Users },
+  { name: 'Design', icon: UserRound },
+  { name: 'Engineering', icon: UserRound },
+  { name: 'Operations', icon: UserRound },
+  { name: 'Marketing', icon: UserRound },
+];
+
 const Directory = () => {
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
-  
-  const filteredEmployees = employees.filter(emp => 
-    emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    emp.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    emp.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    emp.location.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-  
+  const [selectedDepartment, setSelectedDepartment] = useState('All');
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+
+  const filteredEmployees = mockEmployees.filter((employee) => {
+    const matchesSearch = employee.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                         employee.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         employee.email.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesDepartment = selectedDepartment === 'All' || employee.department === selectedDepartment;
+    
+    return matchesSearch && matchesDepartment;
+  });
+
   return (
-    <div className="space-y-8 animate-fade-in">
-      {/* Page header */}
-      <div className="glass-card p-6 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold mb-1">Employee Directory</h1>
-          <p className="text-muted-foreground">Connect with team members across the organization</p>
-        </div>
-        
-        <div className="flex gap-3 items-center">
-          <div className="relative w-64">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <input 
-              type="search" 
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Employee Directory</h1>
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input 
+              className="pl-9 w-[300px]" 
               placeholder="Search employees..." 
-              className="pl-9 pr-4 py-2 w-full bg-secondary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <button className="bg-secondary hover:bg-secondary/80 transition-colors rounded-lg px-4 py-2 flex items-center gap-1">
-            <Filter className="w-4 h-4" />
-            <span>Filter</span>
-          </button>
-          <div className="bg-secondary rounded-lg flex overflow-hidden">
-            <button 
-              className={`px-3 py-2 ${viewMode === 'grid' ? 'bg-primary text-white' : ''}`}
-              onClick={() => setViewMode('grid')}
-            >
-              <Grid className="w-4 h-4" />
-            </button>
-            <button 
-              className={`px-3 py-2 ${viewMode === 'list' ? 'bg-primary text-white' : ''}`}
-              onClick={() => setViewMode('list')}
-            >
-              <List className="w-4 h-4" />
-            </button>
-          </div>
+          <Button>
+            <UserPlus className="mr-2 h-4 w-4" />
+            Add Employee
+          </Button>
         </div>
       </div>
       
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="p-6 flex items-center gap-4">
-          <div className="bg-primary/10 text-primary rounded-full p-3">
-            <Users className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="text-muted-foreground text-sm">Total Employees</div>
-            <div className="text-2xl font-semibold">{employees.length}</div>
-          </div>
-        </Card>
-        
-        <Card className="p-6 flex items-center gap-4">
-          <div className="bg-purple-100 text-purple-600 rounded-full p-3">
-            <Users className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="text-muted-foreground text-sm">Departments</div>
-            <div className="text-2xl font-semibold">8</div>
-          </div>
-        </Card>
-        
-        <Card className="p-6 flex items-center gap-4">
-          <div className="bg-blue-100 text-blue-600 rounded-full p-3">
-            <MapPin className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="text-muted-foreground text-sm">Office Locations</div>
-            <div className="text-2xl font-semibold">6</div>
-          </div>
-        </Card>
-        
-        <Card className="p-6 flex items-center gap-4">
-          <div className="bg-emerald-100 text-emerald-600 rounded-full p-3">
-            <Users className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="text-muted-foreground text-sm">New Hires (30 days)</div>
-            <div className="text-2xl font-semibold">3</div>
-          </div>
-        </Card>
-      </div>
-      
-      {/* Employee directory */}
-      <Card>
-        <div className="p-4 border-b">
-          <h2 className="font-medium">
-            {searchQuery ? `Search Results (${filteredEmployees.length})` : 'All Employees'}
-          </h2>
-        </div>
-        
-        {viewMode === 'grid' ? (
-          <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredEmployees.map((employee, index) => (
-              <div 
-                key={employee.id} 
-                className="bg-secondary/30 rounded-xl p-6 hover:bg-secondary/50 transition-colors cursor-pointer animate-scale-in"
-                style={{ animationDelay: `${index * 50}ms` }}
-              >
-                <div className="flex flex-col items-center text-center">
-                  {employee.avatar ? (
-                    <img 
-                      src={employee.avatar} 
-                      alt={employee.name}
-                      className="w-20 h-20 rounded-full object-cover mb-4"
-                    />
-                  ) : (
-                    <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xl font-semibold mb-4">
-                      {employee.name.split(' ').map(n => n[0]).join('')}
-                    </div>
-                  )}
-                  <h3 className="font-medium text-lg">{employee.name}</h3>
-                  <p className="text-muted-foreground mb-4">{employee.title}</p>
-                  
-                  <div className="w-full space-y-2 text-sm">
-                    <div className="flex items-center justify-center gap-2">
-                      <Users className="w-4 h-4 text-muted-foreground" />
-                      <span>{employee.department}</span>
-                    </div>
-                    <div className="flex items-center justify-center gap-2">
-                      <MapPin className="w-4 h-4 text-muted-foreground" />
-                      <span>{employee.location}</span>
-                    </div>
-                    <div className="flex items-center justify-center gap-2 truncate">
-                      <Mail className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                      <span className="truncate">{employee.email}</span>
-                    </div>
-                    <div className="flex items-center justify-center gap-2">
-                      <Phone className="w-4 h-4 text-muted-foreground" />
-                      <span>{employee.phone}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="divide-y">
-            {filteredEmployees.map((employee, index) => (
-              <div 
-                key={employee.id}
-                className="p-4 flex items-center gap-4 hover:bg-secondary/30 transition-colors cursor-pointer animate-slide-in"
-                style={{ animationDelay: `${index * 50}ms` }}
-              >
-                {employee.avatar ? (
-                  <img 
-                    src={employee.avatar} 
-                    alt={employee.name}
-                    className="w-12 h-12 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
-                    {employee.name.split(' ').map(n => n[0]).join('')}
-                  </div>
-                )}
-                <div className="min-w-0 flex-1">
-                  <h3 className="font-medium">{employee.name}</h3>
-                  <p className="text-sm text-muted-foreground">{employee.title} • {employee.department}</p>
-                </div>
-                <div className="hidden md:flex items-center gap-1 text-sm text-muted-foreground">
-                  <MapPin className="w-4 h-4" />
-                  <span>{employee.location}</span>
-                </div>
-                <div className="hidden md:flex items-center gap-1 text-sm text-muted-foreground">
-                  <Mail className="w-4 h-4" />
-                  <span className="truncate max-w-[200px]">{employee.email}</span>
-                </div>
-                <div className="hidden md:flex items-center gap-1 text-sm text-muted-foreground">
-                  <Phone className="w-4 h-4" />
-                  <span>{employee.phone}</span>
-                </div>
-                <button className="bg-secondary hover:bg-secondary/80 transition-colors rounded-full p-2">
-                  <Phone className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </Card>
-      
-      {/* Department overview */}
-      <Card>
-        <div className="p-4 border-b">
-          <h2 className="font-medium">Departments</h2>
-        </div>
-        
-        <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[
-            { name: 'Engineering', count: 25, color: 'bg-blue-100 text-blue-600' },
-            { name: 'Design', count: 12, color: 'bg-purple-100 text-purple-600' },
-            { name: 'Product', count: 8, color: 'bg-amber-100 text-amber-600' },
-            { name: 'Marketing', count: 10, color: 'bg-emerald-100 text-emerald-600' },
-            { name: 'Sales', count: 15, color: 'bg-pink-100 text-pink-600' },
-            { name: 'Customer Success', count: 18, color: 'bg-indigo-100 text-indigo-600' },
-            { name: 'Finance', count: 6, color: 'bg-green-100 text-green-600' },
-            { name: 'HR', count: 5, color: 'bg-red-100 text-red-600' },
-          ].map((dept, index) => (
-            <div 
-              key={dept.name}
-              className="bg-secondary/30 rounded-xl p-4 hover:bg-secondary/50 transition-colors cursor-pointer animate-scale-in"
-              style={{ animationDelay: `${index * 50}ms` }}
-            >
-              <div className="flex justify-between items-center">
-                <h3 className="font-medium">{dept.name}</h3>
-                <div className={`${dept.color} text-xs font-medium px-2 py-1 rounded-full`}>
-                  {dept.count}
-                </div>
+      <div className="glass-panel border rounded-lg p-6">
+        <Tabs defaultValue="grid" className="w-full">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+            <div className="overflow-x-auto">
+              <div className="flex space-x-2">
+                {departments.map((dept) => (
+                  <Button
+                    key={dept.name}
+                    variant={selectedDepartment === dept.name ? "secondary" : "ghost"}
+                    size="sm"
+                    onClick={() => setSelectedDepartment(dept.name)}
+                  >
+                    <dept.icon className="mr-2 h-4 w-4" />
+                    {dept.name}
+                  </Button>
+                ))}
               </div>
             </div>
-          ))}
-        </div>
-      </Card>
+            
+            <TabsList>
+              <TabsTrigger value="grid">Grid</TabsTrigger>
+              <TabsTrigger value="list">List</TabsTrigger>
+            </TabsList>
+          </div>
+          
+          <TabsContent value="grid" className="mt-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {filteredEmployees.map((employee) => (
+                <Dialog key={employee.id}>
+                  <DialogTrigger asChild>
+                    <div className="glass-panel border rounded-lg p-5 cursor-pointer hover:border-primary transition-colors flex flex-col items-center text-center">
+                      <Avatar className="h-20 w-20 mb-4">
+                        {employee.avatar ? (
+                          <AvatarImage src={employee.avatar} alt={employee.name} />
+                        ) : (
+                          <AvatarFallback>{employee.name.charAt(0)}</AvatarFallback>
+                        )}
+                      </Avatar>
+                      <h3 className="font-medium text-lg mb-1">{employee.name}</h3>
+                      <p className="text-sm text-muted-foreground mb-3">{employee.role}</p>
+                      <div className="flex items-center mb-1">
+                        <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
+                        <span className="text-sm">{employee.email}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <Building className="h-4 w-4 mr-2 text-muted-foreground" />
+                        <span className="text-sm">{employee.department}</span>
+                      </div>
+                    </div>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[600px]">
+                    <DialogHeader>
+                      <DialogTitle>Employee Details</DialogTitle>
+                    </DialogHeader>
+                    <div className="flex flex-col sm:flex-row gap-6 pt-4">
+                      <div className="flex flex-col items-center">
+                        <Avatar className="h-28 w-28 mb-4">
+                          {employee.avatar ? (
+                            <AvatarImage src={employee.avatar} alt={employee.name} />
+                          ) : (
+                            <AvatarFallback>{employee.name.charAt(0)}</AvatarFallback>
+                          )}
+                        </Avatar>
+                        <Button variant="outline" className="w-full">Message</Button>
+                      </div>
+                      
+                      <div className="flex-1">
+                        <h2 className="text-xl font-semibold mb-1">{employee.name}</h2>
+                        <p className="text-muted-foreground mb-4">{employee.role}</p>
+                        
+                        <div className="space-y-3">
+                          <div className="flex items-start">
+                            <Mail className="h-5 w-5 mr-3 text-muted-foreground mt-0.5" />
+                            <div>
+                              <p className="text-sm font-medium">Email</p>
+                              <p className="text-sm text-muted-foreground">{employee.email}</p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-start">
+                            <Phone className="h-5 w-5 mr-3 text-muted-foreground mt-0.5" />
+                            <div>
+                              <p className="text-sm font-medium">Phone</p>
+                              <p className="text-sm text-muted-foreground">{employee.phone}</p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-start">
+                            <Building className="h-5 w-5 mr-3 text-muted-foreground mt-0.5" />
+                            <div>
+                              <p className="text-sm font-medium">Department</p>
+                              <p className="text-sm text-muted-foreground">{employee.department}</p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-start">
+                            <MapPin className="h-5 w-5 mr-3 text-muted-foreground mt-0.5" />
+                            <div>
+                              <p className="text-sm font-medium">Location</p>
+                              <p className="text-sm text-muted-foreground">{employee.location}</p>
+                            </div>
+                          </div>
+                          
+                          {employee.manager && (
+                            <div className="flex items-start">
+                              <UserRound className="h-5 w-5 mr-3 text-muted-foreground mt-0.5" />
+                              <div>
+                                <p className="text-sm font-medium">Manager</p>
+                                <p className="text-sm text-muted-foreground">{employee.manager}</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="mt-4">
+                          <h3 className="text-sm font-medium mb-2">Skills</h3>
+                          <div className="flex flex-wrap gap-2">
+                            {employee.skills.map((skill, index) => (
+                              <span key={index} className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full">
+                                {skill}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              ))}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="list" className="mt-0">
+            <div className="overflow-hidden rounded-lg border">
+              <table className="w-full">
+                <thead className="bg-primary/5">
+                  <tr>
+                    <th className="py-3 px-4 text-left font-medium text-sm">Name</th>
+                    <th className="py-3 px-4 text-left font-medium text-sm">Role</th>
+                    <th className="py-3 px-4 text-left font-medium text-sm">Department</th>
+                    <th className="py-3 px-4 text-left font-medium text-sm">Location</th>
+                    <th className="py-3 px-4 text-left font-medium text-sm">Contact</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {filteredEmployees.map((employee) => (
+                    <Dialog key={employee.id}>
+                      <DialogTrigger asChild>
+                        <tr className="cursor-pointer hover:bg-white/10">
+                          <td className="py-3 px-4">
+                            <div className="flex items-center">
+                              <Avatar className="h-8 w-8 mr-3">
+                                {employee.avatar ? (
+                                  <AvatarImage src={employee.avatar} alt={employee.name} />
+                                ) : (
+                                  <AvatarFallback>{employee.name.charAt(0)}</AvatarFallback>
+                                )}
+                              </Avatar>
+                              <span>{employee.name}</span>
+                            </div>
+                          </td>
+                          <td className="py-3 px-4">{employee.role}</td>
+                          <td className="py-3 px-4">{employee.department}</td>
+                          <td className="py-3 px-4">{employee.location}</td>
+                          <td className="py-3 px-4">
+                            <div className="flex items-center">
+                              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                                <Mail className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                                <Phone className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-[600px]">
+                        <DialogHeader>
+                          <DialogTitle>Employee Details</DialogTitle>
+                        </DialogHeader>
+                        <div className="flex flex-col sm:flex-row gap-6 pt-4">
+                          <div className="flex flex-col items-center">
+                            <Avatar className="h-28 w-28 mb-4">
+                              {employee.avatar ? (
+                                <AvatarImage src={employee.avatar} alt={employee.name} />
+                              ) : (
+                                <AvatarFallback>{employee.name.charAt(0)}</AvatarFallback>
+                              )}
+                            </Avatar>
+                            <Button variant="outline" className="w-full">Message</Button>
+                          </div>
+                          
+                          <div className="flex-1">
+                            <h2 className="text-xl font-semibold mb-1">{employee.name}</h2>
+                            <p className="text-muted-foreground mb-4">{employee.role}</p>
+                            
+                            <div className="space-y-3">
+                              <div className="flex items-start">
+                                <Mail className="h-5 w-5 mr-3 text-muted-foreground mt-0.5" />
+                                <div>
+                                  <p className="text-sm font-medium">Email</p>
+                                  <p className="text-sm text-muted-foreground">{employee.email}</p>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-start">
+                                <Phone className="h-5 w-5 mr-3 text-muted-foreground mt-0.5" />
+                                <div>
+                                  <p className="text-sm font-medium">Phone</p>
+                                  <p className="text-sm text-muted-foreground">{employee.phone}</p>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-start">
+                                <Building className="h-5 w-5 mr-3 text-muted-foreground mt-0.5" />
+                                <div>
+                                  <p className="text-sm font-medium">Department</p>
+                                  <p className="text-sm text-muted-foreground">{employee.department}</p>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-start">
+                                <MapPin className="h-5 w-5 mr-3 text-muted-foreground mt-0.5" />
+                                <div>
+                                  <p className="text-sm font-medium">Location</p>
+                                  <p className="text-sm text-muted-foreground">{employee.location}</p>
+                                </div>
+                              </div>
+                              
+                              {employee.manager && (
+                                <div className="flex items-start">
+                                  <UserRound className="h-5 w-5 mr-3 text-muted-foreground mt-0.5" />
+                                  <div>
+                                    <p className="text-sm font-medium">Manager</p>
+                                    <p className="text-sm text-muted-foreground">{employee.manager}</p>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                            
+                            <div className="mt-4">
+                              <h3 className="text-sm font-medium mb-2">Skills</h3>
+                              <div className="flex flex-wrap gap-2">
+                                {employee.skills.map((skill, index) => (
+                                  <span key={index} className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full">
+                                    {skill}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 };

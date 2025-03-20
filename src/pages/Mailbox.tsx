@@ -1,534 +1,430 @@
+
 import React, { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
+import { useIsMobile } from '@/hooks/use-mobile';
 import { 
-  Inbox, Mail, SendHorizontal, File, Star, AlertCircle, Trash2, 
-  Archive, MoreHorizontal, Plus, Search, Settings, Download, 
-  Paperclip, Bold, Italic, Underline, List, ListOrdered, AlignLeft, 
-  AlignCenter, AlignRight, Image, Link, Settings2, Clock, Calendar, Filter, 
+  Search, Star, Inbox, Send, Archive, Trash2, AlertCircle, 
+  MailPlus, RefreshCcw, MoreVertical, ChevronDown, Tag, 
+  Paperclip, Bold, Italic, Underline, List, ListOrdered, 
+  Trash, Link, Image, AlignLeft, AlignCenter, AlignRight, Sparkles,
+  FileText, Download, ArrowLeft
 } from 'lucide-react';
-import { Card } from '@/components/common/Card';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
 
-// Mock email data
-const emails = [
-  {
-    id: 1,
-    sender: 'John Smith',
-    email: 'john.smith@company.com',
-    subject: 'Weekly Team Meeting',
-    content: 'Hi team, just a reminder about our weekly meeting tomorrow at 10am. Please prepare your updates.',
-    date: '10:32 AM',
-    isRead: true,
-    isStarred: false,
-    label: 'work',
-  },
-  {
-    id: 2,
-    sender: 'Project Notifier',
-    email: 'notifications@projects.com',
-    subject: 'New task assigned: Update dashboard analytics',
-    content: 'A new task has been assigned to you in the project management system.',
-    date: 'Jul 15',
-    isRead: false,
-    isStarred: true,
-    label: 'work',
-  },
-  {
-    id: 3,
-    sender: 'Sales Team',
-    email: 'sales@company.com',
-    subject: 'Q2 Sales Report',
-    content: 'Please find attached the Q2 sales report with analysis of regional performance.',
-    date: 'Jul 14',
-    isRead: true,
-    isStarred: false,
-    label: 'important',
-  },
-  {
-    id: 4,
-    sender: 'HR Department',
-    email: 'hr@company.com',
-    subject: 'Important: New Company Policy',
-    content: 'Please review the updated company policy regarding remote work arrangements.',
-    date: 'Jul 12',
-    isRead: false,
-    isStarred: false,
-    label: 'important',
-  },
-  {
-    id: 5,
-    sender: 'Sarah Johnson',
-    email: 'sarah.j@partner.com',
-    subject: 'Partnership opportunity',
-    content: 'I wanted to discuss a potential partnership between our companies that could be mutually beneficial.',
-    date: 'Jul 10',
-    isRead: true,
-    isStarred: true,
-    label: 'personal',
-  },
-  {
-    id: 6,
-    sender: 'AWS Notification',
-    email: 'no-reply@aws.amazon.com',
-    subject: 'AWS Monthly Cloud Usage Report',
-    content: 'Your AWS cloud usage report for the previous month is now available.',
-    date: 'Jul 5',
-    isRead: true,
-    isStarred: false,
-    label: 'updates',
-  },
-];
+interface EmailItem {
+  id: number;
+  from: string;
+  subject: string;
+  preview: string;
+  time: string;
+  unread: boolean;
+  starred: boolean;
+  avatar: string;
+  hasAttachment: boolean;
+}
 
-const Mailbox = () => {
-  const [selectedEmail, setSelectedEmail] = useState<number | null>(null);
+const MailBox = () => {
+  const [selectedEmail, setSelectedEmail] = useState<EmailItem | null>(null);
   const [composeOpen, setComposeOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [currentTab, setCurrentTab] = useState('inbox');
+  const [activeFolder, setActiveFolder] = useState("inbox");
+  const isMobile = useIsMobile();
   
-  const handleEmailSelect = (id: number) => {
-    setSelectedEmail(id);
+  const emails: EmailItem[] = [
+    {
+      id: 1,
+      from: 'Alex Johnson',
+      subject: 'Project Update: Q3 Goals',
+      preview: 'I wanted to provide an update on our progress towards the Q3 goals we discussed last week...',
+      time: '10:23 AM',
+      unread: true,
+      starred: false,
+      avatar: 'A',
+      hasAttachment: true,
+    },
+    {
+      id: 2,
+      from: 'Sarah Miller',
+      subject: 'Re: Meeting Notes - Product Team',
+      preview: 'Here are the meeting notes from yesterday\'s session. Let me know if you have any questions...',
+      time: 'Yesterday',
+      unread: false,
+      starred: true,
+      avatar: 'S',
+      hasAttachment: false,
+    },
+    {
+      id: 3,
+      from: 'David Wilson',
+      subject: 'Client Presentation Draft',
+      preview: 'I\'ve attached the draft for the upcoming client presentation. Please review when you get a chance...',
+      time: 'Jul 10',
+      unread: false,
+      starred: false,
+      avatar: 'D',
+      hasAttachment: true,
+    },
+    {
+      id: 4,
+      from: 'Emily Chen',
+      subject: 'Quick Question About Budget',
+      preview: 'I was looking at the budget for the marketing campaign and noticed there might be a discrepancy...',
+      time: 'Jul 9',
+      unread: true,
+      starred: false,
+      avatar: 'E',
+      hasAttachment: false,
+    },
+    {
+      id: 5,
+      from: 'Michael Brown',
+      subject: 'Team Lunch Next Week',
+      preview: 'I\'m organizing a team lunch for next Wednesday at 12:30 PM. Please let me know if you can join...',
+      time: 'Jul 8',
+      unread: false,
+      starred: false,
+      avatar: 'M',
+      hasAttachment: false,
+    },
+    {
+      id: 6,
+      from: 'Olivia Martinez',
+      subject: 'Updated Design Assets',
+      preview: 'I\'ve uploaded the updated design assets to the shared folder. The new color palette is now available...',
+      time: 'Jul 7',
+      unread: false,
+      starred: true,
+      avatar: 'O',
+      hasAttachment: true,
+    },
+  ];
+  
+  const handleEmailSelect = (email: EmailItem) => {
+    setSelectedEmail(email);
   };
-  
-  const closeEmailDetail = () => {
+
+  const handleBackToList = () => {
     setSelectedEmail(null);
   };
   
+  const FolderButton = ({ icon: Icon, label, count, value }: { icon: React.ElementType, label: string, count?: number, value: string }) => (
+    <Button 
+      variant={activeFolder === value ? "secondary" : "ghost"} 
+      className="w-full justify-start gap-2 px-3 py-2" 
+      onClick={() => setActiveFolder(value)}
+    >
+      <Icon className="h-4 w-4" />
+      <span className="flex-1 text-left">{label}</span>
+      {count !== undefined && <Badge variant="outline">{count}</Badge>}
+    </Button>
+  );
+  
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold">Mailbox</h1>
-          <p className="text-muted-foreground">Manage your messages</p>
+    <div className="flex flex-col h-full bg-background rounded-lg shadow-sm overflow-hidden">
+      {/* Top toolbar */}
+      <div className="border-b p-2 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 flex-1">
+          {isMobile && selectedEmail && (
+            <Button variant="ghost" size="icon" onClick={handleBackToList}>
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          )}
+          <div className="relative w-full max-w-md">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input placeholder="Search mail..." className="pl-8 w-full" />
+          </div>
         </div>
+        <Button variant="ghost" size="icon">
+          <RefreshCcw className="h-4 w-4" />
+        </Button>
+        <Drawer open={composeOpen} onOpenChange={setComposeOpen}>
+          <DrawerTrigger asChild>
+            <Button className="hidden sm:flex items-center gap-2">
+              <MailPlus className="h-4 w-4" />
+              <span>Compose</span>
+            </Button>
+          </DrawerTrigger>
+          <DrawerContent className="p-0 max-h-[90vh]">
+            <DrawerHeader className="border-b px-4 py-3">
+              <DrawerTitle>New Message</DrawerTitle>
+            </DrawerHeader>
+            <div className="flex flex-col h-[70vh]">
+              <div className="p-4 border-b">
+                <Input placeholder="To" className="border-0 focus-visible:ring-0 px-0 py-1.5" />
+              </div>
+              <div className="p-4 border-b">
+                <Input placeholder="Subject" className="border-0 focus-visible:ring-0 px-0 py-1.5" />
+              </div>
+              <div className="p-4 flex-1 overflow-auto min-h-[200px]">
+                <textarea 
+                  className="w-full h-full outline-none resize-none" 
+                  placeholder="Compose email..."
+                />
+              </div>
+              <div className="p-3 border-t flex justify-between items-center">
+                <div className="flex items-center gap-1 overflow-x-auto">
+                  <Button variant="outline" size="icon" className="h-8 w-8">
+                    <Bold className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="icon" className="h-8 w-8">
+                    <Italic className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="icon" className="h-8 w-8">
+                    <Underline className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="icon" className="h-8 w-8">
+                    <List className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="icon" className="h-8 w-8">
+                    <Link className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="icon" className="h-8 w-8">
+                    <Image className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={() => setComposeOpen(false)}>
+                    Discard
+                  </Button>
+                  <Button size="sm">
+                    Send
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </DrawerContent>
+        </Drawer>
         
-        <div className="flex space-x-2">
-          <Button 
-            onClick={() => setComposeOpen(true)}
-            className="glassmorphic-button"
-          >
-            <Plus className="mr-2 h-4 w-4" />
+        {/* Mobile compose button */}
+        <Button variant="default" size="icon" className="sm:hidden" onClick={() => setComposeOpen(true)}>
+          <MailPlus className="h-4 w-4" />
+        </Button>
+      </div>
+      
+      {/* Main content */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Folders sidebar */}
+        <div className={`w-64 border-r overflow-y-auto p-2 ${isMobile && selectedEmail ? 'hidden' : 'block'} ${isMobile ? 'hidden sm:block' : ''}`}>
+          <Button variant="default" className="w-full justify-start mb-4" onClick={() => setComposeOpen(true)}>
+            <MailPlus className="mr-2 h-4 w-4" />
             Compose
           </Button>
           
-          <Button 
-            variant="outline" 
-            size="icon"
-            onClick={() => setSettingsOpen(true)}
-            className="glassmorphic-button"
-          >
-            <Settings className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Sidebar */}
-        <div className="col-span-1">
-          <Card className="glassmorphic-card bg-white/80 overflow-visible">
-            <div className="p-4">
-              <Tabs defaultValue="inbox" onValueChange={setCurrentTab}>
-                <TabsList className="w-full grid grid-cols-2 mb-4">
-                  <TabsTrigger value="inbox">Inbox</TabsTrigger>
-                  <TabsTrigger value="sent">Sent</TabsTrigger>
-                </TabsList>
-                
-                <div className="space-y-2">
-                  <div className={`flex items-center rounded-md px-3 py-2 cursor-pointer ${currentTab === 'inbox' ? 'bg-white/80' : 'hover:bg-white/70'}`}>
-                    <Inbox className="h-4 w-4 mr-2" />
-                    <span>Inbox</span>
-                    <span className="ml-auto bg-primary/20 text-primary px-2 rounded-full text-xs">14</span>
-                  </div>
-                  
-                  <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/70">
-                    <Star className="h-4 w-4 mr-2 text-yellow-500" />
-                    <span>Starred</span>
-                  </div>
-                  
-                  <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/70">
-                    <SendHorizontal className="h-4 w-4 mr-2" />
-                    <span>Sent</span>
-                  </div>
-                  
-                  <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/70">
-                    <File className="h-4 w-4 mr-2" />
-                    <span>Drafts</span>
-                  </div>
-                  
-                  <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/70">
-                    <AlertCircle className="h-4 w-4 mr-2" />
-                    <span>Spam</span>
-                  </div>
-                  
-                  <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/70">
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    <span>Trash</span>
-                  </div>
-                </div>
-                
-                <div className="mt-6">
-                  <h3 className="text-sm font-medium mb-2">Labels</h3>
-                  <div className="space-y-2">
-                    <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/70">
-                      <span className="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
-                      <span>Work</span>
-                    </div>
-                    
-                    <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/70">
-                      <span className="w-2 h-2 rounded-full bg-green-500 mr-2"></span>
-                      <span>Personal</span>
-                    </div>
-                    
-                    <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/70">
-                      <span className="w-2 h-2 rounded-full bg-red-500 mr-2"></span>
-                      <span>Important</span>
-                    </div>
-                    
-                    <div className="flex items-center rounded-md px-3 py-2 cursor-pointer hover:bg-white/70">
-                      <span className="w-2 h-2 rounded-full bg-purple-500 mr-2"></span>
-                      <span>Updates</span>
-                    </div>
-                  </div>
-                </div>
-              </Tabs>
-            </div>
-          </Card>
+          <div className="space-y-1">
+            <FolderButton icon={Inbox} label="Inbox" count={4} value="inbox" />
+            <FolderButton icon={Star} label="Starred" value="starred" />
+            <FolderButton icon={Send} label="Sent" value="sent" />
+            <FolderButton icon={AlertCircle} label="Drafts" count={2} value="drafts" />
+            <FolderButton icon={Archive} label="Archive" value="archive" />
+            <FolderButton icon={Trash2} label="Trash" value="trash" />
+          </div>
+          
+          <Separator className="my-4" />
+          
+          <div className="space-y-1">
+            <h3 className="px-3 text-sm font-medium mb-2">Labels</h3>
+            <Button variant="ghost" className="w-full justify-start text-xs h-7 px-3">
+              <span className="h-2 w-2 rounded-full bg-red-500 mr-2" />
+              Important
+            </Button>
+            <Button variant="ghost" className="w-full justify-start text-xs h-7 px-3">
+              <span className="h-2 w-2 rounded-full bg-yellow-500 mr-2" />
+              Personal
+            </Button>
+            <Button variant="ghost" className="w-full justify-start text-xs h-7 px-3">
+              <span className="h-2 w-2 rounded-full bg-green-500 mr-2" />
+              Work
+            </Button>
+            <Button variant="ghost" className="w-full justify-start text-xs h-7 px-3">
+              <span className="h-2 w-2 rounded-full bg-blue-500 mr-2" />
+              Project X
+            </Button>
+          </div>
         </div>
         
-        {/* Email List and Detail View */}
-        <div className="col-span-1 lg:col-span-3">
-          <Card className="glassmorphic-card bg-white/80 h-[calc(100vh-14rem)] overflow-hidden flex flex-col">
-            {/* Search bar */}
-            <div className="p-4 border-b border-white/20">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input 
-                  placeholder="Search emails..." 
-                  className="pl-10 glassmorphic-input"
-                />
-              </div>
-            </div>
-            
-            <div className="flex-1 flex overflow-hidden">
-              {/* Email list */}
-              <div className={`${selectedEmail ? 'hidden md:block' : 'block'} w-full md:w-2/5 border-r border-white/20 overflow-y-auto`}>
-                {emails.map((email) => (
-                  <div 
-                    key={email.id}
-                    onClick={() => handleEmailSelect(email.id)}
-                    className={`border-b border-white/10 p-4 cursor-pointer transition-colors ${
-                      selectedEmail === email.id ? 'bg-white/80' : 'hover:bg-white/70'
-                    } ${!email.isRead ? 'font-medium' : ''}`}
-                  >
-                    <div className="flex items-start justify-between">
-                      <p className="font-medium truncate">{email.sender}</p>
-                      <p className="text-xs text-muted-foreground whitespace-nowrap">{email.date}</p>
+        {/* Email list/detail container */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* Email list */}
+          <div className={`${selectedEmail && (isMobile || !isMobile) ? 'hidden md:block' : 'block'} md:w-80 lg:w-96 border-r overflow-y-auto`}>
+            <div className="divide-y">
+              {emails.map((email) => (
+                <div 
+                  key={email.id}
+                  className={`p-3 flex gap-3 cursor-pointer hover:bg-muted/50 ${email.unread ? 'font-medium' : ''}`}
+                  onClick={() => handleEmailSelect(email)}
+                >
+                  <div className="flex flex-col items-center gap-2">
+                    <Checkbox checked={false} onClick={(e) => e.stopPropagation()} />
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-6 w-6" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const updatedEmails = [...emails];
+                        const index = updatedEmails.findIndex(e => e.id === email.id);
+                        if (index !== -1) {
+                          updatedEmails[index] = { ...email, starred: !email.starred };
+                        }
+                      }}
+                    >
+                      <Star className={`h-4 w-4 ${email.starred ? 'fill-yellow-400 text-yellow-400' : ''}`} />
+                    </Button>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-center gap-2 truncate">
+                        <Avatar className="h-6 w-6">
+                          <AvatarFallback>{email.avatar}</AvatarFallback>
+                        </Avatar>
+                        <span className="truncate">{email.from}</span>
+                      </div>
+                      <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">{email.time}</span>
                     </div>
-                    <p className="truncate mt-1">{email.subject}</p>
-                    <p className="text-sm text-muted-foreground truncate mt-1">{email.content}</p>
-                  </div>
-                ))}
-              </div>
-              
-              {/* Email detail */}
-              {selectedEmail ? (
-                <div className="w-full md:w-3/5 overflow-y-auto p-6">
-                  <button 
-                    onClick={closeEmailDetail}
-                    className="md:hidden mb-4 flex items-center text-sm hover:underline"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
-                      <path d="M15 18l-6-6 6-6" />
-                    </svg>
-                    Back to list
-                  </button>
-                  
-                  {(() => {
-                    const email = emails.find(e => e.id === selectedEmail);
-                    if (!email) return null;
-                    
-                    return (
-                      <>
-                        <div className="flex justify-between items-start mb-6">
-                          <h2 className="text-xl font-semibold">{email.subject}</h2>
-                          <div className="flex space-x-2">
-                            <Button variant="ghost" size="icon">
-                              <Archive className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon">
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem>Mark as unread</DropdownMenuItem>
-                                <DropdownMenuItem>Star</DropdownMenuItem>
-                                <DropdownMenuItem>Label as</DropdownMenuItem>
-                                <DropdownMenuItem>Forward</DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        </div>
-                        
-                        <div className="flex justify-between items-center mb-4">
-                          <div className="flex items-center">
-                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-3">
-                              {email.sender.charAt(0)}
-                            </div>
-                            <div>
-                              <p className="font-medium">{email.sender}</p>
-                              <p className="text-xs text-muted-foreground">{email.email}</p>
-                            </div>
-                          </div>
-                          <p className="text-sm text-muted-foreground">{email.date}</p>
-                        </div>
-                        
-                        <div className="my-6 text-base">
-                          <p>{email.content}</p>
-                        </div>
-                        
-                        <div className="flex space-x-2 mt-8">
-                          <Button 
-                            onClick={() => setComposeOpen(true)}
-                            variant="outline"
-                            className="glassmorphic-button"
-                          >
-                            Reply
-                          </Button>
-                          <Button 
-                            variant="outline"
-                            className="glassmorphic-button"
-                          >
-                            Forward
-                          </Button>
-                        </div>
-                      </>
-                    );
-                  })()}
-                </div>
-              ) : (
-                <div className="w-full md:w-3/5 flex items-center justify-center p-6 text-center">
-                  <div>
-                    <Mail className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-medium">Select an email to view</h3>
-                    <p className="text-muted-foreground mt-1">Choose an email from the list to view its contents</p>
+                    <h4 className="text-sm truncate mt-1">{email.subject}</h4>
+                    <p className="text-xs text-muted-foreground truncate mt-1">{email.preview}</p>
+                    {email.hasAttachment && (
+                      <div className="mt-1">
+                        <Badge variant="outline" className="text-xs">
+                          <Paperclip className="h-3 w-3 mr-1" />
+                          Attachment
+                        </Badge>
+                      </div>
+                    )}
                   </div>
                 </div>
-              )}
+              ))}
             </div>
-          </Card>
+          </div>
+          
+          {/* Email detail view */}
+          <div 
+            className={`flex-1 overflow-y-auto ${!selectedEmail && !isMobile ? 'hidden md:flex md:items-center md:justify-center' : 'block'} ${!selectedEmail && isMobile ? 'hidden' : 'block'}`}
+          >
+            {selectedEmail ? (
+              <div className="p-4 sm:p-6 max-w-3xl mx-auto">
+                <h1 className="text-xl sm:text-2xl font-bold">{selectedEmail.subject}</h1>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-6">
+                  <div className="flex items-center gap-3">
+                    <Avatar>
+                      <AvatarFallback>{selectedEmail.avatar}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="font-medium">{selectedEmail.from}</div>
+                      <div className="text-sm text-muted-foreground">to me</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2 sm:mt-0">
+                    <time>{selectedEmail.time}</time>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Star className={`h-4 w-4 ${selectedEmail.starred ? 'fill-yellow-400 text-yellow-400' : ''}`} />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="flex flex-wrap gap-2 mt-4">
+                  <Button variant="outline" size="sm">
+                    <Archive className="h-4 w-4 mr-2" />
+                    Archive
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    <Tag className="h-4 w-4 mr-2" />
+                    Label
+                  </Button>
+                </div>
+                
+                <Separator className="my-6" />
+                
+                <div className="prose prose-sm max-w-none">
+                  <p>Hello,</p>
+                  <p>
+                    {selectedEmail.preview} Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+                    Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, 
+                    quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                  </p>
+                  <p>
+                    Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
+                    Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                  </p>
+                  <p>Best regards,<br/>{selectedEmail.from}</p>
+                </div>
+                
+                {selectedEmail.hasAttachment && (
+                  <>
+                    <Separator className="my-6" />
+                    <div className="mt-6">
+                      <h3 className="font-medium mb-3">Attachments (2)</h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <Card>
+                          <CardContent className="p-3 flex items-center gap-3">
+                            <div className="bg-muted rounded p-2">
+                              <FileText className="h-6 w-6" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium truncate">Presentation.pdf</div>
+                              <div className="text-xs text-muted-foreground">2.4 MB</div>
+                            </div>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          </CardContent>
+                        </Card>
+                        <Card>
+                          <CardContent className="p-3 flex items-center gap-3">
+                            <div className="bg-muted rounded p-2">
+                              <Image className="h-6 w-6" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium truncate">Screenshot.png</div>
+                              <div className="text-xs text-muted-foreground">1.8 MB</div>
+                            </div>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    </div>
+                  </>
+                )}
+                
+                <Separator className="my-6" />
+                
+                <div className="mt-6 flex items-center gap-4">
+                  <Button className="gap-2">
+                    <Send className="h-4 w-4" />
+                    <span>Reply</span>
+                  </Button>
+                  <Button variant="outline" className="gap-2">
+                    <Send className="h-4 w-4 rotate-180" />
+                    <span>Forward</span>
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-center p-8">
+                <Inbox className="h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium">Select an email to read</h3>
+                <p className="text-sm text-muted-foreground mt-2">Choose an email from the list to view its contents.</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-      
-      {/* Compose Email Sheet */}
-      <Sheet open={composeOpen} onOpenChange={setComposeOpen}>
-        <SheetContent side="bottom" className="h-[80vh] glassmorphic-container bg-white/80">
-          <SheetHeader className="mb-4">
-            <SheetTitle>New Message</SheetTitle>
-          </SheetHeader>
-          
-          <div className="space-y-4">
-            <div>
-              <Input placeholder="To" className="glassmorphic-input" />
-            </div>
-            <div>
-              <Input placeholder="Subject" className="glassmorphic-input" />
-            </div>
-            
-            {/* Formatting toolbar */}
-            <div className="flex items-center space-x-1 p-1 bg-white/10 rounded-md">
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Bold className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Italic className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Underline className="h-4 w-4" />
-              </Button>
-              <div className="h-6 w-px bg-white/20 mx-1" />
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <List className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <ListOrdered className="h-4 w-4" />
-              </Button>
-              <div className="h-6 w-px bg-white/20 mx-1" />
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <AlignLeft className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <AlignCenter className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <AlignRight className="h-4 w-4" />
-              </Button>
-              <div className="h-6 w-px bg-white/20 mx-1" />
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Link className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Image className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Paperclip className="h-4 w-4" />
-              </Button>
-            </div>
-            
-            <Textarea 
-              placeholder="Compose your email..." 
-              className="min-h-[300px] glassmorphic-input"
-            />
-          </div>
-          
-          <div className="mt-6 flex justify-between items-center">
-            <div>
-              <Button variant="outline" size="sm" className="mr-2 glassmorphic-button">
-                <Paperclip className="h-4 w-4 mr-2" />
-                Attach
-              </Button>
-            </div>
-            <div>
-              <Button variant="outline" size="sm" className="mr-2" onClick={() => setComposeOpen(false)}>
-                Cancel
-              </Button>
-              <Button size="sm" className="glassmorphic-button">
-                <SendHorizontal className="h-4 w-4 mr-2" />
-                Send
-              </Button>
-            </div>
-          </div>
-        </SheetContent>
-      </Sheet>
-      
-      {/* Email Settings Sheet */}
-      <Sheet open={settingsOpen} onOpenChange={setSettingsOpen}>
-        <SheetContent className="sm:max-w-lg glassmorphic-container bg-white/80">
-          <SheetHeader>
-            <SheetTitle>Email Settings</SheetTitle>
-            <SheetDescription>Customize your email preferences</SheetDescription>
-          </SheetHeader>
-          
-          <div className="py-6">
-            <Tabs defaultValue="general">
-              <TabsList className="w-full mb-6">
-                <TabsTrigger value="general">General</TabsTrigger>
-                <TabsTrigger value="signature">Signature</TabsTrigger>
-                <TabsTrigger value="filters">Filters</TabsTrigger>
-                <TabsTrigger value="accounts">Accounts</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="general" className="space-y-6">
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium">Display settings</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="flex items-center gap-2">
-                      <Settings2 className="h-4 w-4" />
-                      <span className="text-sm">Display density</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4" />
-                      <span className="text-sm">Auto-refresh</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium">Notifications</h3>
-                  <div className="grid grid-cols-1 gap-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Desktop notifications</span>
-                      <Button variant="outline" size="sm">Configure</Button>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium">Out of office</h3>
-                  <div className="grid grid-cols-1 gap-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
-                        <span className="text-sm">Auto-responder</span>
-                      </div>
-                      <Button variant="outline" size="sm">Set up</Button>
-                    </div>
-                  </div>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="signature" className="space-y-4">
-                <p className="text-sm text-muted-foreground">Create and manage your email signature</p>
-                <Textarea placeholder="Enter your signature" className="min-h-[150px] glassmorphic-input" />
-                <div className="flex items-center space-x-2 mt-4">
-                  <Button size="sm" className="glassmorphic-button">Save signature</Button>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="filters" className="space-y-4">
-                <p className="text-sm text-muted-foreground">Create rules to automatically sort incoming emails</p>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-3 border border-white/20 rounded-md">
-                    <div className="flex items-center gap-2">
-                      <Filter className="h-4 w-4" />
-                      <span className="text-sm">Marketing emails → Marketing folder</span>
-                    </div>
-                    <Button variant="ghost" size="icon">
-                      <Settings className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <div className="flex items-center justify-between p-3 border border-white/20 rounded-md">
-                    <div className="flex items-center gap-2">
-                      <Filter className="h-4 w-4" />
-                      <span className="text-sm">Project notifications → Work folder</span>
-                    </div>
-                    <Button variant="ghost" size="icon">
-                      <Settings className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-                <Button className="mt-4" variant="outline" size="sm">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add new filter
-                </Button>
-              </TabsContent>
-              
-              <TabsContent value="accounts" className="space-y-4">
-                <p className="text-sm text-muted-foreground">Add or remove connected email accounts</p>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-3 border border-white/20 rounded-md">
-                    <div>
-                      <p className="text-sm font-medium">work@example.com</p>
-                      <p className="text-xs text-muted-foreground">Primary account</p>
-                    </div>
-                    <Button variant="ghost" size="icon">
-                      <Settings className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-                <Button className="mt-4" variant="outline" size="sm">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Connect account
-                </Button>
-              </TabsContent>
-            </Tabs>
-          </div>
-        </SheetContent>
-      </Sheet>
     </div>
   );
 };
 
-export default Mailbox;
+export default MailBox;

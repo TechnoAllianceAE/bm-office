@@ -1,7 +1,6 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
 import { Role } from './types';
 import { Trash } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -33,38 +32,7 @@ export function RoleList({
       return;
     }
     
-    try {
-      // Delete all permissions for this role
-      const { error: permError } = await supabase
-        .from('permissions')
-        .delete()
-        .eq('role_id', roleId);
-      
-      if (permError) {
-        throw permError;
-      }
-      
-      // Delete the role
-      const { error } = await supabase
-        .from('roles')
-        .delete()
-        .eq('id', roleId);
-      
-      if (error) {
-        throw error;
-      }
-      
-      toast.success('Role deleted successfully');
-      fetchRoles();
-      
-      // If the deleted role was selected, clear the selection
-      if (selectedRole && selectedRole.id === roleId) {
-        setSelectedRole(null);
-      }
-    } catch (error) {
-      console.error('Error deleting role:', error);
-      toast.error('Failed to delete role');
-    }
+    
   };
 
   return (

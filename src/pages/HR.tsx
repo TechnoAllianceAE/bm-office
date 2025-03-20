@@ -1,201 +1,245 @@
-import React, { useState } from 'react';
-import { FileText, Calendar, User, Users, Clock, BarChart3, Plus } from 'lucide-react';
-import { Card } from '@/components/common/Card';
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { CalendarDays, FileText, Award, Clock, User, UserPlus, BriefcaseBusiness, ScrollText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { NewHRRequestForm } from '@/components/hr/NewHRRequestForm';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 const HR = () => {
-  const [isFormOpen, setIsFormOpen] = useState(false);
-
-  const handleNewRequest = () => {
-    setIsFormOpen(true);
-  };
-
-  const handleCloseForm = () => {
-    setIsFormOpen(false);
-  };
-
   return (
-    <div className="space-y-8 animate-fade-in">
-      {/* Page header */}
-      <div className="glass-card p-6 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold mb-1">HR Portal</h1>
-          <p className="text-muted-foreground">Manage your HR tasks and requests</p>
+    <div className="space-y-8">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold">HR Portal</h1>
+          <p className="text-muted-foreground">Manage your HR-related tasks and information</p>
         </div>
         
-        <div className="flex gap-3">
-          <button className="bg-secondary hover:bg-secondary/80 transition-colors rounded-lg px-4 py-2 flex items-center gap-1">
-            <FileText className="w-4 h-4" />
-            <span>Policies</span>
-          </button>
-          <button 
-            className="bg-primary text-white hover:bg-primary/90 transition-colors rounded-lg px-4 py-2 flex items-center gap-1"
-            onClick={handleNewRequest}
-          >
-            <Plus className="w-4 h-4" />
-            <span>New Request</span>
-          </button>
-        </div>
-      </div>
-
-      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="max-w-3xl bg-white/95 backdrop-blur-md">
-          <NewHRRequestForm onClose={handleCloseForm} />
-        </DialogContent>
-      </Dialog>
-      
-      {/* Quick actions */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-        {[
-          { title: 'Request Leave', icon: Calendar, color: 'bg-blue-100 text-blue-600' },
-          { title: 'Update Profile', icon: User, color: 'bg-purple-100 text-purple-600' },
-          { title: 'Training', icon: Users, color: 'bg-amber-100 text-amber-600' },
-          { title: 'Benefits', icon: BarChart3, color: 'bg-emerald-100 text-emerald-600' },
-        ].map((action, index) => (
-          <Card 
-            key={index} 
-            className="p-6 cursor-pointer hover:shadow-md transition-shadow animate-scale-in"
-            style={{ animationDelay: `${index * 100}ms` }}
-          >
-            <div className="flex flex-col items-center md:flex-row md:items-center gap-4">
-              <div className={`${action.color} rounded-full p-3`}>
-                <action.icon className="w-6 h-6" />
-              </div>
-              <div className="text-center md:text-left">
-                <div className="font-medium">{action.title}</div>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
-      
-      {/* Leave balance */}
-      <Card>
-        <div className="p-4 border-b">
-          <h2 className="font-medium">Your Leave Balance</h2>
-        </div>
-        
-        <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { label: 'Annual Leave', used: 10, total: 25, color: 'bg-blue-500' },
-              { label: 'Sick Leave', used: 3, total: 10, color: 'bg-amber-500' },
-              { label: 'Personal Days', used: 1, total: 5, color: 'bg-purple-500' },
-            ].map((leave, index) => {
-              const percentage = (leave.used / leave.total) * 100;
-              return (
-                <div key={index} className="space-y-2 animate-slide-in" style={{ animationDelay: `${index * 100}ms` }}>
-                  <div className="flex justify-between items-center">
-                    <div className="font-medium">{leave.label}</div>
-                    <div className="text-sm text-muted-foreground">
-                      <span className="font-medium text-foreground">{leave.total - leave.used}</span> remaining
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList className="grid grid-cols-4 mb-6">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="leave">Leave Requests</TabsTrigger>
+            <TabsTrigger value="benefits">Benefits</TabsTrigger>
+            <TabsTrigger value="documents">Documents</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card className="bg-white/50 backdrop-blur-sm border dark:bg-gray-900/50">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex items-center">
+                    <CalendarDays className="mr-2 h-5 w-5 text-primary" />
+                    Time Off Balance
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Vacation</p>
+                      <p className="text-2xl font-semibold">12 days</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Sick Leave</p>
+                      <p className="text-2xl font-semibold">5 days</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Personal</p>
+                      <p className="text-2xl font-semibold">3 days</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Used YTD</p>
+                      <p className="text-2xl font-semibold">7 days</p>
                     </div>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span>{leave.used} used</span>
-                    <span>{leave.total} total</span>
+                  <Button className="w-full mt-4" variant="outline">Request Time Off</Button>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-white/50 backdrop-blur-sm border dark:bg-gray-900/50">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex items-center">
+                    <FileText className="mr-2 h-5 w-5 text-primary" />
+                    Performance
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Last Review</p>
+                      <p className="text-lg font-semibold">June 15, 2023</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Next Review</p>
+                      <p className="text-lg font-semibold">December 15, 2023</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Rating</p>
+                      <div className="flex items-center">
+                        <p className="text-lg font-semibold mr-2">Exceeds Expectations</p>
+                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                          4.7/5
+                        </Badge>
+                      </div>
+                    </div>
                   </div>
-                  <div className="w-full bg-secondary rounded-full h-2">
-                    <div 
-                      className={`${leave.color} h-2 rounded-full transition-all duration-1000 ease-out`}
-                      style={{ width: `${percentage}%` }}
-                    />
+                  <Button className="w-full mt-4" variant="outline">View Full Report</Button>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-white/50 backdrop-blur-sm border dark:bg-gray-900/50">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex items-center">
+                    <Award className="mr-2 h-5 w-5 text-primary" />
+                    Recognition & Milestones
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Work Anniversary</p>
+                      <p className="text-lg font-semibold">3 years (Oct 12)</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Recent Awards</p>
+                      <div className="flex flex-col gap-2">
+                        <Badge className="w-fit bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                          Quarterly Star (Q2 2023)
+                        </Badge>
+                        <Badge className="w-fit bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
+                          Innovation Award
+                        </Badge>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </Card>
-      
-      {/* Upcoming events and announcements */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <div className="p-4 border-b">
-            <h2 className="font-medium">Upcoming Company Events</h2>
-          </div>
+                  <Button className="w-full mt-4" variant="outline">Nominate a Colleague</Button>
+                </CardContent>
+              </Card>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card className="bg-white/50 backdrop-blur-sm border dark:bg-gray-900/50">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex items-center">
+                    <Clock className="mr-2 h-5 w-5 text-primary" />
+                    Upcoming Time Off
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {[
+                      { name: 'John Smith', role: 'UI Designer', dates: 'Sep 20 - Sep 27', type: 'Vacation' },
+                      { name: 'Sarah Johnson', role: 'Project Manager', dates: 'Sep 22', type: 'Personal Day' },
+                      { name: 'Alex Wong', role: 'Developer', dates: 'Oct 5 - Oct 10', type: 'Vacation' },
+                    ].map((item, i) => (
+                      <div key={i} className="flex items-center justify-between p-2 rounded-md hover:bg-muted/50">
+                        <div className="flex items-center">
+                          <Avatar className="h-8 w-8 mr-3">
+                            <AvatarFallback>
+                              {item.name.split(' ').map(n => n[0]).join('')}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="text-sm font-medium">{item.name}</p>
+                            <p className="text-xs text-muted-foreground">{item.role}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm">{item.dates}</p>
+                          <p className="text-xs text-muted-foreground">{item.type}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-white/50 backdrop-blur-sm border dark:bg-gray-900/50">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex items-center">
+                    <User className="mr-2 h-5 w-5 text-primary" />
+                    Quick Access
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4">
+                    {[
+                      { icon: UserPlus, label: 'Referral Program', color: 'text-blue-600 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/30' },
+                      { icon: BriefcaseBusiness, label: 'Job Openings', color: 'text-purple-600 bg-purple-100 dark:text-purple-400 dark:bg-purple-900/30' },
+                      { icon: ScrollText, label: 'HR Policies', color: 'text-amber-600 bg-amber-100 dark:text-amber-400 dark:bg-amber-900/30' },
+                      { icon: Award, label: 'Training Courses', color: 'text-emerald-600 bg-emerald-100 dark:text-emerald-400 dark:bg-emerald-900/30' },
+                    ].map((item, i) => (
+                      <motion.button 
+                        key={i}
+                        className={cn(
+                          "flex flex-col items-center justify-center p-6 rounded-xl hover-lift",
+                          item.color
+                        )}
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <item.icon className="h-6 w-6 mb-2" />
+                        <span className="text-sm font-medium text-center">{item.label}</span>
+                      </motion.button>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
           
-          <div className="p-6 space-y-4">
-            {[
-              { title: 'Quarterly Town Hall', date: 'Nov 15, 2023', time: '10:00 AM', location: 'Main Conference Room' },
-              { title: 'Holiday Party', date: 'Dec 20, 2023', time: '6:00 PM', location: 'Grand Ballroom, Marriott Hotel' },
-              { title: 'Team Building Day', date: 'Jan 12, 2024', time: '9:00 AM', location: 'Adventure Park' },
-            ].map((event, index) => (
-              <div 
-                key={index} 
-                className="flex items-start gap-4 pb-4 border-b last:border-0 last:pb-0 animate-slide-in"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <div className="bg-primary/10 text-primary rounded-lg p-2 text-center min-w-[60px]">
-                  <div className="text-sm font-medium">{event.date.split(',')[0]}</div>
+          <TabsContent value="leave">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center py-12">
+                  <CalendarDays className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium">Leave Management</h3>
+                  <p className="text-muted-foreground max-w-md mx-auto mb-6">
+                    This section will allow you to request and track time off, view team calendars, and manage your leave balance.
+                  </p>
+                  <Button>Request Time Off</Button>
                 </div>
-                <div>
-                  <h3 className="font-medium">{event.title}</h3>
-                  <p className="text-sm text-muted-foreground">{event.time} • {event.location}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
-        
-        <Card>
-          <div className="p-4 border-b">
-            <h2 className="font-medium">HR Announcements</h2>
-          </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
           
-          <div className="p-6 space-y-4">
-            {[
-              { title: 'Updated Remote Work Policy', date: 'October 28, 2023', description: 'New guidelines for flexible work arrangements are now available.' },
-              { title: 'Annual Performance Reviews', date: 'October 15, 2023', description: 'Schedule for year-end reviews has been published. Please check your calendar.' },
-              { title: 'New Benefits Enrollment', date: 'October 1, 2023', description: 'Open enrollment for 2024 benefits is now available through November 15.' },
-            ].map((announcement, index) => (
-              <div 
-                key={index} 
-                className="pb-4 border-b last:border-0 last:pb-0 animate-slide-in"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <h3 className="font-medium">{announcement.title}</h3>
-                <p className="text-sm text-muted-foreground mb-2">{announcement.date}</p>
-                <p className="text-sm">{announcement.description}</p>
-              </div>
-            ))}
-          </div>
-        </Card>
-      </div>
-      
-      {/* Wellness resources */}
-      <Card>
-        <div className="p-4 border-b">
-          <h2 className="font-medium">Employee Wellness Resources</h2>
-        </div>
-        
-        <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { title: 'Mental Health Support', description: 'Access to counseling and mental health resources.', icon: User },
-              { title: 'Fitness Program', description: 'Gym membership discounts and wellness challenges.', icon: Users },
-              { title: 'Work-Life Balance', description: 'Resources for maintaining a healthy balance.', icon: Clock },
-            ].map((resource, index) => (
-              <div 
-                key={index} 
-                className="p-5 bg-secondary/30 rounded-xl hover:bg-secondary/50 transition-colors cursor-pointer animate-scale-in"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <div className="flex flex-col items-center text-center">
-                  <div className="bg-white/80 shadow-sm text-primary rounded-full p-3 mb-4">
-                    <resource.icon className="w-6 h-6" />
-                  </div>
-                  <h3 className="font-medium mb-2">{resource.title}</h3>
-                  <p className="text-sm text-muted-foreground">{resource.description}</p>
-                  <button className="mt-4 text-primary text-sm hover:underline">Learn more</button>
+          <TabsContent value="benefits">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center py-12">
+                  <Award className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium">Benefits Portal</h3>
+                  <p className="text-muted-foreground max-w-md mx-auto mb-6">
+                    View and manage your benefits including health insurance, retirement plans, and other perks.
+                  </p>
+                  <Button>Explore Benefits</Button>
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </Card>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="documents">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center py-12">
+                  <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium">HR Documents</h3>
+                  <p className="text-muted-foreground max-w-md mx-auto mb-6">
+                    Access important documents including company policies, forms, and personal records.
+                  </p>
+                  <Button>View Documents</Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </motion.div>
     </div>
   );
 };

@@ -1,6 +1,5 @@
 
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -70,51 +69,6 @@ export function AddRoleDialog({ fetchRoles }: AddRoleDialogProps) {
     },
   });
 
-  const handleAddRole = async (values: z.infer<typeof roleSchema>) => {
-    setIsSubmitting(true);
-    try {
-      const { data, error } = await supabase
-        .from('roles')
-        .insert({
-          name: values.name,
-          description: values.description,
-        })
-        .select()
-        .single();
-      
-      if (error) {
-        throw error;
-      }
-      
-      toast.success('Role created successfully');
-      form.reset();
-      setIsOpen(false);
-      fetchRoles();
-      
-      // Create default permissions for the new role
-      const newPermissions = applications.map(app => ({
-        role_id: data.id,
-        application: app,
-        can_view: false,
-        can_create: false,
-        can_edit: false,
-        can_delete: false,
-      }));
-      
-      const { error: permError } = await supabase
-        .from('permissions')
-        .insert(newPermissions);
-      
-      if (permError) {
-        console.error('Error creating permissions:', permError);
-      }
-    } catch (error) {
-      console.error('Error adding role:', error);
-      toast.error('Failed to create role');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>

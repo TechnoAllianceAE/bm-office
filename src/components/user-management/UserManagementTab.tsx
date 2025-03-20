@@ -1,6 +1,5 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -25,60 +24,12 @@ export function UserManagementTab() {
   }, [currentPage]);
 
   const fetchRoles = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('roles')
-        .select('id, name, description, created_at');
-      
-      if (error) {
-        console.error('Error fetching roles:', error);
-        toast.error('Failed to load roles', { description: error.message });
-        return;
-      }
-      
-      console.log('Roles fetched successfully:', data);
-      setAvailableRoles(data || []);
-    } catch (error) {
-      console.error('Error fetching roles:', error);
-      toast.error('Failed to load roles');
-    }
+
   };
 
   const fetchUsers = async () => {
     setIsLoading(true);
-    try {
-      const { count, error: countError } = await supabase
-        .from('app_users')
-        .select('*', { count: 'exact', head: true });
-      
-      if (countError) {
-        throw countError;
-      }
-      
-      if (count !== null) {
-        setTotalPages(Math.ceil(count / pageSize));
-      }
-      
-      const from = (currentPage - 1) * pageSize;
-      const to = from + pageSize - 1;
-      
-      const { data, error } = await supabase
-        .from('app_users')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .range(from, to);
-      
-      if (error) {
-        throw error;
-      }
-      
-      setUsers(data as User[]);
-    } catch (error) {
-      console.error('Error fetching users:', error);
-      toast.error('Failed to load users');
-    } finally {
-      setIsLoading(false);
-    }
+
   };
 
   return (

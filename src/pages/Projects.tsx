@@ -1,416 +1,303 @@
-import React, { useState } from 'react';
-import { Search, Plus, Filter, Calendar, Clock, Users, CheckCircle, Circle, MoreHorizontal, X } from 'lucide-react';
-import { Card } from '@/components/common/Card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Search, Plus, Filter, ArrowUpDown, Users, MessageSquare, FileText } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
-type ProjectStatus = 'active' | 'completed' | 'onHold';
-
-type Project = {
-  id: number;
+interface Project {
+  id: string;
   name: string;
-  client: string;
-  status: ProjectStatus;
-  progress: number;
-  dueDate: string;
-  team: string[];
   description: string;
-  tags: string[];
-};
+  client: string;
+  progress: number;
+  status: 'active' | 'completed' | 'on-hold' | 'cancelled';
+  team: {
+    name: string;
+    role: string;
+    avatar?: string;
+  }[];
+  startDate: string;
+  dueDate: string;
+  budget: string;
+  tasks: number;
+  completedTasks: number;
+}
 
-const ProjectItem: React.FC<{ project: Project }> = ({ project }) => {
-  const getStatusColor = (status: ProjectStatus) => {
-    switch (status) {
-      case 'active': return 'bg-green-500';
-      case 'completed': return 'bg-blue-500';
-      case 'onHold': return 'bg-amber-500';
-      default: return 'bg-gray-500';
-    }
-  };
-  
-  const statusColor = getStatusColor(project.status);
-  
-  return (
-    <Card className="bg-card/80 backdrop-blur-md border border-white/10 hover:border-primary/30 transition">
-      <div className="p-6">
-        <div className="flex justify-between items-start mb-4">
-          <div>
-            <div className="flex items-center">
-              <div className={`w-2 h-2 rounded-full ${statusColor} mr-2`}></div>
-              <h3 className="text-lg font-semibold">{project.name}</h3>
-            </div>
-            <div className="text-sm text-muted-foreground mt-1">{project.client}</div>
-          </div>
-          <Button variant="ghost" size="icon">
-            <MoreHorizontal className="h-5 w-5" />
-          </Button>
-        </div>
-        
-        <p className="text-sm mb-4 line-clamp-2">{project.description}</p>
-        
-        <div className="mb-4">
-          <div className="flex justify-between text-sm mb-1">
-            <span>Progress</span>
-            <span>{project.progress}%</span>
-          </div>
-          <Progress value={project.progress} className="h-2" />
-        </div>
-        
-        <div className="flex flex-wrap gap-2 mb-4">
-          {project.tags.map((tag, index) => (
-            <Badge key={index} variant="secondary" className="bg-secondary/80 backdrop-blur-sm">
-              {tag}
-            </Badge>
-          ))}
-        </div>
-        
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div className="flex items-center">
-            <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-            <span>{project.dueDate}</span>
-          </div>
-          <div className="flex items-center">
-            <Users className="h-4 w-4 mr-2 text-muted-foreground" />
-            <span>{project.team.length} Members</span>
-          </div>
-        </div>
-      </div>
-    </Card>
-  );
-};
+const projects: Project[] = [
+  {
+    id: 'proj-1',
+    name: 'Website Redesign',
+    description: 'Complete overhaul of company website with new design system',
+    client: 'Acme Inc.',
+    progress: 75,
+    status: 'active',
+    team: [
+      { name: 'Alex Johnson', role: 'Lead Designer', avatar: 'https://i.pravatar.cc/150?img=1' },
+      { name: 'Maria Garcia', role: 'Frontend Developer', avatar: 'https://i.pravatar.cc/150?img=2' },
+      { name: 'John Smith', role: 'Project Manager', avatar: 'https://i.pravatar.cc/150?img=3' },
+    ],
+    startDate: 'Aug 15, 2023',
+    dueDate: 'Sep 30, 2023',
+    budget: '$12,000',
+    tasks: 36,
+    completedTasks: 27,
+  },
+  {
+    id: 'proj-2',
+    name: 'Mobile App Development',
+    description: 'Cross-platform mobile application for inventory management',
+    client: 'TechCorp',
+    progress: 45,
+    status: 'active',
+    team: [
+      { name: 'David Lee', role: 'iOS Developer', avatar: 'https://i.pravatar.cc/150?img=4' },
+      { name: 'Sarah Williams', role: 'Android Developer', avatar: 'https://i.pravatar.cc/150?img=5' },
+    ],
+    startDate: 'Sep 1, 2023',
+    dueDate: 'Oct 15, 2023',
+    budget: '$24,000',
+    tasks: 42,
+    completedTasks: 19,
+  },
+  {
+    id: 'proj-3',
+    name: 'Marketing Campaign',
+    description: 'Q4 digital marketing campaign for product launch',
+    client: 'GlobalBrand',
+    progress: 90,
+    status: 'active',
+    team: [
+      { name: 'James Wilson', role: 'Marketing Specialist', avatar: 'https://i.pravatar.cc/150?img=6' },
+      { name: 'Emily Davies', role: 'Content Creator', avatar: 'https://i.pravatar.cc/150?img=7' },
+      { name: 'Michael Brown', role: 'SEO Expert', avatar: 'https://i.pravatar.cc/150?img=8' },
+      { name: 'Emma Taylor', role: 'Social Media Manager', avatar: 'https://i.pravatar.cc/150?img=9' },
+    ],
+    startDate: 'Aug 20, 2023',
+    dueDate: 'Sep 22, 2023',
+    budget: '$18,500',
+    tasks: 28,
+    completedTasks: 25,
+  },
+  {
+    id: 'proj-4',
+    name: 'Product Launch',
+    description: 'New software product launch campaign',
+    client: 'InnovateSoft',
+    progress: 100,
+    status: 'completed',
+    team: [
+      { name: 'William Jones', role: 'Product Manager', avatar: 'https://i.pravatar.cc/150?img=10' },
+      { name: 'Olivia Martin', role: 'Marketing Director', avatar: 'https://i.pravatar.cc/150?img=11' },
+    ],
+    startDate: 'Jul 15, 2023',
+    dueDate: 'Sep 10, 2023',
+    budget: '$32,000',
+    tasks: 54,
+    completedTasks: 54,
+  },
+];
 
-const NewProjectForm = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
-  const [projectName, setProjectName] = useState('');
-  const [clientName, setClientName] = useState('');
-  const [description, setDescription] = useState('');
-  const [status, setStatus] = useState<ProjectStatus>('active');
-  const [dueDate, setDueDate] = useState('');
-  const [tag, setTag] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
-  
-  const handleAddTag = () => {
-    if (tag.trim() && !tags.includes(tag.trim())) {
-      setTags([...tags, tag.trim()]);
-      setTag('');
-    }
-  };
-  
-  const handleRemoveTag = (tagToRemove: string) => {
-    setTags(tags.filter(t => t !== tagToRemove));
-  };
-  
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onClose();
-  };
-  
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>Create New Project</DialogTitle>
-          <DialogDescription>
-            Add a new project to your dashboard.
-          </DialogDescription>
-        </DialogHeader>
-        
-        <form onSubmit={handleSubmit} className="space-y-4 py-4">
-          <div className="grid grid-cols-1 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="project-name">Project Name</Label>
-              <Input 
-                id="project-name" 
-                value={projectName} 
-                onChange={(e) => setProjectName(e.target.value)} 
-                placeholder="Enter project name" 
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="client-name">Client</Label>
-              <Input 
-                id="client-name" 
-                value={clientName} 
-                onChange={(e) => setClientName(e.target.value)} 
-                placeholder="Enter client name" 
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea 
-                id="description" 
-                value={description} 
-                onChange={(e) => setDescription(e.target.value)} 
-                placeholder="Enter project description" 
-                className="min-h-[100px]"
-                required
-              />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <Select 
-                  value={status} 
-                  onValueChange={(value) => setStatus(value as ProjectStatus)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                    <SelectItem value="onHold">On Hold</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="due-date">Due Date</Label>
-                <Input 
-                  id="due-date" 
-                  type="date" 
-                  value={dueDate} 
-                  onChange={(e) => setDueDate(e.target.value)} 
-                  required
-                />
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="tags">Tags</Label>
-              <div className="flex gap-2">
-                <Input 
-                  id="tags" 
-                  value={tag} 
-                  onChange={(e) => setTag(e.target.value)} 
-                  placeholder="Add tags" 
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      handleAddTag();
-                    }
-                  }}
-                />
-                <Button type="button" onClick={handleAddTag} variant="secondary">
-                  Add
-                </Button>
-              </div>
-              
-              {tags.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {tags.map((t, i) => (
-                    <Badge key={i} variant="secondary" className="flex items-center gap-1">
-                      {t}
-                      <button 
-                        type="button" 
-                        onClick={() => handleRemoveTag(t)}
-                        className="ml-1 rounded-full hover:bg-background/20 p-0.5"
-                      >
-                        <X className="h-3 w-3" />
-                        <span className="sr-only">Remove</span>
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="team">Team Members</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select team members" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="alice">Alice Smith</SelectItem>
-                  <SelectItem value="bob">Bob Johnson</SelectItem>
-                  <SelectItem value="charlie">Charlie Lee</SelectItem>
-                  <SelectItem value="diana">Diana Wang</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button type="submit">Create Project</Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
+const getStatusColor = (status: Project['status']) => {
+  switch (status) {
+    case 'active':
+      return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300';
+    case 'completed':
+      return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
+    case 'on-hold':
+      return 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300';
+    case 'cancelled':
+      return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
+    default:
+      return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300';
+  }
 };
 
 const Projects = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
-  
-  const projects: Project[] = [
-    {
-      id: 1,
-      name: 'Website Redesign',
-      client: 'Acme Corporation',
-      status: 'active',
-      progress: 65,
-      dueDate: 'Dec 15, 2023',
-      team: ['John D.', 'Sarah L.', 'Michael B.'],
-      description: 'Complete overhaul of the corporate website with focus on user experience and conversion optimization.',
-      tags: ['Web', 'Design', 'UX']
-    },
-    {
-      id: 2,
-      name: 'Mobile App Development',
-      client: 'TechStart Inc.',
-      status: 'active',
-      progress: 40,
-      dueDate: 'Jan 30, 2024',
-      team: ['Emma S.', 'David K.', 'Lisa T.', 'Marcus W.'],
-      description: 'Developing a cross-platform mobile application for inventory management and order processing.',
-      tags: ['Mobile', 'React Native', 'API']
-    },
-    {
-      id: 3,
-      name: 'Annual Marketing Campaign',
-      client: 'Global Retail',
-      status: 'active',
-      progress: 85,
-      dueDate: 'Dec 05, 2023',
-      team: ['Robert J.', 'Anna P.'],
-      description: 'Planning and execution of the annual holiday marketing campaign across multiple channels.',
-      tags: ['Marketing', 'Strategy', 'Social Media']
-    },
-    {
-      id: 4,
-      name: 'Infrastructure Upgrade',
-      client: 'FinServe Solutions',
-      status: 'onHold',
-      progress: 30,
-      dueDate: 'Feb 28, 2024',
-      team: ['Thomas R.', 'Julia M.', 'Christopher L.'],
-      description: 'Modernizing the IT infrastructure with cloud migration and security enhancements.',
-      tags: ['IT', 'Cloud', 'Security']
-    },
-    {
-      id: 5,
-      name: 'User Research Study',
-      client: 'HealthCare Inc.',
-      status: 'completed',
-      progress: 100,
-      dueDate: 'Oct 20, 2023',
-      team: ['Sophie G.', 'Daniel T.'],
-      description: 'Comprehensive user research study to gather insights for the upcoming product redesign.',
-      tags: ['Research', 'UX', 'Analytics']
-    },
-    {
-      id: 6,
-      name: 'Brand Identity Refresh',
-      client: 'Nexus Innovations',
-      status: 'active',
-      progress: 75,
-      dueDate: 'Dec 22, 2023',
-      team: ['Laura B.', 'Connor S.', 'Maria L.'],
-      description: 'Refreshing the brand identity including logo, color palette, and brand guidelines.',
-      tags: ['Branding', 'Design', 'Strategy']
-    },
-  ];
-  
-  const filteredProjects = projects.filter(project => 
-    project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    project.client.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    project.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
-  
-  const activeProjects = filteredProjects.filter(p => p.status === 'active');
-  const completedProjects = filteredProjects.filter(p => p.status === 'completed');
-  const onHoldProjects = filteredProjects.filter(p => p.status === 'onHold');
-  
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-semibold">Projects</h1>
-          <p className="text-muted-foreground">Manage and track your projects</p>
+    <div>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+          <div>
+            <h1 className="text-3xl font-bold">Projects</h1>
+            <p className="text-muted-foreground">Manage and track your project portfolio</p>
+          </div>
+          
+          <div className="flex gap-2 w-full md:w-auto">
+            <div className="relative flex-1 md:w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input placeholder="Search projects..." className="pl-9" />
+            </div>
+            
+            <Button variant="outline">
+              <Filter className="h-4 w-4 mr-2" />
+              Filter
+            </Button>
+            
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              New Project
+            </Button>
+          </div>
         </div>
-        <Button className="gap-1" onClick={() => setShowNewProjectDialog(true)}>
-          <Plus className="h-4 w-4" />
-          New Project
-        </Button>
-      </div>
-      
-      <div className="flex items-center space-x-2">
-        <div className="relative flex-grow">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input 
-            placeholder="Search projects" 
-            className="pl-9 bg-background/80 backdrop-blur-sm"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        <Button variant="outline" className="gap-1">
-          <Filter className="h-4 w-4" />
-          Filter
-        </Button>
-      </div>
-      
-      <Tabs defaultValue="all">
-        <TabsList className="mb-6 bg-secondary/80 backdrop-blur-sm">
-          <TabsTrigger value="all">All Projects</TabsTrigger>
-          <TabsTrigger value="active">Active</TabsTrigger>
-          <TabsTrigger value="completed">Completed</TabsTrigger>
-          <TabsTrigger value="onHold">On Hold</TabsTrigger>
-        </TabsList>
         
-        <TabsContent value="all">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProjects.map(project => (
-              <ProjectItem key={project.id} project={project} />
+        <Tabs defaultValue="all" className="w-full">
+          <TabsList className="mb-6">
+            <TabsTrigger value="all">All Projects</TabsTrigger>
+            <TabsTrigger value="active">Active</TabsTrigger>
+            <TabsTrigger value="completed">Completed</TabsTrigger>
+            <TabsTrigger value="on-hold">On Hold</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="all" className="space-y-6">
+            {projects.map((project, index) => (
+              <motion.div
+                key={project.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
+              >
+                <Card className="hover:border-primary/20 transition-all">
+                  <CardContent className="p-6">
+                    <div className="flex flex-col lg:flex-row gap-6">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-4 mb-3">
+                          <h3 className="text-xl font-semibold">{project.name}</h3>
+                          <Badge className={cn("font-normal", getStatusColor(project.status))}>
+                            {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
+                          </Badge>
+                        </div>
+                        
+                        <p className="text-muted-foreground mb-3">{project.description}</p>
+                        
+                        <div className="flex flex-wrap gap-x-6 gap-y-2 mb-4">
+                          <div>
+                            <span className="text-xs text-muted-foreground block">Client</span>
+                            <span className="text-sm font-medium">{project.client}</span>
+                          </div>
+                          <div>
+                            <span className="text-xs text-muted-foreground block">Timeline</span>
+                            <span className="text-sm font-medium">{project.startDate} - {project.dueDate}</span>
+                          </div>
+                          <div>
+                            <span className="text-xs text-muted-foreground block">Budget</span>
+                            <span className="text-sm font-medium">{project.budget}</span>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2 mb-4">
+                          <div className="flex justify-between text-sm">
+                            <span>Progress</span>
+                            <span>{project.progress}%</span>
+                          </div>
+                          <Progress value={project.progress} className="h-2" />
+                        </div>
+                        
+                        <div className="flex gap-4">
+                          <div className="flex items-center gap-1 text-sm">
+                            <FileText className="h-4 w-4 text-muted-foreground" />
+                            <span>
+                              <span className="font-medium">{project.completedTasks}</span>
+                              <span className="text-muted-foreground">/{project.tasks} tasks</span>
+                            </span>
+                          </div>
+                          
+                          <div className="flex items-center gap-1 text-sm">
+                            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                            <span>
+                              <span className="font-medium">24</span>
+                              <span className="text-muted-foreground"> comments</span>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="lg:w-60 space-y-4">
+                        <div>
+                          <h4 className="text-sm font-medium mb-2 flex items-center">
+                            <Users className="h-4 w-4 mr-1" />
+                            Team Members
+                          </h4>
+                          <div className="space-y-2">
+                            {project.team.map((member, idx) => (
+                              <div key={idx} className="flex items-center gap-2">
+                                <Avatar className="h-8 w-8">
+                                  <AvatarImage src={member.avatar} alt={member.name} />
+                                  <AvatarFallback className="text-xs">
+                                    {member.name.split(' ').map(n => n[0]).join('')}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <p className="text-sm font-medium leading-none">{member.name}</p>
+                                  <p className="text-xs text-muted-foreground">{member.role}</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <div className="flex flex-col gap-2">
+                          <Button size="sm" variant="outline" className="justify-start">
+                            <FileText className="h-4 w-4 mr-2" />
+                            View Details
+                          </Button>
+                          <Button size="sm" variant="outline" className="justify-start">
+                            <MessageSquare className="h-4 w-4 mr-2" />
+                            Team Chat
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
             ))}
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="active">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {activeProjects.map(project => (
-              <ProjectItem key={project.id} project={project} />
-            ))}
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="completed">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {completedProjects.map(project => (
-              <ProjectItem key={project.id} project={project} />
-            ))}
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="onHold">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {onHoldProjects.map(project => (
-              <ProjectItem key={project.id} project={project} />
-            ))}
-          </div>
-        </TabsContent>
-      </Tabs>
-      
-      <NewProjectForm 
-        isOpen={showNewProjectDialog} 
-        onClose={() => setShowNewProjectDialog(false)} 
-      />
+          </TabsContent>
+          
+          <TabsContent value="active">
+            <div className="grid place-items-center py-12">
+              <div className="text-center max-w-md">
+                <h3 className="text-lg font-medium mb-2">Active Projects View</h3>
+                <p className="text-muted-foreground">
+                  This tab will display only active projects. The functionality is similar to the "All Projects" tab but filtered to show active projects only.
+                </p>
+              </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="completed">
+            <div className="grid place-items-center py-12">
+              <div className="text-center max-w-md">
+                <h3 className="text-lg font-medium mb-2">Completed Projects View</h3>
+                <p className="text-muted-foreground">
+                  This tab will display only completed projects. The functionality is similar to the "All Projects" tab but filtered to show completed projects only.
+                </p>
+              </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="on-hold">
+            <div className="grid place-items-center py-12">
+              <div className="text-center max-w-md">
+                <h3 className="text-lg font-medium mb-2">On Hold Projects View</h3>
+                <p className="text-muted-foreground">
+                  This tab will display only on-hold projects. The functionality is similar to the "All Projects" tab but filtered to show on-hold projects only.
+                </p>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </motion.div>
     </div>
   );
 };

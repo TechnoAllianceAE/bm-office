@@ -1,96 +1,100 @@
 
 import React, { useState } from 'react';
-import { Send, Plus, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/common/Card';
-import { cn } from '@/lib/utils';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Bot, Send, PlusCircle } from 'lucide-react';
 
 const AIAssistant = () => {
-  const [messages, setMessages] = useState<Array<{role: 'user' | 'assistant', content: string}>>([
-    { role: 'assistant', content: 'Hello! How can I help you with your projects today?' }
+  const [messages, setMessages] = useState([
+    {
+      id: 1,
+      content: "Hello! I'm your AI assistant. How can I help you with your projects today?",
+      role: 'assistant'
+    }
   ]);
   const [input, setInput] = useState('');
 
-  const handleSendMessage = () => {
+  const handleSendMessage = (e: React.FormEvent) => {
+    e.preventDefault();
     if (!input.trim()) return;
-    
+
     // Add user message
-    setMessages(prev => [...prev, { role: 'user', content: input }]);
-    
-    // Simulate AI response
+    setMessages(prev => [
+      ...prev,
+      { id: Date.now(), content: input, role: 'user' }
+    ]);
+
+    // Simulate assistant response
     setTimeout(() => {
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: 'I understand you\'re asking about projects. What specific information or assistance do you need with your projects?' 
-      }]);
+      setMessages(prev => [
+        ...prev,
+        { 
+          id: Date.now() + 1, 
+          content: "I'm analyzing your request about projects. What specific information would you like to know?", 
+          role: 'assistant' 
+        }
+      ]);
     }, 1000);
-    
+
     setInput('');
   };
 
   return (
     <div className="flex flex-col h-[calc(100vh-6rem)]">
-      <div className="flex-none mb-4">
-        <h1 className="text-2xl font-semibold">AI Assistant</h1>
-        <p className="text-muted-foreground">Your intelligent project companion</p>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">AI Assistant</h1>
+        <Button variant="outline" size="sm">
+          <PlusCircle className="mr-2 h-4 w-4" />
+          New Chat
+        </Button>
       </div>
-
-      <Card className="flex-1 flex flex-col bg-card/60 backdrop-blur-md border border-white/30 overflow-hidden">
-        <div className="flex-none border-b border-border/50 p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Sparkles className="h-5 w-5 text-primary" />
-              <h2 className="font-medium">GlobalHub Assistant</h2>
-            </div>
-            <Button variant="outline" size="sm" className="gap-1">
-              <Plus className="h-4 w-4" />
-              New Chat
-            </Button>
-          </div>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-4 space-y-6">
-          {messages.map((message, index) => (
-            <div 
-              key={index} 
-              className={cn(
-                "flex max-w-3xl",
-                message.role === 'assistant' ? "self-start" : "self-end ml-auto"
-              )}
-            >
-              <div className={cn(
-                "rounded-lg p-4",
-                message.role === 'assistant' 
-                  ? "bg-secondary/80 backdrop-blur-sm" 
-                  : "bg-primary/10 backdrop-blur-sm"
-              )}>
-                {message.content}
+      
+      <Card className="flex-1 mb-4 border">
+        <ScrollArea className="h-[calc(100vh-12rem)]">
+          <CardContent className="p-4">
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={`mb-4 flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div className={`flex ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'} gap-2 max-w-[80%]`}>
+                  <Avatar className={`h-8 w-8 ${message.role === 'user' ? 'bg-primary' : 'bg-secondary'}`}>
+                    {message.role === 'assistant' ? (
+                      <Bot className="h-5 w-5 text-primary-foreground" />
+                    ) : (
+                      <AvatarFallback>U</AvatarFallback>
+                    )}
+                  </Avatar>
+                  <div
+                    className={`rounded-lg p-3 ${
+                      message.role === 'user'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted'
+                    }`}
+                  >
+                    {message.content}
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="flex-none p-4 border-t border-border/50">
-          <div className="relative flex items-center">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-              placeholder="Ask about your projects..."
-              className="w-full rounded-full bg-background/50 backdrop-blur-sm border border-border/50 px-4 py-2 pr-10 focus:outline-none focus:ring-1 focus:ring-primary"
-            />
-            <Button 
-              size="icon" 
-              variant="ghost" 
-              className="absolute right-2"
-              onClick={handleSendMessage}
-            >
-              <Send className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+            ))}
+          </CardContent>
+        </ScrollArea>
       </Card>
+      
+      <form onSubmit={handleSendMessage} className="flex gap-2">
+        <Input
+          placeholder="Ask about your projects..."
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          className="flex-1"
+        />
+        <Button type="submit" size="icon">
+          <Send className="h-4 w-4" />
+        </Button>
+      </form>
     </div>
   );
 };

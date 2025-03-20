@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { UserPlus } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
@@ -54,47 +53,7 @@ export function AddUserDialog({ availableRoles, onUserAdded }: AddUserDialogProp
     },
   });
 
-  const handleAddUser = async (values: z.infer<typeof userSchema>) => {
-    setIsSubmitting(true);
-    try {
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: values.email,
-        password: values.password,
-        email_confirm: true,
-        user_metadata: { full_name: values.fullName },
-      });
-      
-      if (authError) {
-        toast.error('Failed to create user', { description: authError.message });
-        return;
-      }
-      
-      if (!authData.user) {
-        toast.error('Failed to create user');
-        return;
-      }
-      
-      const { error: updateError } = await supabase
-        .from('app_users')
-        .update({ role: values.role })
-        .eq('user_id', authData.user.id);
-      
-      if (updateError) {
-        toast.error('Failed to set user role', { description: updateError.message });
-        return;
-      }
-      
-      toast.success('User created successfully');
-      form.reset();
-      setIsModalOpen(false);
-      onUserAdded();
-    } catch (error) {
-      console.error('Error adding user:', error);
-      toast.error('Failed to create user');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+
 
   return (
     <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>

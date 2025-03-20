@@ -1,203 +1,357 @@
-import React, { useState } from 'react';
-import { Calendar, Clock, ChevronLeft, ChevronRight, Plus, Filter, Download } from 'lucide-react';
-import { Card } from '@/components/common/Card';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { NewTimesheetEntryForm } from '@/components/timesheet/NewTimesheetEntryForm';
 
-// Sample project data
-const projects = [
-  { id: 1, name: 'Website Redesign', client: 'Acme Corp', color: 'bg-blue-500' },
-  { id: 2, name: 'Mobile App Development', client: 'TechStart', color: 'bg-green-500' },
-  { id: 3, name: 'Marketing Campaign', client: 'Global Retail', color: 'bg-purple-500' },
-  { id: 4, name: 'Infrastructure Upgrade', client: 'FinServe', color: 'bg-amber-500' },
-  { id: 5, name: 'User Research', client: 'HealthCare Inc', color: 'bg-pink-500' },
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from '@/components/ui/table';
+import { 
+  Calendar as CalendarIcon, 
+  Clock, 
+  Plus,
+  Edit,
+  Trash,
+  Download
+} from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { format } from 'date-fns';
+import { toast } from 'sonner';
+
+interface TimeEntry {
+  id: string;
+  date: Date;
+  project: string;
+  task: string;
+  hours: number;
+  description: string;
+}
+
+const sampleTimeEntries: TimeEntry[] = [
+  {
+    id: '1',
+    date: new Date(2023, 8, 18),
+    project: 'Website Redesign',
+    task: 'Frontend Development',
+    hours: 3.5,
+    description: 'Implemented new homepage components'
+  },
+  {
+    id: '2',
+    date: new Date(2023, 8, 18),
+    project: 'Mobile App',
+    task: 'API Integration',
+    hours: 4,
+    description: 'Connected user profile endpoints'
+  },
+  {
+    id: '3',
+    date: new Date(2023, 8, 19),
+    project: 'Website Redesign',
+    task: 'UX Improvements',
+    hours: 2.5,
+    description: 'Enhanced form validation feedback'
+  },
+  {
+    id: '4',
+    date: new Date(2023, 8, 19),
+    project: 'Marketing Campaign',
+    task: 'Content Creation',
+    hours: 4,
+    description: 'Wrote copy for landing pages'
+  },
+  {
+    id: '5',
+    date: new Date(2023, 8, 20),
+    project: 'Mobile App',
+    task: 'Bug Fixes',
+    hours: 5,
+    description: 'Fixed authentication issues'
+  },
 ];
 
-// Sample timesheet entries
-const timesheetEntries = [
-  { id: 1, date: '2023-11-20', project: 1, hours: 3.5, notes: 'Homepage wireframes' },
-  { id: 2, date: '2023-11-20', project: 3, hours: 2, notes: 'Content strategy' },
-  { id: 3, date: '2023-11-20', project: 5, hours: 1.5, notes: 'User interviews' },
-  { id: 4, date: '2023-11-21', project: 1, hours: 4, notes: 'Design implementation' },
-  { id: 5, date: '2023-11-21', project: 2, hours: 3, notes: 'API development' },
-  { id: 6, date: '2023-11-22', project: 4, hours: 6, notes: 'Server configuration' },
-  { id: 7, date: '2023-11-22', project: 3, hours: 2, notes: 'Campaign analytics' },
-  { id: 8, date: '2023-11-23', project: 2, hours: 5, notes: 'Frontend development' },
-  { id: 9, date: '2023-11-24', project: 5, hours: 4, notes: 'Analysis and reporting' },
-  { id: 10, date: '2023-11-24', project: 1, hours: 3, notes: 'Client feedback review' },
+const projectOptions = [
+  'Website Redesign',
+  'Mobile App',
+  'Marketing Campaign',
+  'Product Launch',
+  'Internal Tools'
 ];
 
 const Timesheet = () => {
-  const [currentWeek, setCurrentWeek] = useState('Nov 20 - Nov 26, 2023');
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  
-  // Generate days of the week
-  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const dates = ['20', '21', '22', '23', '24', '25', '26'];
+  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [timeEntries, setTimeEntries] = useState<TimeEntry[]>(sampleTimeEntries);
+  const [selectedWeek, setSelectedWeek] = useState<Date | undefined>(new Date());
 
-  const getProjectById = (id: number) => projects.find(project => project.id === id);
-
-  const totalHours = timesheetEntries.reduce((sum, entry) => sum + entry.hours, 0);
-
-  const handleNewEntry = () => {
-    setIsFormOpen(true);
-  };
-
-  const handleCloseForm = () => {
-    setIsFormOpen(false);
+  const handleAddTimeEntry = () => {
+    toast.success('Time entry added successfully');
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-semibold">Timesheet</h1>
-          <p className="text-muted-foreground">Track and manage your working hours</p>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Button variant="outline" size="icon" onClick={() => {}}>
-            <Filter className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="icon" onClick={() => {}}>
-            <Download className="h-4 w-4" />
-          </Button>
-          <Button className="gap-1" onClick={handleNewEntry}>
-            <Plus className="h-4 w-4" />
-            New Entry
-          </Button>
-        </div>
-      </div>
-
-      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="max-w-3xl bg-white/95 backdrop-blur-md">
-          <NewTimesheetEntryForm 
-            onClose={handleCloseForm} 
-            projects={projects}
-          />
-        </DialogContent>
-      </Dialog>
-
-      <Tabs defaultValue="week">
-        <TabsList className="mb-6 bg-secondary/50 backdrop-blur-sm">
-          <TabsTrigger value="week">Week</TabsTrigger>
-          <TabsTrigger value="month">Month</TabsTrigger>
-          <TabsTrigger value="entries">All Entries</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="week">
-          <Card className="p-6 bg-card/40 backdrop-blur-md border border-white/10">
-            <div className="flex justify-between items-center mb-6">
-              <div className="flex items-center space-x-4">
-                <Button variant="outline" size="icon" onClick={() => {}}>
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <div className="flex items-center">
-                  <Calendar className="h-5 w-5 mr-2" />
-                  <span className="font-medium">{currentWeek}</span>
-                </div>
-                <Button variant="outline" size="icon" onClick={() => {}}>
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Clock className="h-5 w-5 text-muted-foreground" />
-                <span className="font-medium">{totalHours} hours this week</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-7 gap-4">
-              {days.map((day, i) => (
-                <div key={day} className="text-center">
-                  <div className="font-medium">{day}</div>
-                  <div className="text-sm text-muted-foreground">{dates[i]}</div>
-                </div>
-              ))}
+    <div className="space-y-8">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Tabs defaultValue="week" className="w-full">
+          <div className="flex justify-between items-center mb-6">
+            <TabsList className="grid w-[400px] grid-cols-3">
+              <TabsTrigger value="day">Day</TabsTrigger>
+              <TabsTrigger value="week">Week</TabsTrigger>
+              <TabsTrigger value="month">Month</TabsTrigger>
+            </TabsList>
+            
+            <div className="flex items-center gap-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-[200px] justify-start text-left font-normal">
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {selectedWeek ? (
+                      format(selectedWeek, "MMM d, yyyy")
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={selectedWeek}
+                    onSelect={setSelectedWeek}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
               
-              {days.map((day, dayIndex) => (
-                <div 
-                  key={`time-${day}`} 
-                  className="bg-background/30 backdrop-blur-sm rounded-lg border border-border/50 h-32 relative hover:border-primary/30 transition cursor-pointer"
-                >
-                  {timesheetEntries
-                    .filter(entry => {
-                      const entryDate = new Date(entry.date);
-                      return entryDate.getDate() === parseInt(dates[dayIndex]) && entryDate.getMonth() === 10;
-                    })
-                    .map(entry => {
-                      const project = getProjectById(entry.project);
-                      return (
-                        <div 
-                          key={entry.id} 
-                          className="p-2 text-xs rounded-md m-1 bg-white/10 backdrop-blur-sm border border-white/5"
-                        >
-                          <div className="flex items-center mb-1">
-                            <div className={`w-2 h-2 rounded-full mr-1 ${project?.color}`}></div>
-                            <span className="font-medium truncate">{project?.name}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="truncate">{entry.notes}</span>
-                            <span className="font-medium">{entry.hours}h</span>
-                          </div>
-                        </div>
-                      );
-                    })}
+              <Button>
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+            </div>
+          </div>
+          
+          <TabsContent value="day" className="space-y-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="date">Date</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="w-full justify-start text-left font-normal"
+                            id="date"
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {date ? (
+                              format(date, "PPP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <Calendar
+                            mode="single"
+                            selected={date}
+                            onSelect={setDate}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                    
+                    <div className="grid gap-2">
+                      <Label htmlFor="project">Project</Label>
+                      <Select>
+                        <SelectTrigger id="project">
+                          <SelectValue placeholder="Select project" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {projectOptions.map((project) => (
+                            <SelectItem key={project} value={project}>{project}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="grid gap-2">
+                      <Label htmlFor="task">Task</Label>
+                      <Input id="task" placeholder="Enter task name" />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="hours">Hours</Label>
+                      <div className="flex items-center">
+                        <Input
+                          id="hours"
+                          type="number"
+                          min="0"
+                          step="0.5"
+                          placeholder="0.0"
+                          className="w-24"
+                        />
+                        <Clock className="ml-2 h-4 w-4 text-muted-foreground" />
+                      </div>
+                    </div>
+                    
+                    <div className="grid gap-2">
+                      <Label htmlFor="description">Description</Label>
+                      <Input
+                        id="description"
+                        placeholder="What did you work on?"
+                        className="h-[104px]"
+                      />
+                    </div>
+                  </div>
                 </div>
-              ))}
-            </div>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="month">
-          <Card className="flex items-center justify-center h-96 bg-card/40 backdrop-blur-md border border-white/10">
-            <div className="text-center">
-              <Calendar className="h-16 w-16 text-muted-foreground mb-4 mx-auto" />
-              <h3 className="text-lg font-medium mb-2">Month View Coming Soon</h3>
-              <p className="text-muted-foreground mb-4">
-                We're working on this feature. It will be available soon.
-              </p>
-            </div>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="entries">
-          <Card className="overflow-hidden bg-card/40 backdrop-blur-md border border-white/10">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-border/50">
-                <thead className="bg-secondary/30 backdrop-blur-sm">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Date</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Project</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Client</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Notes</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Hours</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-background/20 backdrop-blur-sm divide-y divide-border/50">
-                  {timesheetEntries.map((entry) => {
-                    const project = getProjectById(entry.project);
-                    return (
-                      <tr key={entry.id} className="hover:bg-secondary/20 transition">
-                        <td className="px-6 py-4 whitespace-nowrap">{entry.date}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className={`w-3 h-3 rounded-full mr-2 ${project?.color}`}></div>
-                            {project?.name}
+                
+                <Button className="mt-6 w-full" onClick={handleAddTimeEntry}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Time Entry
+                </Button>
+              </CardContent>
+            </Card>
+            
+            <h3 className="text-lg font-medium mt-6 mb-3">Today's Entries</h3>
+            
+            <Card>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Project</TableHead>
+                      <TableHead>Task</TableHead>
+                      <TableHead>Hours</TableHead>
+                      <TableHead>Description</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {timeEntries
+                      .filter(entry => format(entry.date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd'))
+                      .map((entry) => (
+                        <TableRow key={entry.id}>
+                          <TableCell className="font-medium">{entry.project}</TableCell>
+                          <TableCell>{entry.task}</TableCell>
+                          <TableCell>{entry.hours}</TableCell>
+                          <TableCell className="max-w-[300px] truncate">{entry.description}</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button variant="ghost" size="icon">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon">
+                                <Trash className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="week">
+            <Card>
+              <CardContent className="pt-6">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Project</TableHead>
+                      <TableHead>Task</TableHead>
+                      <TableHead>Hours</TableHead>
+                      <TableHead>Description</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {timeEntries.map((entry) => (
+                      <TableRow key={entry.id}>
+                        <TableCell>{format(entry.date, 'MMM d')}</TableCell>
+                        <TableCell className="font-medium">{entry.project}</TableCell>
+                        <TableCell>{entry.task}</TableCell>
+                        <TableCell>{entry.hours}</TableCell>
+                        <TableCell className="max-w-[300px] truncate">{entry.description}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button variant="ghost" size="icon">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon">
+                              <Trash className="h-4 w-4" />
+                            </Button>
                           </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">{project?.client}</td>
-                        <td className="px-6 py-4">{entry.notes}</td>
-                        <td className="px-6 py-4 whitespace-nowrap font-medium">{entry.hours}h</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </Card>
-        </TabsContent>
-      </Tabs>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                
+                <div className="mt-4 flex justify-between items-center py-2 px-4 bg-muted rounded-md">
+                  <div className="flex items-center gap-6">
+                    <div>
+                      <span className="text-sm text-muted-foreground">Total Hours</span>
+                      <p className="font-medium">19.0h</p>
+                    </div>
+                    <div>
+                      <span className="text-sm text-muted-foreground">Billable</span>
+                      <p className="font-medium">17.5h</p>
+                    </div>
+                    <div>
+                      <span className="text-sm text-muted-foreground">Non-Billable</span>
+                      <p className="font-medium">1.5h</p>
+                    </div>
+                  </div>
+                  
+                  <Button>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Entry
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="month">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center py-12">
+                  <Clock className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium">Monthly View Coming Soon</h3>
+                  <p className="text-muted-foreground">
+                    We're working on a comprehensive monthly timesheet view.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </motion.div>
     </div>
   );
 };

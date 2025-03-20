@@ -1,6 +1,5 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -38,24 +37,7 @@ export function SecuritySettingsTab() {
 
   const fetchSettings = async () => {
     setIsLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('security_settings')
-        .select('*')
-        .limit(1)
-        .single();
-      
-      if (error) {
-        throw error;
-      }
-      
-      setSettings(data as SecuritySettings);
-    } catch (error) {
-      console.error('Error fetching security settings:', error);
-      toast.error('Failed to load security settings');
-    } finally {
-      setIsLoading(false);
-    }
+
   };
 
   const updateSetting = <K extends keyof SecuritySettings>(key: K, value: SecuritySettings[K]) => {
@@ -69,35 +51,7 @@ export function SecuritySettingsTab() {
     if (!settings) return;
     
     setIsSaving(true);
-    try {
-      const { error } = await supabase
-        .from('security_settings')
-        .update({
-          min_password_length: settings.min_password_length,
-          require_uppercase: settings.require_uppercase,
-          require_lowercase: settings.require_lowercase,
-          require_numbers: settings.require_numbers,
-          require_special_chars: settings.require_special_chars,
-          password_expiry_days: settings.password_expiry_days,
-          max_login_attempts: settings.max_login_attempts,
-          google_sso_enabled: settings.google_sso_enabled,
-          microsoft_sso_enabled: settings.microsoft_sso_enabled,
-          linkedin_sso_enabled: settings.linkedin_sso_enabled,
-        })
-        .eq('id', settings.id);
-      
-      if (error) {
-        throw error;
-      }
-      
-      toast.success('Security settings saved successfully');
-      setHasChanges(false);
-    } catch (error) {
-      console.error('Error saving security settings:', error);
-      toast.error('Failed to save security settings');
-    } finally {
-      setIsSaving(false);
-    }
+
   };
 
   const getPasswordStrengthLabel = () => {

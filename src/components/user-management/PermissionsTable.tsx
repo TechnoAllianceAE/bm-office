@@ -1,6 +1,5 @@
 
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { Permission, Role } from './types';
 import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -50,19 +49,7 @@ export function PermissionsTable({
   fetchPermissions 
 }: PermissionsTableProps) {
   const handleUpdatePermission = async (permissionId: string, field: string, value: boolean) => {
-    try {
-      const { error } = await supabase
-        .from('permissions')
-        .update({ [field]: value })
-        .eq('id', permissionId);
-      
-      if (error) {
-        throw error;
-      }
-    } catch (error) {
-      console.error('Error updating permission:', error);
-      throw error;
-    }
+    
   };
 
   return (
