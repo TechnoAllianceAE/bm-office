@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Activity, Clock, Briefcase, Receipt, Users, 
   LineChart, UserPlus, BarChart, Settings, ChevronLeft, ChevronRight, Menu,
   Bot, FileText, Wrench,ListChecks, Mail, UserRound,HelpCircle, BookOpenCheck, ClipboardList,
-  Calendar
+  Calendar, Building
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -74,12 +74,16 @@ const AppSidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-2 overflow-hidden">
             <div className="rounded-md bg-primary p-1.5 shrink-0">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2L4 6V18L12 22L20 18V6L12 2Z" fill="white" />
-              </svg>
+              <img 
+                src="/lovable-uploads/05305298-8812-4b79-9e2e-0f8fa2dc1d97.png" 
+                alt="BM Office Logo" 
+                width="24" 
+                height="24" 
+                className="h-6 w-6"
+              />
             </div>
             {!collapsed && (
-              <span className="font-display text-lg font-semibold whitespace-nowrap">Office Hub</span>
+              <span className="font-display text-lg font-semibold whitespace-nowrap">BM Office</span>
             )}
           </div>
           <Button 
