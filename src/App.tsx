@@ -54,9 +54,9 @@ const App = () => (
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/mis" element={<MIS />} />
                 <Route path="/timesheet" element={<Timesheet />} />
+                <Route path="/timesheet/approve" element={<ApproveTimesheets />} />
                 <Route path="/projects" element={<Projects />} />
                 <Route path="/projects/new" element={<NewProject />} />
-                <Route path="/projects/approve-timesheets" element={<ApproveTimesheets />} />
                 <Route path="/projects/organization" element={<Organization />} />
                 <Route path="/ai-assistant" element={<AIAssistant />} />
                 <Route path="/ai-workflow" element={<AIWorkflow />} />
@@ -65,7 +65,7 @@ const App = () => (
                 <Route path="/hr" element={<HR />} />
                 <Route path="/referrals" element={<Referrals />} />
                 <Route path="/claims" element={<Claims />} />
-                <Route path="helpdesk" element={<HelpDesk />} />
+                <Route path="/helpdesk" element={<HelpDesk />} />
                 <Route path="/lms" element={<LMS />} />
                 <Route path="/lms/course/:id" element={<CourseView />} />
                 <Route path="/handy-tools" element={<HandyTools />} />

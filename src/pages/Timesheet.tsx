@@ -27,12 +27,14 @@ import {
   Plus,
   Edit,
   Trash,
-  Download
+  Download,
+  FileCheck
 } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { Link } from 'react-router-dom';
 
 interface TimeEntry {
   id: string;
@@ -110,6 +112,20 @@ const Timesheet = () => {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+          <div>
+            <h1 className="text-2xl font-bold">Timesheet</h1>
+            <p className="text-muted-foreground">Log and manage your working hours</p>
+          </div>
+          
+          <Button asChild variant="outline" className="gap-2">
+            <Link to="/timesheet/approve">
+              <FileCheck className="h-4 w-4" />
+              Approve Timesheets
+            </Link>
+          </Button>
+        </div>
+        
         <Tabs defaultValue="week" className="w-full">
           <div className="flex justify-between items-center mb-6">
             <TabsList className="grid w-[400px] grid-cols-3">

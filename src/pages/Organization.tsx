@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -152,6 +152,47 @@ const departmentsData: Department[] = [
   }
 ];
 
+type DraggableNodeProps = {
+  id: string;
+  type: 'employee' | 'team';
+  data: Employee | Team;
+};
+
+const DragItem: React.FC<DraggableNodeProps> = ({ id, type, data }) => {
+  const handleDragStart = (e: React.DragEvent) => {
+    e.dataTransfer.setData('application/json', JSON.stringify({ id, type }));
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  return (
+    <div 
+      draggable
+      id={id}
+      className="p-2 bg-white/30 dark:bg-gray-800/30 rounded-md cursor-grab border border-dashed border-primary/30 hover:border-primary/50 transition-colors"
+      onDragStart={handleDragStart}
+    >
+      <div className="flex items-center gap-2">
+        {'name' in data && (
+          <>
+            <Avatar className="h-8 w-8">
+              <AvatarImage src={('avatar' in data) ? data.avatar : undefined} alt={data.name} />
+              <AvatarFallback>
+                {data.name.split(' ').map(n => n[0]).join('')}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <div className="font-medium truncate">{data.name}</div>
+              <div className="text-xs text-muted-foreground truncate">
+                {type === 'employee' ? (data as Employee).designation : `${(data as Team).members.length} Members`}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
 type OrganizationNodeProps = {
   title: string;
   subtitle?: string;
@@ -162,6 +203,8 @@ type OrganizationNodeProps = {
   department?: boolean;
   team?: boolean;
   collapsible?: boolean;
+  id?: string;
+  onDrop?: (data: {id: string, type: string}) => void;
 };
 
 const OrganizationNode: React.FC<OrganizationNodeProps> = ({
@@ -174,15 +217,37 @@ const OrganizationNode: React.FC<OrganizationNodeProps> = ({
   department = false,
   team = false,
   collapsible = false,
+  id,
+  onDrop,
 }) => {
   const [expanded, setExpanded] = useState(true);
   
+  const handleDragOver = (e: React.DragEvent) => {
+    if (onDrop) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    if (onDrop) {
+      e.preventDefault();
+      const data = JSON.parse(e.dataTransfer.getData('application/json'));
+      onDrop(data);
+    }
+  };
+  
   return (
-    <div className={cn(
-      "border rounded-md",
-      department ? "bg-muted/50" : team ? "bg-muted/30" : "bg-background",
-      !children && "shadow-sm"
-    )}>
+    <div 
+      className={cn(
+        "border rounded-md",
+        department ? "bg-muted/50" : team ? "bg-muted/30" : "bg-background",
+        !children && "shadow-sm"
+      )}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+      id={id}
+    >
       <div className={cn(
         "flex items-center gap-3 p-3",
         (department || team) && "border-b",
@@ -238,26 +303,139 @@ const OrganizationNode: React.FC<OrganizationNodeProps> = ({
 };
 
 const DepartmentView: React.FC<{ department: Department }> = ({ department }) => {
+  const [departmentData, setDepartmentData] = useState<Department>(department);
+  
+  const handleDropOnTeam = (teamId: string) => (data: {id: string, type: string}) => {
+    if (data.type !== 'employee') return;
+    
+    const employeeId = data.id;
+    const employee = employeesData.find(e => e.id === employeeId);
+    
+    if (!employee) return;
+    
+    // Update team members
+    const updatedTeams = departmentData.teams?.map(team => {
+      if (team.id === teamId) {
+        // Check if employee is already in team
+        if (team.members.some(m => m.id === employeeId)) {
+          return team;
+        }
+        
+        // If employee is already a lead in this team, don't add as normal member
+        if (team.lead?.id === employeeId) {
+          return team;
+        }
+        
+        return {
+          ...team,
+          members: [...team.members, employee]
+        };
+      }
+      return team;
+    });
+    
+    setDepartmentData({
+      ...departmentData,
+      teams: updatedTeams
+    });
+    
+    toast({
+      title: "Employee Added to Team",
+      description: `${employee.name} has been added to the team.`,
+    });
+  };
+  
+  const handleDropOnTeamLead = (teamId: string) => (data: {id: string, type: string}) => {
+    if (data.type !== 'employee') return;
+    
+    const employeeId = data.id;
+    const employee = employeesData.find(e => e.id === employeeId);
+    
+    if (!employee) return;
+    
+    // Update team lead
+    const updatedTeams = departmentData.teams?.map(team => {
+      if (team.id === teamId) {
+        return {
+          ...team,
+          lead: employee,
+          // Add employee to members if not already there
+          members: team.members.some(m => m.id === employeeId)
+            ? team.members
+            : [...team.members, employee]
+        };
+      }
+      return team;
+    });
+    
+    setDepartmentData({
+      ...departmentData,
+      teams: updatedTeams
+    });
+    
+    toast({
+      title: "Team Lead Updated",
+      description: `${employee.name} is now the team lead.`,
+    });
+  };
+  
+  const handleDropOnDepartmentHead = (data: {id: string, type: string}) => {
+    if (data.type !== 'employee') return;
+    
+    const employeeId = data.id;
+    const employee = employeesData.find(e => e.id === employeeId);
+    
+    if (!employee) return;
+    
+    setDepartmentData({
+      ...departmentData,
+      head: employee
+    });
+    
+    toast({
+      title: "Department Head Updated",
+      description: `${employee.name} is now the head of ${departmentData.name}.`,
+    });
+  };
+
   return (
     <div className="space-y-3">
       <OrganizationNode
-        title={department.name}
-        subtitle={`${department.employees.length} Employees`}
+        title={departmentData.name}
+        subtitle={`${departmentData.employees.length} Employees`}
         icon={Building}
         department
         collapsible
+        id={`dept-${departmentData.id}`}
       >
-        {department.head && (
+        {departmentData.head ? (
           <OrganizationNode
-            title={department.head.name}
-            subtitle={department.head.designation}
-            avatar={department.head.avatar}
+            title={departmentData.head.name}
+            subtitle={departmentData.head.designation}
+            avatar={departmentData.head.avatar}
             leader
+            id={`dept-head-${departmentData.id}`}
+            onDrop={handleDropOnDepartmentHead}
           />
+        ) : (
+          <div 
+            className="border border-dashed border-primary/30 rounded-md p-3 bg-primary/5 text-center"
+            onDragOver={(e) => {
+              e.preventDefault();
+              e.dataTransfer.dropEffect = 'move';
+            }}
+            onDrop={(e) => {
+              e.preventDefault();
+              const data = JSON.parse(e.dataTransfer.getData('application/json'));
+              handleDropOnDepartmentHead(data);
+            }}
+          >
+            <p className="text-sm text-muted-foreground">Drag an employee here to assign as Department Head</p>
+          </div>
         )}
         
         <div className="mt-3 space-y-3">
-          {department.teams && department.teams.map(team => (
+          {departmentData.teams && departmentData.teams.map(team => (
             <OrganizationNode
               key={team.id}
               title={team.name}
@@ -265,14 +443,33 @@ const DepartmentView: React.FC<{ department: Department }> = ({ department }) =>
               icon={Users}
               team
               collapsible
+              id={`team-${team.id}`}
+              onDrop={handleDropOnTeam(team.id)}
             >
-              {team.lead && (
+              {team.lead ? (
                 <OrganizationNode
                   title={team.lead.name}
                   subtitle={team.lead.designation}
                   avatar={team.lead.avatar}
                   leader
+                  id={`team-lead-${team.id}`}
+                  onDrop={handleDropOnTeamLead(team.id)}
                 />
+              ) : (
+                <div 
+                  className="border border-dashed border-primary/30 rounded-md p-3 bg-primary/5 text-center"
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const data = JSON.parse(e.dataTransfer.getData('application/json'));
+                    handleDropOnTeamLead(team.id)(data);
+                  }}
+                >
+                  <p className="text-sm text-muted-foreground">Drag an employee here to assign as Team Lead</p>
+                </div>
               )}
               
               <div className="mt-3 grid gap-2">
@@ -284,6 +481,7 @@ const DepartmentView: React.FC<{ department: Department }> = ({ department }) =>
                       title={member.name}
                       subtitle={member.designation}
                       avatar={member.avatar}
+                      id={`team-member-${team.id}-${member.id}`}
                     />
                   ))
                 }
@@ -300,6 +498,7 @@ const Organization = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isNewDepartmentDialogOpen, setIsNewDepartmentDialogOpen] = useState(false);
   const [isNewTeamDialogOpen, setIsNewTeamDialogOpen] = useState(false);
+  const [unassignedEmployees, setUnassignedEmployees] = useState<Employee[]>(employeesData.slice(0, 3)); // Sample unassigned employees
   
   // Filter departments based on search query
   const filteredDepartments = departmentsData.filter(department => {
@@ -344,7 +543,7 @@ const Organization = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
           <h1 className="text-3xl font-bold">Organization</h1>
-          <p className="text-muted-foreground">Manage your organization structure</p>
+          <p className="text-muted-foreground">Manage your organization structure with drag and drop</p>
         </div>
         
         <div className="flex gap-2 w-full md:w-auto">
@@ -479,28 +678,60 @@ const Organization = () => {
         </div>
       </div>
 
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2">
-            <FolderTree className="h-5 w-5 text-primary" />
-            Organization Structure
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
-            {filteredDepartments.length === 0 ? (
-              <div className="text-center py-10 text-muted-foreground">
-                <UserRound className="h-10 w-10 mx-auto mb-3 opacity-20" />
-                <p>No departments or employees match your search criteria</p>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="md:col-span-1">
+          <Card className="h-full">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <UserRound className="h-5 w-5 text-primary" />
+                Unassigned Employees
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {unassignedEmployees.map(employee => (
+                  <DragItem 
+                    key={employee.id} 
+                    id={employee.id} 
+                    type="employee" 
+                    data={employee} 
+                  />
+                ))}
+                {unassignedEmployees.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p>All employees have been assigned</p>
+                  </div>
+                )}
               </div>
-            ) : (
-              filteredDepartments.map(department => (
-                <DepartmentView key={department.id} department={department} />
-              ))
-            )}
-          </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </div>
+        
+        <div className="md:col-span-3">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2">
+                <FolderTree className="h-5 w-5 text-primary" />
+                Organization Structure
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {filteredDepartments.length === 0 ? (
+                  <div className="text-center py-10 text-muted-foreground">
+                    <UserRound className="h-10 w-10 mx-auto mb-3 opacity-20" />
+                    <p>No departments or employees match your search criteria</p>
+                  </div>
+                ) : (
+                  filteredDepartments.map(department => (
+                    <DepartmentView key={department.id} department={department} />
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </motion.div>
   );
 };

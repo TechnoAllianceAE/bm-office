@@ -7,9 +7,10 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Search, Plus, Filter, ArrowUpDown, Users, MessageSquare, FileText } from 'lucide-react';
+import { Search, Plus, Filter, ArrowUpDown, Users, MessageSquare, FileText, Building } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { Link } from 'react-router-dom';
 
 interface Project {
   id: string;
@@ -144,11 +145,51 @@ const Projects = () => {
               Filter
             </Button>
             
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              New Project
+            <Button asChild>
+              <Link to="/projects/new">
+                <Plus className="h-4 w-4 mr-2" />
+                New Project
+              </Link>
             </Button>
           </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <Button variant="outline" asChild className="justify-start h-auto py-3 px-4">
+            <Link to="/projects/new" className="flex items-start">
+              <div className="h-10 w-10 rounded-md bg-primary/10 flex items-center justify-center text-primary mr-3">
+                <Plus className="h-5 w-5" />
+              </div>
+              <div className="text-left">
+                <h3 className="font-medium">New Project</h3>
+                <p className="text-xs text-muted-foreground">Create a new project</p>
+              </div>
+            </Link>
+          </Button>
+          
+          <Button variant="outline" asChild className="justify-start h-auto py-3 px-4">
+            <Link to="/timesheet/approve" className="flex items-start">
+              <div className="h-10 w-10 rounded-md bg-primary/10 flex items-center justify-center text-primary mr-3">
+                <FileText className="h-5 w-5" />
+              </div>
+              <div className="text-left">
+                <h3 className="font-medium">Approve Timesheets</h3>
+                <p className="text-xs text-muted-foreground">Review and approve timesheets</p>
+              </div>
+            </Link>
+          </Button>
+          
+          <Button variant="outline" asChild className="justify-start h-auto py-3 px-4">
+            <Link to="/projects/organization" className="flex items-start">
+              <div className="h-10 w-10 rounded-md bg-primary/10 flex items-center justify-center text-primary mr-3">
+                <Building className="h-5 w-5" />
+              </div>
+              <div className="text-left">
+                <h3 className="font-medium">Organization</h3>
+                <p className="text-xs text-muted-foreground">Manage project organization</p>
+              </div>
+            </Link>
+          </Button>
         </div>
         
         <Tabs defaultValue="all" className="w-full">

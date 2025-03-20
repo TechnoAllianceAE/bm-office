@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Activity, Clock, Briefcase, Receipt, Users, 
   LineChart, UserPlus, BarChart, Settings, ChevronLeft, ChevronRight, Menu,
   Bot, FileText, Wrench, ListChecks, Mail, UserRound, HelpCircle, BookOpenCheck, ClipboardList,
-  Calendar, Building, PlusCircle, ClipboardCheck, UsersRound
+  Calendar, Building
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -22,9 +22,7 @@ const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
   { icon: Clock, label: 'Timesheet', path: '/timesheet' },
   { icon: Briefcase, label: 'Projects', path: '/projects' },
-  { icon: PlusCircle, label: 'New Project', path: '/projects/new' },
-  { icon: ClipboardCheck, label: 'Approve Timesheets', path: '/projects/approve-timesheets' },
-  { icon: UsersRound, label: 'Organization', path: '/projects/organization' },
+  { icon: Building, label: 'Organization', path: '/projects/organization' },
   { icon: UserRound, label: 'Directory', path: '/directory' },
   { icon: Bot, label: 'AI Assistant', path: '/ai-assistant' },
   { icon: Activity, label: 'Workflow', path: '/ai-workflow' },
@@ -34,13 +32,13 @@ const menuItems = [
   { icon: UserPlus, label: 'Referrals', path: '/referrals' },
   { icon: ListChecks, label: 'Claims', path: '/claims' },
   { icon: BookOpenCheck, label: 'eLearning', path: '/lms' },
-  { icon: UserPlus, label: 'HelpDesk', path: '/helpdesk' },
+  { icon: HelpCircle, label: 'HelpDesk', path: '/helpdesk' },
   { icon: Mail, label: 'Mail Box', path: '/mailbox' },
   { icon: Calendar, label: 'Calendar', path: '/calendar' },
   { icon: ClipboardList, label: 'Requisition', path: '/requisition' },
   { icon: LineChart, label: 'MIS', path: '/mis' },
   { icon: BarChart, label: 'Analytics', path: '/analytics' },
-  { icon: HelpCircle, label: 'User management', path: '/usermanagement' },
+  { icon: UserRound, label: 'User Management', path: '/usermanagement' },
   { icon: Settings, label: 'Settings', path: '/settings' },
 ];
 

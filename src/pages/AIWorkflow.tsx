@@ -3,7 +3,13 @@ import React, { useState, useCallback } from 'react';
 import { Card } from '@/components/common/Card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Save, Play, Download, Upload, Settings } from 'lucide-react';
+import { 
+  Plus, Save, Play, Download, Upload, Settings, 
+  Clock, Mail, Globe, Database, MessageSquare, 
+  ArrowRight, FileText, Image, BarChart, Envelope,
+  Webhook, ExternalLink, Search, Filter,
+  Smartphone, BellRing, Share2
+} from 'lucide-react';
 import {
   ReactFlow,
   Background,
@@ -16,13 +22,16 @@ import {
   MarkerType,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 // Sample node data
 const initialNodes = [
   {
     id: '1',
     type: 'input',
-    data: { label: 'Input' },
+    data: { label: 'Webhook Trigger' },
     position: { x: 250, y: 25 },
     style: { background: 'rgba(255, 255, 255, 0.8)', border: '1px solid #ddd', borderRadius: '8px', padding: '10px' }
   },
@@ -35,7 +44,7 @@ const initialNodes = [
   {
     id: '3',
     type: 'output',
-    data: { label: 'Output' },
+    data: { label: 'Email Notification' },
     position: { x: 250, y: 225 },
     style: { background: 'rgba(230, 255, 230, 0.8)', border: '1px solid #ddd', borderRadius: '8px', padding: '10px' }
   },
@@ -46,12 +55,114 @@ const initialEdges = [
   { id: 'e2-3', source: '2', target: '3', animated: true, markerEnd: { type: MarkerType.ArrowClosed } },
 ];
 
+// Define trigger components
+const triggers = [
+  { id: 'trigger-time', name: 'Time Schedule', icon: Clock, description: 'Trigger workflows on a time schedule' },
+  { id: 'trigger-mail', name: 'Email Received', icon: Mail, description: 'Trigger when an email is received' },
+  { id: 'trigger-webhook', name: 'Webhook', icon: Webhook, description: 'HTTP webhook endpoint to trigger workflows' },
+  { id: 'trigger-api', name: 'API Request', icon: Globe, description: 'Trigger from external API calls' },
+  { id: 'trigger-database', name: 'Database Change', icon: Database, description: 'Trigger when database records change' },
+  { id: 'trigger-mobile', name: 'Mobile Event', icon: Smartphone, description: 'Trigger from mobile app events' },
+  { id: 'trigger-notification', name: 'Notification', icon: BellRing, description: 'Trigger from system notifications' },
+];
+
+// Define action components
+const actions = [
+  { id: 'action-mail', name: 'Send Email', icon: Envelope, description: 'Send automated emails' },
+  { id: 'action-api', name: 'API Call', icon: ExternalLink, description: 'Make external API requests' },
+  { id: 'action-database', name: 'Update Database', icon: Database, description: 'Insert or update database records' },
+  { id: 'action-message', name: 'Send Message', icon: MessageSquare, description: 'Send messages to communication channels' },
+  { id: 'action-document', name: 'Generate Document', icon: FileText, description: 'Create documents from templates' },
+  { id: 'action-image', name: 'Process Image', icon: Image, description: 'Process and transform images' },
+  { id: 'action-analytics', name: 'Record Analytics', icon: BarChart, description: 'Log events for analytics' },
+  { id: 'action-share', name: 'Share Content', icon: Share2, description: 'Share content with external services' },
+];
+
+// Component for draggable items in the triggers/actions panel
+const DraggableItem = ({ item }) => {
+  const onDragStart = (event, nodeType) => {
+    event.dataTransfer.setData('application/reactflow', nodeType);
+    event.dataTransfer.effectAllowed = 'move';
+  };
+
+  return (
+    <div 
+      className="p-2 rounded-md bg-white/50 dark:bg-gray-800/50 cursor-grab border border-white/30 hover:border-primary/30 transition-colors mb-2 flex items-center gap-2"
+      draggable
+      onDragStart={(e) => onDragStart(e, item.id)}
+    >
+      <div className="h-6 w-6 rounded-md bg-primary/10 flex items-center justify-center text-primary">
+        <item.icon className="h-3.5 w-3.5" />
+      </div>
+      <span className="text-sm">{item.name}</span>
+    </div>
+  );
+};
+
 const AIWorkflow = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [selectedWorkflow, setSelectedWorkflow] = useState('workflow1');
+  const [searchTriggers, setSearchTriggers] = useState('');
+  const [searchActions, setSearchActions] = useState('');
 
   const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
+
+  const onDragOver = useCallback((event) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  }, []);
+
+  const onDrop = useCallback(
+    (event) => {
+      event.preventDefault();
+
+      const type = event.dataTransfer.getData('application/reactflow');
+      
+      if (!type) return;
+
+      const position = { x: event.clientX, y: event.clientY };
+      const reactFlowBounds = document.querySelector('.react-flow').getBoundingClientRect();
+      
+      // Calculate the position of the new node
+      const newX = position.x - reactFlowBounds.left;
+      const newY = position.y - reactFlowBounds.top;
+
+      let newNode = {
+        id: `node-${Date.now()}`,
+        position: { x: newX, y: newY },
+        style: { 
+          background: 'rgba(255, 255, 255, 0.8)', 
+          border: '1px solid #ddd', 
+          borderRadius: '8px', 
+          padding: '10px' 
+        },
+      };
+
+      // Configure the node based on its type
+      if (type.startsWith('trigger-')) {
+        const trigger = triggers.find(t => t.id === type);
+        newNode.type = 'input';
+        newNode.data = { label: trigger.name };
+        newNode.style.background = 'rgba(230, 242, 255, 0.8)'; // Light blue for triggers
+      } else if (type.startsWith('action-')) {
+        const action = actions.find(a => a.id === type);
+        newNode.data = { label: action.name };
+        newNode.style.background = 'rgba(230, 255, 238, 0.8)'; // Light green for actions
+      }
+
+      setNodes((nds) => nds.concat(newNode));
+    },
+    [setNodes]
+  );
+
+  const filteredTriggers = triggers.filter(trigger => 
+    trigger.name.toLowerCase().includes(searchTriggers.toLowerCase())
+  );
+  
+  const filteredActions = actions.filter(action => 
+    action.name.toLowerCase().includes(searchActions.toLowerCase())
+  );
 
   const workflows = [
     { id: 'workflow1', name: 'Document Processing' },
@@ -82,51 +193,43 @@ const AIWorkflow = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="md:col-span-1">
+      <div className="grid grid-cols-1 md:grid-cols-11 gap-4">
+        {/* Left Panel - Triggers */}
+        <div className="md:col-span-2">
           <Card className="page-content h-full p-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="font-medium">Workflows</h3>
-              <Button variant="ghost" size="icon">
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="space-y-2">
-              {workflows.map((workflow) => (
-                <div 
-                  key={workflow.id}
-                  className={`p-2 rounded-md cursor-pointer ${selectedWorkflow === workflow.id ? 'bg-primary/10' : 'hover:bg-white/20'}`}
-                  onClick={() => setSelectedWorkflow(workflow.id)}
-                >
-                  {workflow.name}
-                </div>
-              ))}
+            <div className="mb-3">
+              <h3 className="font-medium flex items-center gap-1 mb-2">
+                <ArrowRight className="h-4 w-4 text-primary" />
+                Triggers
+              </h3>
+              <div className="relative">
+                <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  placeholder="Search triggers..." 
+                  className="pl-8 text-sm"
+                  value={searchTriggers}
+                  onChange={(e) => setSearchTriggers(e.target.value)}
+                />
+              </div>
             </div>
             
-            <div className="mt-6">
-              <h3 className="font-medium mb-4">Components</h3>
-              <div className="space-y-2">
-                <div className="p-2 rounded-md bg-white/50 cursor-grab border border-white/30">
-                  AI Text Generation
+            <div className="space-y-1 overflow-y-auto max-h-[600px] pr-1">
+              {filteredTriggers.map((trigger) => (
+                <div key={trigger.id} className="mb-2">
+                  <DraggableItem item={trigger} />
                 </div>
-                <div className="p-2 rounded-md bg-white/50 cursor-grab border border-white/30">
-                  Data Transformation
+              ))}
+              {filteredTriggers.length === 0 && (
+                <div className="text-center p-4 text-muted-foreground text-sm">
+                  No triggers match your search
                 </div>
-                <div className="p-2 rounded-md bg-white/50 cursor-grab border border-white/30">
-                  API Connector
-                </div>
-                <div className="p-2 rounded-md bg-white/50 cursor-grab border border-white/30">
-                  Decision Node
-                </div>
-                <div className="p-2 rounded-md bg-white/50 cursor-grab border border-white/30">
-                  Trigger
-                </div>
-              </div>
+              )}
             </div>
           </Card>
         </div>
         
-        <div className="md:col-span-3">
+        {/* Middle Panel - Flow Editor */}
+        <div className="md:col-span-7">
           <Card className="page-content h-[600px] p-4">
             <Tabs defaultValue="editor">
               <div className="flex justify-between items-center mb-4">
@@ -142,35 +245,37 @@ const AIWorkflow = () => {
               </div>
               
               <TabsContent value="editor" className="h-[500px] m-0">
-                <ReactFlow
-                  nodes={nodes}
-                  edges={edges}
-                  onNodesChange={onNodesChange}
-                  onEdgesChange={onEdgesChange}
-                  onConnect={onConnect}
-                  fitView
-                >
-                  <Background color="#aaa" gap={16} />
-                  <Controls />
-                  <MiniMap
-                    nodeStrokeColor={(n) => {
-                      if (n.type === 'input') return '#0041d0';
-                      if (n.type === 'output') return '#ff0072';
-                      return '#1a192b';
-                    }}
-                    nodeColor={(n) => {
-                      if (n.type === 'input') return 'rgba(200, 220, 255, 0.8)';
-                      if (n.type === 'output') return 'rgba(255, 200, 200, 0.8)';
-                      return 'rgba(225, 225, 225, 0.8)';
-                    }}
-                  />
-                  <Panel position="top-right">
-                    <Button variant="outline" size="sm" className="bg-white/50">
-                      <Settings className="h-4 w-4 mr-1" />
-                      Flow Settings
-                    </Button>
-                  </Panel>
-                </ReactFlow>
+                <div className="h-full w-full" onDragOver={onDragOver} onDrop={onDrop}>
+                  <ReactFlow
+                    nodes={nodes}
+                    edges={edges}
+                    onNodesChange={onNodesChange}
+                    onEdgesChange={onEdgesChange}
+                    onConnect={onConnect}
+                    fitView
+                  >
+                    <Background color="#aaa" gap={16} />
+                    <Controls />
+                    <MiniMap
+                      nodeStrokeColor={(n) => {
+                        if (n.type === 'input') return '#0041d0';
+                        if (n.type === 'output') return '#ff0072';
+                        return '#1a192b';
+                      }}
+                      nodeColor={(n) => {
+                        if (n.type === 'input') return 'rgba(200, 220, 255, 0.8)';
+                        if (n.type === 'output') return 'rgba(255, 200, 200, 0.8)';
+                        return 'rgba(225, 225, 225, 0.8)';
+                      }}
+                    />
+                    <Panel position="top-right">
+                      <Button variant="outline" size="sm" className="bg-white/50">
+                        <Settings className="h-4 w-4 mr-1" />
+                        Flow Settings
+                      </Button>
+                    </Panel>
+                  </ReactFlow>
+                </div>
               </TabsContent>
               
               <TabsContent value="settings" className="h-[500px] overflow-auto">
@@ -247,6 +352,40 @@ const AIWorkflow = () => {
                 </div>
               </TabsContent>
             </Tabs>
+          </Card>
+        </div>
+        
+        {/* Right Panel - Actions */}
+        <div className="md:col-span-2">
+          <Card className="page-content h-full p-4">
+            <div className="mb-3">
+              <h3 className="font-medium flex items-center gap-1 mb-2">
+                <ArrowRight className="h-4 w-4 text-primary" />
+                Actions
+              </h3>
+              <div className="relative">
+                <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  placeholder="Search actions..." 
+                  className="pl-8 text-sm"
+                  value={searchActions}
+                  onChange={(e) => setSearchActions(e.target.value)}
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-1 overflow-y-auto max-h-[600px] pr-1">
+              {filteredActions.map((action) => (
+                <div key={action.id} className="mb-2">
+                  <DraggableItem item={action} />
+                </div>
+              ))}
+              {filteredActions.length === 0 && (
+                <div className="text-center p-4 text-muted-foreground text-sm">
+                  No actions match your search
+                </div>
+              )}
+            </div>
           </Card>
         </div>
       </div>
