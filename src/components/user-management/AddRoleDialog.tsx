@@ -69,6 +69,31 @@ export function AddRoleDialog({ fetchRoles }: AddRoleDialogProps) {
     },
   });
 
+  const handleAddRole = async (data: z.infer<typeof roleSchema>) => {
+    setIsSubmitting(true);
+    try {
+      // For now, just simulate adding a role
+      console.log('Adding role:', data);
+      
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Show success message
+      toast.success(`Role "${data.name}" created successfully`);
+      
+      // Reset form and close modal
+      form.reset();
+      setIsOpen(false);
+      
+      // Refresh the roles list
+      fetchRoles();
+    } catch (error) {
+      console.error('Error adding role:', error);
+      toast.error('Failed to create role');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>

@@ -28,10 +28,82 @@ export function RoleManagementTab() {
 
   const fetchRoles = async () => {
     setIsLoading(true);
+    try {
+      // Mock roles data
+      const mockRoles: Role[] = [
+        {
+          id: "1",
+          name: "Admin",
+          description: "Administrator with full access",
+          created_at: new Date().toISOString()
+        },
+        {
+          id: "2",
+          name: "User",
+          description: "Regular user with limited access",
+          created_at: new Date().toISOString()
+        },
+        {
+          id: "3",
+          name: "Manager",
+          description: "Department manager with team access",
+          created_at: new Date().toISOString()
+        }
+      ];
+      
+      setRoles(mockRoles);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error fetching roles:", error);
+      toast.error("Failed to load roles");
+      setIsLoading(false);
+    }
   };
 
   const fetchPermissions = async (roleId: string) => {
-
+    setIsLoading(true);
+    try {
+      // Mock permissions data
+      const mockPermissions: Permission[] = [
+        {
+          id: "1",
+          role_id: roleId,
+          application: "Dashboard",
+          can_view: true,
+          can_create: roleId === "1",
+          can_edit: roleId === "1",
+          can_delete: roleId === "1",
+          created_at: new Date().toISOString()
+        },
+        {
+          id: "2",
+          role_id: roleId,
+          application: "User Management",
+          can_view: roleId === "1",
+          can_create: roleId === "1",
+          can_edit: roleId === "1",
+          can_delete: roleId === "1",
+          created_at: new Date().toISOString()
+        },
+        {
+          id: "3",
+          role_id: roleId,
+          application: "Projects",
+          can_view: true,
+          can_create: roleId === "1" || roleId === "3",
+          can_edit: roleId === "1" || roleId === "3",
+          can_delete: roleId === "1",
+          created_at: new Date().toISOString()
+        }
+      ];
+      
+      setPermissions(mockPermissions);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error fetching permissions:", error);
+      toast.error("Failed to load permissions");
+      setIsLoading(false);
+    }
   };
 
   return (

@@ -53,7 +53,31 @@ export function AddUserDialog({ availableRoles, onUserAdded }: AddUserDialogProp
     },
   });
 
-
+  const handleAddUser = async (data: z.infer<typeof userSchema>) => {
+    setIsSubmitting(true);
+    try {
+      // For now, just simulate adding a user
+      console.log('Adding user:', data);
+      
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Show success message
+      toast.success(`User ${data.fullName} created successfully`);
+      
+      // Reset form and close modal
+      form.reset();
+      setIsModalOpen(false);
+      
+      // Refresh the users list
+      onUserAdded();
+    } catch (error) {
+      console.error('Error adding user:', error);
+      toast.error('Failed to create user');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
@@ -139,13 +163,6 @@ export function AddUserDialog({ availableRoles, onUserAdded }: AddUserDialogProp
                             {role.name}
                           </SelectItem>
                         ))
-                      )}
-                      {availableRoles.length === 0 && (
-                        <>
-                          <SelectItem value="User">User</SelectItem>
-                          <SelectItem value="Admin">Admin</SelectItem>
-                          <SelectItem value="Manager">Manager</SelectItem>
-                        </>
                       )}
                     </SelectContent>
                   </Select>

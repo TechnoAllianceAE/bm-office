@@ -24,12 +24,78 @@ export function UserManagementTab() {
   }, [currentPage]);
 
   const fetchRoles = async () => {
-
+    try {
+      // Mock roles data for now
+      const mockRoles: Role[] = [
+        {
+          id: "1",
+          name: "Admin",
+          description: "Administrator with full access",
+          created_at: new Date().toISOString()
+        },
+        {
+          id: "2",
+          name: "User",
+          description: "Regular user with limited access",
+          created_at: new Date().toISOString()
+        },
+        {
+          id: "3",
+          name: "Manager",
+          description: "Department manager with team access",
+          created_at: new Date().toISOString()
+        }
+      ];
+      
+      setAvailableRoles(mockRoles);
+    } catch (error) {
+      console.error("Error fetching roles:", error);
+      toast.error("Failed to load roles");
+    }
   };
 
   const fetchUsers = async () => {
     setIsLoading(true);
-
+    try {
+      // Mock users data for now
+      const mockUsers: User[] = [
+        {
+          id: "1",
+          full_name: "John Doe",
+          email: "john.doe@example.com",
+          role: "Admin",
+          status: "Active",
+          last_login: new Date().toISOString(),
+          created_at: new Date().toISOString()
+        },
+        {
+          id: "2",
+          full_name: "Jane Smith",
+          email: "jane.smith@example.com",
+          role: "User",
+          status: "Active",
+          last_login: new Date().toISOString(),
+          created_at: new Date().toISOString()
+        },
+        {
+          id: "3",
+          full_name: "Mike Johnson",
+          email: "mike.johnson@example.com",
+          role: "Manager",
+          status: "Inactive",
+          last_login: null,
+          created_at: new Date().toISOString()
+        }
+      ];
+      
+      setUsers(mockUsers);
+      setTotalPages(Math.ceil(mockUsers.length / pageSize));
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      toast.error("Failed to load users");
+      setIsLoading(false);
+    }
   };
 
   return (

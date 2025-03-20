@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { Permission, Role } from './types';
 import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -49,7 +50,24 @@ export function PermissionsTable({
   fetchPermissions 
 }: PermissionsTableProps) {
   const handleUpdatePermission = async (permissionId: string, field: string, value: boolean) => {
-    
+    try {
+      // Log the permission change
+      console.log(`Updating permission ${permissionId}, ${field} = ${value}`);
+      
+      // Mock API call
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Show success toast
+      toast.success(`Permission updated successfully`);
+      
+      // Update the permissions list if needed
+      if (selectedRole) {
+        fetchPermissions(selectedRole.id);
+      }
+    } catch (error) {
+      console.error("Error updating permission:", error);
+      toast.error("Failed to update permission");
+    }
   };
 
   return (

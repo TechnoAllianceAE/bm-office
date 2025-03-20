@@ -1,350 +1,175 @@
 
-import { useState, useEffect } from 'react';
-import { toast } from 'sonner';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
-import { AlertCircle, Shield, Key, RefreshCw, User, Save, Lock } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
-interface SecuritySettings {
-  id: string;
-  min_password_length: number;
-  require_uppercase: boolean;
-  require_lowercase: boolean;
-  require_numbers: boolean;
-  require_special_chars: boolean;
-  password_expiry_days: number;
-  max_login_attempts: number;
-  google_sso_enabled: boolean;
-  microsoft_sso_enabled: boolean;
-  linkedin_sso_enabled: boolean;
-}
+import { Card } from '@/components/common/Card';
+import { toast } from 'sonner';
+import { Save, Lock } from 'lucide-react';
 
 export function SecuritySettingsTab() {
-  const [settings, setSettings] = useState<SecuritySettings | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [hasChanges, setHasChanges] = useState(false);
-
-  useEffect(() => {
-    fetchSettings();
-  }, []);
-
-  const fetchSettings = async () => {
-    setIsLoading(true);
-
-  };
-
-  const updateSetting = <K extends keyof SecuritySettings>(key: K, value: SecuritySettings[K]) => {
-    if (settings) {
-      setSettings({ ...settings, [key]: value });
-      setHasChanges(true);
-    }
-  };
-
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Password complexity settings
+  const [minPasswordLength, setMinPasswordLength] = useState(8);
+  const [requireUppercase, setRequireUppercase] = useState(true);
+  const [requireLowercase, setRequireLowercase] = useState(true);
+  const [requireNumbers, setRequireNumbers] = useState(true);
+  const [requireSpecialChars, setRequireSpecialChars] = useState(false);
+  const [passwordExpiryDays, setPasswordExpiryDays] = useState(90);
+  const [maxLoginAttempts, setMaxLoginAttempts] = useState(5);
+  
+  // SSO settings
+  const [googleSSOEnabled, setGoogleSSOEnabled] = useState(false);
+  const [microsoftSSOEnabled, setMicrosoftSSOEnabled] = useState(false);
+  const [linkedInSSOEnabled, setLinkedInSSOEnabled] = useState(false);
+  
   const handleSaveSettings = async () => {
-    if (!settings) return;
-    
-    setIsSaving(true);
-
-  };
-
-  const getPasswordStrengthLabel = () => {
-    if (!settings) return 'Low';
-    
-    let score = 0;
-    if (settings.min_password_length >= 12) score += 2;
-    else if (settings.min_password_length >= 8) score += 1;
-    
-    if (settings.require_uppercase) score += 1;
-    if (settings.require_lowercase) score += 1;
-    if (settings.require_numbers) score += 1;
-    if (settings.require_special_chars) score += 1;
-    
-    if (score >= 5) return 'Very High';
-    if (score >= 4) return 'High';
-    if (score >= 3) return 'Medium';
-    if (score >= 2) return 'Low';
-    return 'Very Low';
-  };
-
-  const getPasswordStrengthColor = () => {
-    const label = getPasswordStrengthLabel();
-    switch (label) {
-      case 'Very High': return 'bg-green-500';
-      case 'High': return 'bg-green-400';
-      case 'Medium': return 'bg-yellow-400';
-      case 'Low': return 'bg-orange-400';
-      default: return 'bg-red-500';
+    setIsLoading(true);
+    try {
+      // Mock API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      toast.success('Security settings saved successfully');
+    } catch (error) {
+      console.error('Error saving security settings:', error);
+      toast.error('Failed to save security settings');
+    } finally {
+      setIsLoading(false);
     }
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center p-8">
-        <RefreshCw className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (!settings) {
-    return (
-      <Alert variant="destructive" className="mb-6">
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Error</AlertTitle>
-        <AlertDescription>
-          Could not load security settings. Please try refreshing the page.
-        </AlertDescription>
-      </Alert>
-    );
-  }
-
+  
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium">Security Settings</h3>
-        <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={fetchSettings} 
-            disabled={isSaving}
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
-          </Button>
-          <Button 
-            size="sm" 
-            onClick={handleSaveSettings} 
-            disabled={!hasChanges || isSaving}
-          >
-            <Save className="h-4 w-4 mr-2" />
-            {isSaving ? 'Saving...' : 'Save Changes'}
-          </Button>
+      {/* Password Policy */}
+      <Card className="p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Lock className="h-5 w-5 text-primary" />
+          <h3 className="text-lg font-medium">Password Policy</h3>
         </div>
-      </div>
-      
-      <Tabs defaultValue="password">
-        <TabsList className="mb-6 bg-secondary/50 backdrop-blur-sm">
-          <TabsTrigger value="password">
-            <Lock className="h-4 w-4 mr-2" />
-            Password Policy
-          </TabsTrigger>
-          <TabsTrigger value="sso">
-            <User className="h-4 w-4 mr-2" />
-            SSO Providers
-          </TabsTrigger>
-        </TabsList>
         
-        <TabsContent value="password">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="bg-card/40 backdrop-blur-md border border-white/10">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Key className="h-5 w-5" />
-                  Password Policy
-                </CardTitle>
-                <CardDescription>
-                  Configure password requirements for all users
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <Label htmlFor="min_length">Minimum Length: {settings.min_password_length}</Label>
-                      <span className="text-sm text-muted-foreground">
-                        {settings.min_password_length} characters
-                      </span>
-                    </div>
-                    <Slider
-                      id="min_length"
-                      value={[settings.min_password_length]}
-                      min={6}
-                      max={24}
-                      step={1}
-                      onValueChange={(value) => updateSetting('min_password_length', value[0])}
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="require_uppercase">Require Uppercase</Label>
-                    <Switch
-                      id="require_uppercase"
-                      checked={settings.require_uppercase}
-                      onCheckedChange={(checked) => updateSetting('require_uppercase', checked)}
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="require_lowercase">Require Lowercase</Label>
-                    <Switch
-                      id="require_lowercase"
-                      checked={settings.require_lowercase}
-                      onCheckedChange={(checked) => updateSetting('require_lowercase', checked)}
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="require_numbers">Require Numbers</Label>
-                    <Switch
-                      id="require_numbers"
-                      checked={settings.require_numbers}
-                      onCheckedChange={(checked) => updateSetting('require_numbers', checked)}
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="require_special">Require Special Characters</Label>
-                    <Switch
-                      id="require_special"
-                      checked={settings.require_special_chars}
-                      onCheckedChange={(checked) => updateSetting('require_special_chars', checked)}
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-card/40 backdrop-blur-md border border-white/10">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Shield className="h-5 w-5" />
-                  Additional Security
-                </CardTitle>
-                <CardDescription>
-                  Configure additional security settings
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <Label htmlFor="password_expiry">Password Expiry: {settings.password_expiry_days} days</Label>
-                    <span className="text-sm text-muted-foreground">
-                      {settings.password_expiry_days === 0 ? 'Never' : `${settings.password_expiry_days} days`}
-                    </span>
-                  </div>
-                  <Slider
-                    id="password_expiry"
-                    value={[settings.password_expiry_days]}
-                    min={0}
-                    max={365}
-                    step={30}
-                    onValueChange={(value) => updateSetting('password_expiry_days', value[0])}
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Set to 0 to disable password expiration
-                  </p>
-                </div>
-                
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <Label htmlFor="max_attempts">Max Login Attempts</Label>
-                    <span className="text-sm text-muted-foreground">
-                      {settings.max_login_attempts} attempts
-                    </span>
-                  </div>
-                  <Slider
-                    id="max_attempts"
-                    value={[settings.max_login_attempts]}
-                    min={3}
-                    max={10}
-                    step={1}
-                    onValueChange={(value) => updateSetting('max_login_attempts', value[0])}
-                  />
-                </div>
-                
-                <div className="mt-6 border-t pt-4">
-                  <p className="text-sm font-medium mb-2">Overall Password Strength</p>
-                  <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-                    <div 
-                      className={`h-full ${getPasswordStrengthColor()}`}
-                      style={{ 
-                        width: `${Math.min(100, (
-                          20 + 
-                          (settings.min_password_length >= 8 ? 15 : 0) + 
-                          (settings.require_uppercase ? 15 : 0) + 
-                          (settings.require_lowercase ? 15 : 0) + 
-                          (settings.require_numbers ? 15 : 0) + 
-                          (settings.require_special_chars ? 20 : 0)
-                        ))}%` 
-                      }}
-                    />
-                  </div>
-                  <p className="text-sm text-right mt-1">{getPasswordStrengthLabel()}</p>
-                </div>
-              </CardContent>
-            </Card>
+        <div className="space-y-6">
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <Label htmlFor="password-length">Minimum Password Length</Label>
+              <span className="text-sm font-medium">{minPasswordLength} characters</span>
+            </div>
+            <Slider 
+              id="password-length" 
+              min={6} 
+              max={20} 
+              step={1} 
+              value={[minPasswordLength]} 
+              onValueChange={(value) => setMinPasswordLength(value[0])} 
+            />
           </div>
-        </TabsContent>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="require-uppercase">Require Uppercase Letters</Label>
+              <Switch 
+                id="require-uppercase" 
+                checked={requireUppercase} 
+                onCheckedChange={setRequireUppercase} 
+              />
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <Label htmlFor="require-lowercase">Require Lowercase Letters</Label>
+              <Switch 
+                id="require-lowercase" 
+                checked={requireLowercase} 
+                onCheckedChange={setRequireLowercase} 
+              />
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <Label htmlFor="require-numbers">Require Numbers</Label>
+              <Switch 
+                id="require-numbers" 
+                checked={requireNumbers} 
+                onCheckedChange={setRequireNumbers} 
+              />
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <Label htmlFor="require-special">Require Special Characters</Label>
+              <Switch 
+                id="require-special" 
+                checked={requireSpecialChars} 
+                onCheckedChange={setRequireSpecialChars} 
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="password-expiry">Password Expiry (Days)</Label>
+              <Input 
+                id="password-expiry" 
+                type="number" 
+                min={0} 
+                value={passwordExpiryDays} 
+                onChange={(e) => setPasswordExpiryDays(parseInt(e.target.value) || 0)} 
+              />
+              <p className="text-xs text-muted-foreground">0 = no expiration</p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="max-attempts">Max Failed Login Attempts</Label>
+              <Input 
+                id="max-attempts" 
+                type="number" 
+                min={1} 
+                value={maxLoginAttempts} 
+                onChange={(e) => setMaxLoginAttempts(parseInt(e.target.value) || 1)} 
+              />
+            </div>
+          </div>
+        </div>
+      </Card>
+      
+      {/* Single Sign-On */}
+      <Card className="p-6">
+        <h3 className="text-lg font-medium mb-4">Single Sign-On (SSO)</h3>
         
-        <TabsContent value="sso">
-          <Card className="bg-card/40 backdrop-blur-md border border-white/10">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                SSO Providers
-              </CardTitle>
-              <CardDescription>
-                Configure Single Sign-On options for your organization
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Google</p>
-                  <p className="text-sm text-muted-foreground">
-                    Allow users to sign in with their Google account
-                  </p>
-                </div>
-                <Switch
-                  checked={settings.google_sso_enabled}
-                  onCheckedChange={(checked) => updateSetting('google_sso_enabled', checked)}
-                />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Microsoft</p>
-                  <p className="text-sm text-muted-foreground">
-                    Allow users to sign in with their Microsoft account
-                  </p>
-                </div>
-                <Switch
-                  checked={settings.microsoft_sso_enabled}
-                  onCheckedChange={(checked) => updateSetting('microsoft_sso_enabled', checked)}
-                />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">LinkedIn</p>
-                  <p className="text-sm text-muted-foreground">
-                    Allow users to sign in with their LinkedIn account
-                  </p>
-                </div>
-                <Switch
-                  checked={settings.linkedin_sso_enabled}
-                  onCheckedChange={(checked) => updateSetting('linkedin_sso_enabled', checked)}
-                />
-              </div>
-              
-              <Alert className="mt-4">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Note</AlertTitle>
-                <AlertDescription>
-                  To complete SSO setup, you'll need to configure OAuth credentials for each provider in your Supabase project settings.
-                </AlertDescription>
-              </Alert>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="google-sso">Google SSO</Label>
+            <Switch 
+              id="google-sso" 
+              checked={googleSSOEnabled} 
+              onCheckedChange={setGoogleSSOEnabled} 
+            />
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <Label htmlFor="microsoft-sso">Microsoft SSO</Label>
+            <Switch 
+              id="microsoft-sso" 
+              checked={microsoftSSOEnabled} 
+              onCheckedChange={setMicrosoftSSOEnabled} 
+            />
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <Label htmlFor="linkedin-sso">LinkedIn SSO</Label>
+            <Switch 
+              id="linkedin-sso" 
+              checked={linkedInSSOEnabled} 
+              onCheckedChange={setLinkedInSSOEnabled} 
+            />
+          </div>
+        </div>
+      </Card>
+      
+      <div className="flex justify-end">
+        <Button onClick={handleSaveSettings} disabled={isLoading}>
+          <Save className="h-4 w-4 mr-2" />
+          {isLoading ? 'Saving...' : 'Save Settings'}
+        </Button>
+      </div>
     </div>
   );
 }
