@@ -138,7 +138,8 @@ export default {
 			},
 			fontFamily: {
 				'sans': ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
-				'display': ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
+				'display': ['Playfair Display', 'Poppins', 'serif'],
+				'body': ['Inter', 'system-ui', 'sans-serif'],
 			},
 		}
 	},

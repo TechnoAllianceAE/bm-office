@@ -43,8 +43,8 @@ const Settings = () => {
                     </Label>
                     <RadioGroup 
                       value={theme} 
-                      onValueChange={(value) => setTheme(value as 'default' | 'coolBlue')}
-                      className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                      onValueChange={(value) => setTheme(value as 'default' | 'coolBlue' | 'purple')}
+                      className="grid grid-cols-1 md:grid-cols-3 gap-4"
                     >
                       <div className="relative">
                         <RadioGroupItem value="default" id="default" className="peer sr-only" />
@@ -82,6 +82,26 @@ const Settings = () => {
                           <div className="flex w-full items-center justify-between">
                             <span>Cool Blue Theme</span>
                             {theme === 'coolBlue' && <Check className="h-4 w-4" />}
+                          </div>
+                        </Label>
+                      </div>
+                      
+                      <div className="relative">
+                        <RadioGroupItem value="purple" id="purple" className="peer sr-only" />
+                        <Label 
+                          htmlFor="purple" 
+                          className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+                        >
+                          <div className="mb-3 w-full space-y-2">
+                            <div className="w-full h-6 rounded-md bg-[#6A4BFC]"></div>
+                            <div className="flex gap-2">
+                              <div className="w-1/3 h-4 rounded-md bg-[#9B87F5]"></div>
+                              <div className="w-1/3 h-4 rounded-md bg-[#D6BCFA]"></div>
+                            </div>
+                          </div>
+                          <div className="flex w-full items-center justify-between">
+                            <span>Purple Theme</span>
+                            {theme === 'purple' && <Check className="h-4 w-4" />}
                           </div>
                         </Label>
                       </div>
