@@ -20,6 +20,7 @@ import MIS from "./pages/MIS";
 import Requisition from "./pages/Requisition";
 import Settings from "./pages/Settings";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { AuthProvider } from "./contexts/auth/AuthContext";
 import AIWorkflow from "./pages/AIWorkflow";
 import HR from "./pages/HR";
 import CourseView from "./pages/CourseView";
@@ -34,46 +35,48 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            
-            {/* Dashboard routes - wrapped in AppLayout */}
-            <Route element={<AppLayout />}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/mis" element={<MIS />} />
-              <Route path="/timesheet" element={<Timesheet />} />
-              <Route path="/projects" element={<Projects />} />
-              <Route path="/ai-assistant" element={<AIAssistant />} />
-              <Route path="/ai-workflow" element={<AIWorkflow />} />
-              <Route path="/requisition" element={<Requisition />} />
-              <Route path="/document-manager" element={<DocumentManager />} />
-              <Route path="/hr" element={<HR />} />
-              <Route path="/referrals" element={<Index />} />
-              <Route path="/claims" element={<Claims />} />
-              <Route path="helpdesk" element={<HelpDesk />} />
-              <Route path="/lms" element={<LMS />} />
-              <Route path="/lms/course/:id" element={<CourseView />} />
-              <Route path="/handy-tools" element={<HandyTools />} />
-              <Route path="/mailbox" element={<MailBox />} />
-              <Route path="/calendar" element={<Calendar />} />
-              <Route path="/directory" element={<Directory />} />
-              <Route path="/usermanagement" element={<UserManagement />} />
-              <Route path="/analytics" element={<Analytics />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/login" element={<Login />} />
-            </Route>
-            
-            {/* Catch-all route */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              
+              {/* Dashboard routes - wrapped in AppLayout */}
+              <Route element={<AppLayout />}>
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/mis" element={<MIS />} />
+                <Route path="/timesheet" element={<Timesheet />} />
+                <Route path="/projects" element={<Projects />} />
+                <Route path="/ai-assistant" element={<AIAssistant />} />
+                <Route path="/ai-workflow" element={<AIWorkflow />} />
+                <Route path="/requisition" element={<Requisition />} />
+                <Route path="/document-manager" element={<DocumentManager />} />
+                <Route path="/hr" element={<HR />} />
+                <Route path="/referrals" element={<Index />} />
+                <Route path="/claims" element={<Claims />} />
+                <Route path="helpdesk" element={<HelpDesk />} />
+                <Route path="/lms" element={<LMS />} />
+                <Route path="/lms/course/:id" element={<CourseView />} />
+                <Route path="/handy-tools" element={<HandyTools />} />
+                <Route path="/mailbox" element={<MailBox />} />
+                <Route path="/calendar" element={<Calendar />} />
+                <Route path="/directory" element={<Directory />} />
+                <Route path="/usermanagement" element={<UserManagement />} />
+                <Route path="/analytics" element={<Analytics />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/login" element={<Login />} />
+              </Route>
+              
+              {/* Catch-all route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </ThemeProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
