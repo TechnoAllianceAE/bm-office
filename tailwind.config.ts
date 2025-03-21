@@ -137,9 +137,9 @@ export default {
 				'glass': 'blur(10px) saturate(180%)',
 			},
 			fontFamily: {
-				'sans': ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
-				'display': ['Playfair Display', 'Poppins', 'serif'],
-				'body': ['Inter', 'system-ui', 'sans-serif'],
+				'sans': ['Roboto', 'system-ui', 'sans-serif'],
+				'display': ['Lucida Sans', 'Roboto', 'sans-serif'],
+				'body': ['Roboto', 'system-ui', 'sans-serif'],
 			},
 		}
 	},
