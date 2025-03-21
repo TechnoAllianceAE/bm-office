@@ -8,11 +8,13 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { Bell, User, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const AppLayout = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const isMobile = useIsMobile();
   const location = useLocation();
+  const { glassEnabled } = useTheme();
   
   // Automatically collapse sidebar on mobile
   useEffect(() => {
@@ -46,7 +48,7 @@ const AppLayout = () => {
         <header className="sticky top-0 z-30 h-16 glass-panel">
           <div className="flex items-center justify-between px-4 h-full">
             <div className="flex items-center gap-3">
-              <h1 className="text-xl font-display font-medium">{getPageTitle()}</h1>
+              <h1 className="text-xl font-medium">{getPageTitle()}</h1>
             </div>
             
             <div className="flex items-center gap-2">
@@ -75,7 +77,7 @@ const AppLayout = () => {
               transition={{ duration: 0.3 }}
               className="max-w-7xl mx-auto"
             >
-              <div className="glass-card p-6">
+              <div className={cn("glass-card p-6", glassEnabled ? "bg-white/60 backdrop-blur-md" : "")}>
                 <Outlet />
               </div>
             </motion.div>
