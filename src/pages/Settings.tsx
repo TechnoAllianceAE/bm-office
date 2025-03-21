@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,36 +21,54 @@ import { useTheme } from "@/contexts/ThemeContext";
 
 const Settings = () => {
   const { theme, setTheme } = useTheme();
+  const [activeTab, setActiveTab] = useState("appearance");
+
+  // This helps ensure the tab navigation works properly
+  useEffect(() => {
+    // Force tab content to update when theme changes
+    const tabContent = document.querySelector(`[data-state="active"][role="tabpanel"]`);
+    if (tabContent) {
+      tabContent.setAttribute("data-state", "inactive");
+      setTimeout(() => {
+        tabContent.setAttribute("data-state", "active");
+      }, 10);
+    }
+  }, [theme]);
+  
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+  };
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
+      className="container mx-auto px-4 py-6"
     >
       <div className="mb-6">
         <h1 className="text-3xl font-bold">Settings</h1>
         <p className="text-muted-foreground">Customize your workspace preferences</p>
       </div>
       
-      <Tabs defaultValue="appearance" className="w-full">
-        <TabsList className="mb-6 w-full md:w-auto overflow-x-auto grid grid-flow-col md:grid-flow-row auto-cols-auto">
-          <TabsTrigger value="appearance" className="flex gap-2 items-center">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+        <TabsList className="mb-6 w-full grid grid-cols-3 md:w-auto">
+          <TabsTrigger value="appearance" className="flex gap-2 items-center justify-center">
             <Palette className="h-4 w-4" />
             Appearance
           </TabsTrigger>
-          <TabsTrigger value="notifications" className="flex gap-2 items-center">
+          <TabsTrigger value="notifications" className="flex gap-2 items-center justify-center">
             <Bell className="h-4 w-4" />
             Notifications
           </TabsTrigger>
-          <TabsTrigger value="integration" className="flex gap-2 items-center">
+          <TabsTrigger value="integration" className="flex gap-2 items-center justify-center">
             <FileCode className="h-4 w-4" />
             Integrations
           </TabsTrigger>
         </TabsList>
         
         <TabsContent value="appearance">
-          <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
             <Card>
               <CardHeader>
                 <CardTitle>Theme</CardTitle>
