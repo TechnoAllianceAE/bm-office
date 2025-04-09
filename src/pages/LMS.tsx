@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Filter, GraduationCap, BookOpen, Book, Video, Play } from 'lucide-react';
+import { Search, Filter, GraduationCap, BookOpen, Book, Video, Play, PenSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/common/Card';
@@ -131,6 +131,12 @@ const LMS = () => {
           <Button variant="outline" size="icon">
             <Filter className="h-4 w-4" />
           </Button>
+          <Link to="/lms/content-manager">
+            <Button variant="default" className="flex items-center gap-2">
+              <PenSquare className="h-4 w-4" />
+              Content Manager
+            </Button>
+          </Link>
         </div>
       </div>
       

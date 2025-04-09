@@ -31,6 +31,7 @@ import CourseView from "./pages/CourseView";
 import Claims from "./pages/Claims";
 import UserManagement from "./pages/UserManagement";
 import LMS from "./pages/LMS";
+import LMSContentManager from "./pages/LMSContentManager";
 import Login from "./pages/Login";
 import Calendar from "./pages/Calendar";
 import HelpDesk from "./pages/HelpDesk";
@@ -68,6 +69,7 @@ const App = () => (
                 <Route path="/helpdesk" element={<HelpDesk />} />
                 <Route path="/lms" element={<LMS />} />
                 <Route path="/lms/course/:id" element={<CourseView />} />
+                <Route path="/lms/content-manager" element={<LMSContentManager />} />
                 <Route path="/handy-tools" element={<HandyTools />} />
                 <Route path="/mailbox" element={<MailBox />} />
                 <Route path="/calendar" element={<Calendar />} />

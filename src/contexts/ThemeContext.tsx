@@ -16,7 +16,7 @@ interface ThemeContextType {
 
 const defaultSettings: ThemeSettings = {
   theme: 'light',
-  backgroundImage: '/lovable-uploads/05305298-8812-4b79-9e2e-0f8fa2dc1d97.png'
+  backgroundImage: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=2070&q=80'
 };
 
 const SETTINGS_STORAGE_KEY = 'app-theme-settings';
