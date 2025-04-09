@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
-import { Mail, Apple, Linkedin, Microsoft } from 'lucide-react';
+import { Mail, Apple, Linkedin, BriefcaseBusiness } from 'lucide-react';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import {
   Dialog,
@@ -145,7 +145,7 @@ export default function Login() {
                 className="w-full flex items-center justify-center gap-2" 
                 onClick={() => handleSocialLogin('microsoft')}
               >
-                <Microsoft className="h-4 w-4" />
+                <BriefcaseBusiness className="h-4 w-4" />
                 Continue with Microsoft
               </Button>
               
