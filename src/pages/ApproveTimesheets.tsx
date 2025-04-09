@@ -25,8 +25,27 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { toast } from '@/components/ui/use-toast';
 
+// Define the Employee type locally since we're not using the User type directly
+type Employee = {
+  name: string;
+  email: string;
+  avatar: string;
+  designation: string;
+};
+
+// Define the timesheet type locally
+type Timesheet = {
+  id: string;
+  employee: Employee;
+  weekEnding: string;
+  totalHours: number;
+  projects: { name: string; hours: number }[];
+  status: string;
+  submittedOn: string;
+};
+
 // Mock data for timesheets pending approval
-const timesheets = [
+const timesheets: Timesheet[] = [
   {
     id: 'ts-1',
     employee: {
@@ -110,7 +129,7 @@ const dailyEntries = [
 ];
 
 const ApproveTimesheets = () => {
-  const [selectedTimesheet, setSelectedTimesheet] = useState<any>(null);
+  const [selectedTimesheet, setSelectedTimesheet] = useState<Timesheet | null>(null);
   const [viewMode, setViewMode] = useState<'summary' | 'daily'>('summary');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
