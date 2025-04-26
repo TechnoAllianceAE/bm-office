@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -32,7 +33,6 @@ import Claims from "./pages/Claims";
 import UserManagement from "./pages/UserManagement";
 import LMS from "./pages/LMS";
 import LMSContentManager from "./pages/LMSContentManager";
-import Login from "./pages/Login";
 import Calendar from "./pages/Calendar";
 import HelpDesk from "./pages/HelpDesk";
 import Referrals from "./pages/Referrals";
@@ -79,7 +79,6 @@ const App = () => (
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/settings/branding" element={<AppBranding />} />
-                <Route path="/login" element={<Login />} />
               </Route>
               
               {/* Catch-all route */}
