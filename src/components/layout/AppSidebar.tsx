@@ -1,17 +1,17 @@
-
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, Activity, Clock, Briefcase, Receipt, Users, 
   LineChart, UserPlus, BarChart, Settings, ChevronLeft, ChevronRight, Menu,
-  Bot, FileText, Wrench, ListChecks, Mail, UserRound, HelpCircle, BookOpenCheck, ClipboardList,
-  Calendar, Building
+  Bot, FileText, Wrench, ListChecks, Mail, UserRound, HelpCircle, BookOpenCheck,
+  Calendar, Building, LogOut
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Separator } from '@/components/ui/separator';
+import { useAuth } from '@/contexts/auth/AuthContext';
 
 interface SidebarProps {
   collapsed: boolean;
@@ -45,11 +45,18 @@ const menuItems = [
 const AppSidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
   const location = useLocation();
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
   
   const handleNavigation = () => {
     if (isMobile) {
       setCollapsed(true);
     }
+  };
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/login');
   };
 
   const toggleSidebar = () => {
@@ -65,13 +72,11 @@ const AppSidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
         />
       )}
       
-      <aside
-        className={cn(
-          "fixed top-0 left-0 z-50 h-full glass-panel border-r",
-          "flex flex-col transition-all duration-300",
-          collapsed ? "w-[80px]" : "w-[280px]"
-        )}
-      >
+      <aside className={cn(
+        "fixed top-0 left-0 z-50 h-full glass-panel border-r",
+        "flex flex-col transition-all duration-300",
+        collapsed ? "w-[80px]" : "w-[280px]"
+      )}>
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-2 overflow-hidden">
             <div className="rounded-md bg-primary p-1.5 shrink-0">
@@ -101,33 +106,42 @@ const AppSidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
         
         <div className="flex-1 overflow-y-auto py-3 px-3">
           <nav className="space-y-1">
-            {menuItems.map((item) => {
-              const isActive = location.pathname === item.path;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  onClick={handleNavigation}
-                  className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all",
-                    "hover:bg-white/30 dark:hover:bg-gray-800/30 group relative",
-                    isActive ? "bg-white/40 dark:bg-gray-800/40 text-primary font-medium" : "text-foreground",
-                    collapsed && "justify-center px-2"
-                  )}
-                >
-                  {isActive && (
-                    <div
-                      className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r-full"
-                    />
-                  )}
-                  <item.icon className={cn(
-                    "h-5 w-5 shrink-0",
-                    isActive ? "text-primary" : "text-foreground"
-                  )} />
-                  {!collapsed && <span>{item.label}</span>}
-                </Link>
-              );
-            })}
+            {menuItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={handleNavigation}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all",
+                  "hover:bg-white/30 dark:hover:bg-gray-800/30 group relative",
+                  location.pathname === item.path ? "bg-white/40 dark:bg-gray-800/40 text-primary font-medium" : "text-foreground",
+                  collapsed && "justify-center px-2"
+                )}
+              >
+                {location.pathname === item.path && (
+                  <div
+                    className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r-full"
+                  />
+                )}
+                <item.icon className={cn(
+                  "h-5 w-5 shrink-0",
+                  location.pathname === item.path ? "text-primary" : "text-foreground"
+                )} />
+                {!collapsed && <span>{item.label}</span>}
+              </Link>
+            ))}
+            
+            <button
+              onClick={handleLogout}
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all w-full",
+                "hover:bg-white/30 dark:hover:bg-gray-800/30 group relative text-red-600",
+                collapsed && "justify-center px-2"
+              )}
+            >
+              <LogOut className="h-5 w-5 shrink-0" />
+              {!collapsed && <span>Logout</span>}
+            </button>
           </nav>
         </div>
         
