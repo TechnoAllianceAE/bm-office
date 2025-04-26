@@ -1,10 +1,11 @@
+
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, Activity, Clock, Briefcase, Receipt, Users, 
   LineChart, UserPlus, BarChart, Settings, ChevronLeft, ChevronRight, Menu,
   Bot, FileText, Wrench, ListChecks, Mail, UserRound, HelpCircle, BookOpenCheck,
-  Calendar, Building, LogOut
+  Calendar, Building, LogOut, ClipboardList as ClipboardIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -35,7 +36,7 @@ const menuItems = [
   { icon: HelpCircle, label: 'HelpDesk', path: '/helpdesk' },
   { icon: Mail, label: 'Mail Box', path: '/mailbox' },
   { icon: Calendar, label: 'Calendar', path: '/calendar' },
-  { icon: ClipboardList, label: 'Requisition', path: '/requisition' },
+  { icon: ClipboardIcon, label: 'Requisition', path: '/requisition' },
   { icon: LineChart, label: 'MIS', path: '/mis' },
   { icon: BarChart, label: 'Analytics', path: '/analytics' },
   { icon: UserRound, label: 'User Management', path: '/usermanagement' },
