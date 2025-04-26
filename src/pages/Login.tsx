@@ -9,11 +9,22 @@ import { PasswordInput } from '@/components/auth/PasswordInput';
 
 export default function Login() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="w-full max-w-md p-4">
-        <Card className="w-full backdrop-blur-md bg-white/90 shadow-xl border-0">
-          <CardHeader className="space-y-1 text-center">
-            <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+      <div className="w-full max-w-md relative">
+        {/* Logo */}
+        <div className="absolute -top-20 left-1/2 transform -translate-x-1/2">
+          <div className="rounded-xl bg-primary p-2.5 shadow-lg">
+            <img 
+              src="/lovable-uploads/05305298-8812-4b79-9e2e-0f8fa2dc1d97.png" 
+              alt="BM Office Logo" 
+              className="h-8 w-8"
+            />
+          </div>
+        </div>
+
+        <Card className="w-full backdrop-blur-md bg-white/90 shadow-2xl border-0">
+          <CardHeader className="space-y-1 text-center pt-8">
+            <CardTitle className="text-2xl font-bold tracking-tight">Welcome back</CardTitle>
             <CardDescription>
               Sign in to continue to the platform
             </CardDescription>
@@ -34,9 +45,14 @@ export default function Login() {
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <PasswordInput id="password" />
+              <div className="text-right">
+                <Button variant="link" className="px-0 font-normal text-xs">
+                  Forgot your password?
+                </Button>
+              </div>
             </div>
             
-            <Button className="w-full" size="lg">
+            <Button className="w-full bg-primary hover:bg-primary/90" size="lg">
               Sign in with Email
             </Button>
 
@@ -57,9 +73,9 @@ export default function Login() {
             <div>
               <p className="text-sm text-muted-foreground">
                 Don't have an account?{" "}
-                <a href="#" className="text-primary hover:underline">
+                <Button variant="link" className="p-0 font-normal h-auto">
                   Sign up
-                </a>
+                </Button>
               </p>
             </div>
             <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
