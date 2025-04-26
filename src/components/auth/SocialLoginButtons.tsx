@@ -1,12 +1,13 @@
 
 import { Button } from '@/components/ui/button';
-import { Apple, Github, Google, Linkedin } from 'lucide-react';
+import { Apple, Github, Linkedin } from 'lucide-react';
+import { Facebook } from 'lucide-react';
 
 export const SocialLoginButtons = () => {
   return (
     <div className="grid grid-cols-2 gap-4">
       <Button variant="outline" className="w-full">
-        <Google className="h-4 w-4 mr-2" />
+        <Facebook className="h-4 w-4 mr-2" />
         Google
       </Button>
       <Button variant="outline" className="w-full">
