@@ -10,10 +10,10 @@ import { PasswordInput } from '@/components/auth/PasswordInput';
 export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <div className="w-full max-w-md relative">
+      <div className="w-full max-w-md relative animate-fade-in">
         {/* Logo */}
-        <div className="absolute -top-20 left-1/2 transform -translate-x-1/2">
-          <div className="rounded-xl bg-primary p-2.5 shadow-lg">
+        <div className="absolute -top-20 left-1/2 transform -translate-x-1/2 animate-fade-in">
+          <div className="rounded-xl glass-panel p-2.5 shadow-glass">
             <img 
               src="/lovable-uploads/05305298-8812-4b79-9e2e-0f8fa2dc1d97.png" 
               alt="BM Office Logo" 
@@ -22,10 +22,10 @@ export default function Login() {
           </div>
         </div>
 
-        <Card className="w-full backdrop-blur-md bg-white/90 shadow-2xl border-0">
+        <Card className="glass-card backdrop-blur-md bg-white/90 shadow-glass border-0">
           <CardHeader className="space-y-1 text-center pt-8">
-            <CardTitle className="text-2xl font-bold tracking-tight">Welcome back</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-2xl font-bold tracking-tight text-gradient">Welcome back</CardTitle>
+            <CardDescription className="text-muted-foreground">
               Sign in to continue to the platform
             </CardDescription>
           </CardHeader>
@@ -38,13 +38,13 @@ export default function Login() {
                   id="email"
                   placeholder="name@example.com"
                   type="email"
-                  className="pl-9"
+                  className="pl-9 glass-panel"
                 />
               </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <PasswordInput id="password" />
+              <PasswordInput id="password" className="glass-panel" />
               <div className="text-right">
                 <Button variant="link" className="px-0 font-normal text-xs">
                   Forgot your password?
@@ -52,16 +52,19 @@ export default function Login() {
               </div>
             </div>
             
-            <Button className="w-full bg-primary hover:bg-primary/90" size="lg">
+            <Button 
+              className="w-full bg-primary hover:bg-primary/90 shadow-glass" 
+              size="lg"
+            >
               Sign in with Email
             </Button>
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
+                <span className="w-full border-t border-white/20" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
+                <span className="glass-panel px-2 text-muted-foreground">
                   Or continue with
                 </span>
               </div>
