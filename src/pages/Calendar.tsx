@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Calendar as CalendarIcon, PlusCircle, Video, FileText, Laptop, RotateCw, CheckCircle, Users, Clock } from 'lucide-react';
+import { Calendar as CalendarIcon, PlusCircle, Video, FileText, Laptop, RotateCw, CheckCircle, Users, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Card } from '@/components/common/Card';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
