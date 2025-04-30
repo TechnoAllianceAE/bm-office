@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,13 +8,27 @@ import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useToast } from '@/hooks/use-toast';
+import { Textarea } from "@/components/ui/textarea";
 import { 
   Search, Star, Inbox, Send, Archive, Trash2, AlertCircle, 
   MailPlus, RefreshCcw, MoreVertical, ChevronDown, Tag, 
   Paperclip, Bold, Italic, Underline, List, ListOrdered, 
   Trash, Link, Image, AlignLeft, AlignCenter, AlignRight, Sparkles,
-  FileText, Download, ArrowLeft
+  FileText, Download, ArrowLeft, AtSign, Smile, Bookmark,
+  Code, Heading2, Quote, SquareCheck, Minus, PlusCircle,
+  Clock, Paperclip as AttachmentIcon, Type, Layout, Palette
 } from 'lucide-react';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuLabel, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 
 interface EmailItem {
   id: number;
@@ -33,7 +46,13 @@ const MailBox = () => {
   const [selectedEmail, setSelectedEmail] = useState<EmailItem | null>(null);
   const [composeOpen, setComposeOpen] = useState(false);
   const [activeFolder, setActiveFolder] = useState("inbox");
+  const [emailContent, setEmailContent] = useState('');
+  const [emailSubject, setEmailSubject] = useState('');
+  const [emailTo, setEmailTo] = useState('');
+  const [isUsingAI, setIsUsingAI] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState('');
   const isMobile = useIsMobile();
+  const { toast } = useToast();
   
   const emails: EmailItem[] = [
     {
@@ -112,6 +131,53 @@ const MailBox = () => {
     setSelectedEmail(null);
   };
   
+  const handleSendEmail = () => {
+    if (!emailTo) {
+      toast({
+        title: "Missing recipient",
+        description: "Please specify at least one recipient",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    toast({
+      title: "Email sent",
+      description: "Your message has been sent successfully"
+    });
+    
+    // Reset the compose form
+    setEmailTo('');
+    setEmailSubject('');
+    setEmailContent('');
+    setComposeOpen(false);
+  };
+  
+  const handleAIGenerate = () => {
+    if (!aiPrompt) {
+      toast({
+        title: "Missing prompt",
+        description: "Please enter a prompt for AI assistance",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsUsingAI(true);
+    // Simulate AI generation with a timeout
+    setTimeout(() => {
+      const generatedContent = `Dear recipient,\n\nI wanted to follow up on ${aiPrompt}. Let's discuss this matter further at your earliest convenience.\n\nBest regards,\nMe`;
+      setEmailContent(generatedContent);
+      setIsUsingAI(false);
+      setAiPrompt('');
+      
+      toast({
+        title: "Content generated",
+        description: "AI has generated content based on your prompt"
+      });
+    }, 1500);
+  };
+  
   const FolderButton = ({ icon: Icon, label, count, value }: { icon: React.ElementType, label: string, count?: number, value: string }) => (
     <Button 
       variant={activeFolder === value ? "secondary" : "ghost"} 
@@ -121,6 +187,18 @@ const MailBox = () => {
       <Icon className="h-4 w-4" />
       <span className="flex-1 text-left">{label}</span>
       {count !== undefined && <Badge variant="outline">{count}</Badge>}
+    </Button>
+  );
+  
+  const FormattingButton = ({ icon: Icon, tooltip, onClick }: { icon: React.ElementType, tooltip: string, onClick?: () => void }) => (
+    <Button 
+      variant="outline" 
+      size="icon" 
+      className="h-8 w-8" 
+      title={tooltip}
+      onClick={onClick}
+    >
+      <Icon className="h-4 w-4" />
     </Button>
   );
   
@@ -142,63 +220,175 @@ const MailBox = () => {
         <Button variant="ghost" size="icon">
           <RefreshCcw className="h-4 w-4" />
         </Button>
-        <Drawer open={composeOpen} onOpenChange={setComposeOpen}>
-          <DrawerTrigger asChild>
+        <Dialog open={composeOpen} onOpenChange={setComposeOpen}>
+          <DialogTrigger asChild>
             <Button className="hidden sm:flex items-center gap-2">
               <MailPlus className="h-4 w-4" />
               <span>Compose</span>
             </Button>
-          </DrawerTrigger>
-          <DrawerContent className="p-0 max-h-[90vh]">
-            <DrawerHeader className="border-b px-4 py-3">
-              <DrawerTitle>New Message</DrawerTitle>
-            </DrawerHeader>
-            <div className="flex flex-col h-[70vh]">
-              <div className="p-4 border-b">
-                <Input placeholder="To" className="border-0 focus-visible:ring-0 px-0 py-1.5" />
-              </div>
-              <div className="p-4 border-b">
-                <Input placeholder="Subject" className="border-0 focus-visible:ring-0 px-0 py-1.5" />
-              </div>
-              <div className="p-4 flex-1 overflow-auto min-h-[200px]">
-                <textarea 
-                  className="w-full h-full outline-none resize-none" 
-                  placeholder="Compose email..."
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-auto">
+            <DialogHeader>
+              <DialogTitle>New Message</DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-4 mt-2">
+              <div className="flex items-center space-x-2 border-b pb-2">
+                <AtSign className="h-4 w-4 text-muted-foreground" />
+                <Input 
+                  placeholder="To" 
+                  className="border-0 focus-visible:ring-0 px-0 py-1.5" 
+                  value={emailTo}
+                  onChange={(e) => setEmailTo(e.target.value)}
                 />
               </div>
-              <div className="p-3 border-t flex justify-between items-center">
-                <div className="flex items-center gap-1 overflow-x-auto">
-                  <Button variant="outline" size="icon" className="h-8 w-8">
-                    <Bold className="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" size="icon" className="h-8 w-8">
-                    <Italic className="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" size="icon" className="h-8 w-8">
-                    <Underline className="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" size="icon" className="h-8 w-8">
-                    <List className="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" size="icon" className="h-8 w-8">
-                    <Link className="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" size="icon" className="h-8 w-8">
-                    <Image className="h-4 w-4" />
+              
+              <div className="flex items-center space-x-2 border-b pb-2">
+                <Type className="h-4 w-4 text-muted-foreground" />
+                <Input 
+                  placeholder="Subject" 
+                  className="border-0 focus-visible:ring-0 px-0 py-1.5" 
+                  value={emailSubject}
+                  onChange={(e) => setEmailSubject(e.target.value)}
+                />
+              </div>
+              
+              <div className="border rounded-md">
+                <div className="flex flex-wrap items-center gap-1 p-1 bg-muted/30 border-b">
+                  <FormattingButton icon={Bold} tooltip="Bold" />
+                  <FormattingButton icon={Italic} tooltip="Italic" />
+                  <FormattingButton icon={Underline} tooltip="Underline" />
+                  <Separator orientation="vertical" className="h-6 mx-1" />
+                  
+                  <FormattingButton icon={Heading2} tooltip="Heading" />
+                  <FormattingButton icon={Quote} tooltip="Quote" />
+                  <FormattingButton icon={Code} tooltip="Code" />
+                  <Separator orientation="vertical" className="h-6 mx-1" />
+                  
+                  <FormattingButton icon={List} tooltip="Bullet List" />
+                  <FormattingButton icon={ListOrdered} tooltip="Numbered List" />
+                  <FormattingButton icon={SquareCheck} tooltip="Task List" />
+                  <Separator orientation="vertical" className="h-6 mx-1" />
+                  
+                  <FormattingButton icon={AlignLeft} tooltip="Align Left" />
+                  <FormattingButton icon={AlignCenter} tooltip="Align Center" />
+                  <FormattingButton icon={AlignRight} tooltip="Align Right" />
+                  <Separator orientation="vertical" className="h-6 mx-1" />
+                  
+                  <FormattingButton icon={Link} tooltip="Insert Link" />
+                  <FormattingButton icon={Image} tooltip="Insert Image" />
+                  <FormattingButton icon={AttachmentIcon} tooltip="Attach File" />
+                  <Separator orientation="vertical" className="h-6 mx-1" />
+                  
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="icon" className="h-8 w-8">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-[200px]">
+                      <DropdownMenuLabel>More formatting</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem>
+                        <Layout className="mr-2 h-4 w-4" />
+                        <span>Insert Table</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <Minus className="mr-2 h-4 w-4" />
+                        <span>Horizontal Rule</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <Smile className="mr-2 h-4 w-4" />
+                        <span>Emoji</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <Palette className="mr-2 h-4 w-4" />
+                        <span>Text Color</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                
+                <Textarea 
+                  className="min-h-[200px] border-0 rounded-none focus-visible:ring-0 resize-none" 
+                  placeholder="Compose email..."
+                  value={emailContent}
+                  onChange={(e) => setEmailContent(e.target.value)}
+                />
+              </div>
+              
+              {/* AI Assistant */}
+              <div className="border rounded-md p-3 bg-muted/20">
+                <div className="flex items-center gap-2 mb-3">
+                  <Sparkles className="h-5 w-5 text-yellow-500" />
+                  <h3 className="text-sm font-medium">AI Assist</h3>
+                </div>
+                
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Type a prompt (e.g., 'Draft a follow-up email about the project status')"
+                    value={aiPrompt}
+                    onChange={(e) => setAiPrompt(e.target.value)}
+                    disabled={isUsingAI}
+                  />
+                  <Button 
+                    onClick={handleAIGenerate} 
+                    disabled={isUsingAI || !aiPrompt}
+                    className="whitespace-nowrap"
+                  >
+                    {isUsingAI ? (
+                      <>
+                        <span className="animate-spin mr-2">
+                          <RotateCw className="h-4 w-4" />
+                        </span>
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        Generate
+                      </>
+                    )}
                   </Button>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" onClick={() => setComposeOpen(false)}>
-                    Discard
-                  </Button>
-                  <Button size="sm">
-                    Send
-                  </Button>
+                
+                <div className="mt-2 flex flex-wrap gap-1">
+                  <Badge variant="outline" className="cursor-pointer hover:bg-muted" onClick={() => setAiPrompt("Draft a professional introduction email")}>
+                    <PlusCircle className="h-3 w-3 mr-1" />
+                    Professional intro
+                  </Badge>
+                  <Badge variant="outline" className="cursor-pointer hover:bg-muted" onClick={() => setAiPrompt("Write a follow-up email")}>
+                    <PlusCircle className="h-3 w-3 mr-1" />
+                    Follow-up
+                  </Badge>
+                  <Badge variant="outline" className="cursor-pointer hover:bg-muted" onClick={() => setAiPrompt("Create a meeting invitation")}>
+                    <PlusCircle className="h-3 w-3 mr-1" />
+                    Meeting invite
+                  </Badge>
                 </div>
               </div>
             </div>
-          </DrawerContent>
-        </Drawer>
+            
+            <DialogFooter className="gap-2 mt-4">
+              <Button variant="outline" onClick={() => setComposeOpen(false)}>
+                <Trash className="h-4 w-4 mr-2" />
+                Discard
+              </Button>
+              <Button variant="outline">
+                <Bookmark className="h-4 w-4 mr-2" />
+                Save Draft
+              </Button>
+              <Button variant="outline">
+                <Clock className="h-4 w-4 mr-2" />
+                Schedule
+              </Button>
+              <Button onClick={handleSendEmail}>
+                <Send className="h-4 w-4 mr-2" />
+                Send
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
         
         {/* Mobile compose button */}
         <Button variant="default" size="icon" className="sm:hidden" onClick={() => setComposeOpen(true)}>
