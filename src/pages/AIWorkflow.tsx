@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
   Plus, Save, Play, Download, Upload, Settings, 
   Clock, Mail, Globe, Database, MessageSquare, 
@@ -15,7 +16,7 @@ import {
   Smartphone, BellRing, Share2, Copy, Check,
   Users, ChevronDown, X, Trash, ArrowUp, ArrowDown,
   RefreshCcw, RotateCw, Heart, MoreVertical, Folders,
-  Link2 as Link
+  Link2
 } from 'lucide-react';
 import {
   ReactFlow,
@@ -290,6 +291,7 @@ const AIWorkflow = () => {
   const [myWorkflows, setMyWorkflows] = useState<WorkflowData[]>(sampleWorkflows);
   const [sharedWithMe, setSharedWithMe] = useState<WorkflowData[]>([]);
   const [activeTab, setActiveTab] = useState('editor');
+  const isMobile = useIsMobile();
   
   const reactFlowWrapper = useRef(null);
   const { toast } = useToast();
@@ -458,12 +460,12 @@ const AIWorkflow = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
         <div>
           <h1 className="text-2xl font-semibold">AI Workflow Builder</h1>
           <p className="text-muted-foreground">Build, save, and share automated AI workflows</p>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
           <Button variant="outline" className="gap-1" onClick={() => handleNewWorkflow()}>
             <Plus className="h-4 w-4" />
             New
@@ -536,7 +538,7 @@ const AIWorkflow = () => {
               <div className="space-y-4 py-4">
                 {!shareLink ? (
                   <Button onClick={handleShareWorkflow} className="w-full">
-                    <Link className="h-4 w-4 mr-2" />
+                    <Link2 className="h-4 w-4 mr-2" />
                     Generate Shareable Link
                   </Button>
                 ) : (
@@ -575,23 +577,25 @@ const AIWorkflow = () => {
           
           <Button onClick={handleRunWorkflow} disabled={nodes.length === 0}>
             <Play className="h-4 w-4 mr-1" />
-            Run
+            {!isMobile && "Run Workflow"}
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Left Panel - Workflows & Triggers */}
-        <div className="md:col-span-3">
+        <div className="lg:col-span-3">
           <Card className="page-content h-full">
             <Tabs defaultValue="workflows" className="w-full">
-              <TabsList className="w-full mb-4">
-                <TabsTrigger value="workflows" className="flex-1">My Workflows</TabsTrigger>
-                <TabsTrigger value="triggers" className="flex-1">Triggers</TabsTrigger>
-                <TabsTrigger value="actions" className="flex-1">Actions</TabsTrigger>
-              </TabsList>
+              <div className="overflow-x-auto">
+                <TabsList className="w-full mb-4">
+                  <TabsTrigger value="workflows" className="flex-1">My Workflows</TabsTrigger>
+                  <TabsTrigger value="triggers" className="flex-1">Triggers</TabsTrigger>
+                  <TabsTrigger value="actions" className="flex-1">Actions</TabsTrigger>
+                </TabsList>
+              </div>
               
-              <TabsContent value="workflows" className="p-4 overflow-y-auto max-h-[600px]">
+              <TabsContent value="workflows" className="p-4 overflow-y-auto max-h-[400px] md:max-h-[600px]">
                 <div className="mb-3 flex items-center justify-between">
                   <h3 className="font-medium text-sm flex items-center gap-1">
                     <Folders className="h-4 w-4 text-primary" />
@@ -658,7 +662,7 @@ const AIWorkflow = () => {
                 </div>
               </TabsContent>
               
-              <TabsContent value="triggers" className="p-4 overflow-y-auto max-h-[600px]">
+              <TabsContent value="triggers" className="p-4 overflow-y-auto max-h-[400px] md:max-h-[600px]">
                 <div className="mb-3">
                   <h3 className="font-medium flex items-center gap-1 mb-2">
                     <ArrowRight className="h-4 w-4 text-primary" />
@@ -689,7 +693,7 @@ const AIWorkflow = () => {
                 </div>
               </TabsContent>
               
-              <TabsContent value="actions" className="p-4 overflow-y-auto max-h-[600px]">
+              <TabsContent value="actions" className="p-4 overflow-y-auto max-h-[400px] md:max-h-[600px]">
                 <div className="mb-3">
                   <h3 className="font-medium flex items-center gap-1 mb-2">
                     <ArrowRight className="h-4 w-4 text-primary" />
@@ -724,11 +728,11 @@ const AIWorkflow = () => {
         </div>
         
         {/* Middle Panel - Flow Editor */}
-        <div className="md:col-span-9">
-          <Card className="page-content h-[600px]">
+        <div className="lg:col-span-9">
+          <Card className="page-content h-[400px] md:h-[600px]">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <div className="flex justify-between items-center p-4 border-b">
-                <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border-b gap-3">
+                <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0">
                   <TabsList className="bg-white/30">
                     <TabsTrigger value="editor">Editor</TabsTrigger>
                     <TabsTrigger value="settings">Settings</TabsTrigger>
@@ -742,7 +746,7 @@ const AIWorkflow = () => {
                   )}
                 </div>
                 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 w-full sm:w-auto">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" size="sm">
@@ -787,12 +791,12 @@ const AIWorkflow = () => {
                     className="gap-1"
                   >
                     <Play className="h-4 w-4" />
-                    Run Workflow
+                    {!isMobile && "Run Workflow"}
                   </Button>
                 </div>
               </div>
               
-              <TabsContent value="editor" className="h-[530px] m-0">
+              <TabsContent value="editor" className="h-[330px] sm:h-[470px] md:h-[530px] m-0">
                 <div className="h-full w-full relative" ref={reactFlowWrapper}>
                   <ReactFlow
                     nodes={nodes}
@@ -807,27 +811,29 @@ const AIWorkflow = () => {
                   >
                     <Background color="#aaa" gap={16} />
                     <Controls />
-                    <MiniMap
-                      nodeStrokeColor={(n) => {
-                        if (n.type === 'input') return '#0041d0';
-                        if (n.type === 'output') return '#ff0072';
-                        return '#1a192b';
-                      }}
-                      nodeColor={(n) => {
-                        if (n.type === 'input') return 'rgba(200, 220, 255, 0.8)';
-                        if (n.type === 'output') return 'rgba(255, 200, 200, 0.8)';
-                        return 'rgba(225, 225, 225, 0.8)';
-                      }}
-                    />
+                    {!isMobile && (
+                      <MiniMap
+                        nodeStrokeColor={(n) => {
+                          if (n.type === 'input') return '#0041d0';
+                          if (n.type === 'output') return '#ff0072';
+                          return '#1a192b';
+                        }}
+                        nodeColor={(n) => {
+                          if (n.type === 'input') return 'rgba(200, 220, 255, 0.8)';
+                          if (n.type === 'output') return 'rgba(255, 200, 200, 0.8)';
+                          return 'rgba(225, 225, 225, 0.8)';
+                        }}
+                      />
+                    )}
                     <Panel position="top-right">
                       <div className="flex flex-col gap-2">
                         <Button variant="outline" size="sm" className="bg-white/50">
                           <RefreshCcw className="h-4 w-4 mr-1" />
-                          Auto Layout
+                          {!isMobile && "Auto Layout"}
                         </Button>
                         <Button variant="outline" size="sm" className="bg-white/50">
                           <Settings className="h-4 w-4 mr-1" />
-                          Flow Settings
+                          {!isMobile && "Flow Settings"}
                         </Button>
                       </div>
                     </Panel>
@@ -835,10 +841,10 @@ const AIWorkflow = () => {
                   
                   {nodes.length === 0 && (
                     <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                      <div className="text-center bg-white/80 p-6 rounded-lg shadow-sm">
-                        <ArrowRight className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                        <h3 className="text-lg font-medium mb-2">Start Building Your Workflow</h3>
-                        <p className="text-muted-foreground max-w-md">
+                      <div className="text-center bg-white/80 p-4 md:p-6 rounded-lg shadow-sm mx-2">
+                        <ArrowRight className="h-8 w-8 md:h-12 md:w-12 mx-auto mb-2 md:mb-4 text-muted-foreground" />
+                        <h3 className="text-base md:text-lg font-medium mb-1 md:mb-2">Start Building Your Workflow</h3>
+                        <p className="text-sm md:text-base text-muted-foreground max-w-md">
                           Drag triggers and actions from the sidebar to create your workflow.
                           Connect nodes together to define your process flow.
                         </p>
@@ -848,7 +854,7 @@ const AIWorkflow = () => {
                 </div>
               </TabsContent>
               
-              <TabsContent value="settings" className="h-[530px] overflow-auto">
+              <TabsContent value="settings" className="h-[330px] sm:h-[470px] md:h-[530px] overflow-auto">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-white/20 rounded-md">
                   <div>
                     <h3 className="text-sm font-medium mb-2">Workflow Settings</h3>
@@ -883,7 +889,7 @@ const AIWorkflow = () => {
                 </div>
               </TabsContent>
               
-              <TabsContent value="testing" className="h-[530px] p-0">
+              <TabsContent value="testing" className="h-[330px] sm:h-[470px] md:h-[530px] p-0">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full p-4">
                   <div className="bg-white/20 p-4 rounded-md overflow-auto">
                     <h3 className="text-sm font-medium mb-2">Test Input</h3>
@@ -927,10 +933,9 @@ const AIWorkflow = () => {
       </div>
       
       {/* CSS for custom nodes */}
-      <style>
-      {`
+      <style jsx global>{`
         .custom-node {
-          min-width: 180px;
+          min-width: 150px;
           border-radius: 8px;
           font-size: 12px;
           color: #222;
@@ -1002,8 +1007,25 @@ const AIWorkflow = () => {
         .output-dot {
           background-color: #2ecc71;
         }
-      `}
-      </style>
+        
+        @media (max-width: 768px) {
+          .custom-node {
+            min-width: 150px;
+          }
+          
+          .custom-node-header {
+            padding: 8px;
+          }
+          
+          .custom-node-description {
+            padding: 4px 8px;
+          }
+          
+          .custom-node-section {
+            padding: 4px 8px;
+          }
+        }
+      `}</style>
     </div>
   );
 };
