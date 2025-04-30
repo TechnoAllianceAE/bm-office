@@ -16,7 +16,7 @@ import {
   Smartphone, BellRing, Share2, Copy, Check,
   Users, ChevronDown, X, Trash, ArrowUp, ArrowDown,
   RefreshCcw, RotateCw, Heart, MoreVertical, Folders,
-  Link2
+  Link2, Link
 } from 'lucide-react';
 import {
   ReactFlow,
@@ -933,7 +933,8 @@ const AIWorkflow = () => {
       </div>
       
       {/* CSS for custom nodes */}
-      <style jsx global>{`
+      <style>
+        {`
         .custom-node {
           min-width: 150px;
           border-radius: 8px;
@@ -1025,7 +1026,8 @@ const AIWorkflow = () => {
             padding: 4px 8px;
           }
         }
-      `}</style>
+        `}
+      </style>
     </div>
   );
 };
