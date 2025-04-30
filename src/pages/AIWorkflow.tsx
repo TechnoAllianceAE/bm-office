@@ -451,7 +451,7 @@ const AIWorkflow = () => {
       toast({
         title: "Workflow completed",
         description: "Your workflow has completed successfully",
-        variant: "success"
+        variant: "default"
       });
     }, 2000);
   };
@@ -927,7 +927,8 @@ const AIWorkflow = () => {
       </div>
       
       {/* CSS for custom nodes */}
-      <style jsx global>{`
+      <style>
+      {`
         .custom-node {
           min-width: 180px;
           border-radius: 8px;
@@ -1001,7 +1002,8 @@ const AIWorkflow = () => {
         .output-dot {
           background-color: #2ecc71;
         }
-      `}</style>
+      `}
+      </style>
     </div>
   );
 };
