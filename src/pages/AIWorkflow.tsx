@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Card } from '@/components/common/Card';
 import { Button } from '@/components/ui/button';
@@ -15,7 +14,8 @@ import {
   Webhook, ExternalLink, Search, Filter,
   Smartphone, BellRing, Share2, Copy, Check,
   Users, ChevronDown, X, Trash, ArrowUp, ArrowDown,
-  RefreshCcw, RotateCw, Heart, MoreVertical, Folders
+  RefreshCcw, RotateCw, Heart, MoreVertical, Folders,
+  Link2 as Link
 } from 'lucide-react';
 import {
   ReactFlow,
