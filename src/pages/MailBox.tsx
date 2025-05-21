@@ -14,6 +14,7 @@ import {
   Mail,
   Archive,
   AlertCircle,
+  Download, // Added the missing Download import
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
