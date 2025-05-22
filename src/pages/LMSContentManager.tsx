@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   ArrowLeft, Search, ListFilter, Plus, BookOpen, 
-  BarChart3, ClipboardCheck, Users, Edit, Trash, Eye
+  BarChart3, ClipboardCheck, Users, Edit, Trash, Eye,
+  Video, Image, FileText, File, Youtube
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -15,7 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from '@/components/ui/use-toast';
 import { 
   Dialog, DialogContent, DialogHeader, 
-  DialogTitle, DialogTrigger 
+  DialogTitle, DialogTrigger, DialogFooter
 } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -33,6 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { CourseUnitEditor } from '@/components/lms/CourseUnitEditor';
 
 // Sample course data for management
 const managedCourses = [
@@ -130,6 +132,8 @@ const LMSContentManager = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [userSearchQuery, setUserSearchQuery] = useState('');
   const [showNewCourseDialog, setShowNewCourseDialog] = useState(false);
+  const [showUnitEditorDialog, setShowUnitEditorDialog] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState(null);
   
   // Filter enrollments based on search
   const filteredEnrollments = enrollments.filter(enrollment => 
@@ -157,6 +161,11 @@ const LMSContentManager = () => {
       title: "Course deleted",
       description: `Course ID ${courseId} has been deleted.`,
     });
+  };
+
+  const handleOpenUnitEditor = (course) => {
+    setSelectedCourse(course);
+    setShowUnitEditorDialog(true);
   };
   
   return (
@@ -356,6 +365,12 @@ const LMSContentManager = () => {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuItem 
+                                className="flex items-center gap-2"
+                                onClick={() => handleOpenUnitEditor(course)}
+                              >
+                                <BookOpen className="h-4 w-4" /> Manage Units
+                              </DropdownMenuItem>
                               <DropdownMenuItem className="flex items-center gap-2">
                                 <Edit className="h-4 w-4" /> Edit
                               </DropdownMenuItem>
@@ -525,6 +540,25 @@ const LMSContentManager = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Unit Editor Dialog */}
+      <Dialog 
+        open={showUnitEditorDialog} 
+        onOpenChange={setShowUnitEditorDialog}
+        className="max-w-4xl"
+      >
+        <DialogContent className="max-w-5xl w-[95vw]">
+          <DialogHeader>
+            <DialogTitle>
+              Manage Units: {selectedCourse?.title}
+            </DialogTitle>
+          </DialogHeader>
+          <CourseUnitEditor 
+            courseId={selectedCourse?.id} 
+            onClose={() => setShowUnitEditorDialog(false)} 
+          />
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 };
