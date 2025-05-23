@@ -18,7 +18,7 @@ import {
 import {
   Plus,
   Trash,
-  DragVertical,
+  GripVertical,
   Video,
   FileText,
   Youtube,

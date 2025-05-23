@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -545,7 +544,6 @@ const LMSContentManager = () => {
       <Dialog 
         open={showUnitEditorDialog} 
         onOpenChange={setShowUnitEditorDialog}
-        className="max-w-4xl"
       >
         <DialogContent className="max-w-5xl w-[95vw]">
           <DialogHeader>
