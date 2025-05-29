@@ -1,9 +1,8 @@
-
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2, Eye } from 'lucide-react';
 import { Student } from './types';
 
 interface StudentListProps {
@@ -12,9 +11,17 @@ interface StudentListProps {
   searchTerm: string;
   gradeFilter: string;
   batchFilter: string;
+  onViewStudent?: (studentId: string) => void;
 }
 
-export function StudentList({ students, isLoading, searchTerm, gradeFilter, batchFilter }: StudentListProps) {
+export function StudentList({ 
+  students, 
+  isLoading, 
+  searchTerm, 
+  gradeFilter, 
+  batchFilter,
+  onViewStudent 
+}: StudentListProps) {
   const filteredStudents = students.filter(student => {
     const matchesSearch = 
       student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -91,6 +98,15 @@ export function StudentList({ students, isLoading, searchTerm, gradeFilter, batc
               </TableCell>
               <TableCell>
                 <div className="flex space-x-2">
+                  {onViewStudent && (
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => onViewStudent(student.id)}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  )}
                   <Button variant="ghost" size="sm">
                     <Edit className="h-4 w-4" />
                   </Button>

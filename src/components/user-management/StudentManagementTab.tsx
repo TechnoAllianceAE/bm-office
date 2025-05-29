@@ -1,13 +1,18 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, Upload, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Student } from './types';
 import { StudentSearch } from './StudentSearch';
 import { StudentList } from './StudentList';
 import { StudentPagination } from './StudentPagination';
 import { AddStudentDialog } from './AddStudentDialog';
+import { StudentCsvUpload } from './StudentCsvUpload';
+import { StudentView } from './StudentView';
+import { StudentSubjectEndorsement } from './StudentSubjectEndorsement';
+
+type ViewMode = 'list' | 'upload' | 'view' | 'endorsement';
 
 export function StudentManagementTab() {
   const [students, setStudents] = useState<Student[]>([]);
@@ -17,6 +22,8 @@ export function StudentManagementTab() {
   const [batchFilter, setBatchFilter] = useState('all-batches');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [selectedStudentId, setSelectedStudentId] = useState<string>('');
   const pageSize = 10;
 
   useEffect(() => {
@@ -94,42 +101,92 @@ export function StudentManagementTab() {
     }
   };
 
+  const handleViewStudent = (studentId: string) => {
+    setSelectedStudentId(studentId);
+    setViewMode('view');
+  };
+
+  const renderContent = () => {
+    switch (viewMode) {
+      case 'upload':
+        return <StudentCsvUpload />;
+      case 'view':
+        return (
+          <StudentView 
+            studentId={selectedStudentId} 
+            onBack={() => setViewMode('list')} 
+          />
+        );
+      case 'endorsement':
+        return <StudentSubjectEndorsement />;
+      default:
+        return (
+          <>
+            <StudentList 
+              students={students} 
+              isLoading={isLoading} 
+              searchTerm={searchTerm}
+              gradeFilter={gradeFilter}
+              batchFilter={batchFilter}
+              onViewStudent={handleViewStudent}
+            />
+            
+            <StudentPagination 
+              currentPage={currentPage} 
+              totalPages={totalPages} 
+              isLoading={isLoading} 
+              setCurrentPage={setCurrentPage} 
+            />
+          </>
+        );
+    }
+  };
+
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row gap-4 justify-between">
-        <StudentSearch 
-          searchTerm={searchTerm} 
-          setSearchTerm={setSearchTerm}
-          gradeFilter={gradeFilter}
-          setGradeFilter={setGradeFilter}
-          batchFilter={batchFilter}
-          setBatchFilter={setBatchFilter}
-        />
-        
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={fetchStudents} disabled={isLoading}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-            Refresh
+      {viewMode === 'list' && (
+        <>
+          <div className="flex flex-col sm:flex-row gap-4 justify-between">
+            <StudentSearch 
+              searchTerm={searchTerm} 
+              setSearchTerm={setSearchTerm}
+              gradeFilter={gradeFilter}
+              setGradeFilter={setGradeFilter}
+              batchFilter={batchFilter}
+              setBatchFilter={setBatchFilter}
+            />
+            
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={fetchStudents} disabled={isLoading}>
+                <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+              
+              <Button variant="outline" size="sm" onClick={() => setViewMode('upload')}>
+                <Upload className="h-4 w-4 mr-2" />
+                CSV Upload
+              </Button>
+              
+              <Button variant="outline" size="sm" onClick={() => setViewMode('endorsement')}>
+                <Eye className="h-4 w-4 mr-2" />
+                Subject Endorsement
+              </Button>
+              
+              <AddStudentDialog onStudentAdded={fetchStudents} />
+            </div>
+          </div>
+        </>
+      )}
+      
+      {(viewMode === 'upload' || viewMode === 'endorsement') && (
+        <div className="mb-4">
+          <Button variant="outline" size="sm" onClick={() => setViewMode('list')}>
+            ← Back to Students
           </Button>
-          
-          <AddStudentDialog onStudentAdded={fetchStudents} />
         </div>
-      </div>
+      )}
       
-      <StudentList 
-        students={students} 
-        isLoading={isLoading} 
-        searchTerm={searchTerm}
-        gradeFilter={gradeFilter}
-        batchFilter={batchFilter}
-      />
-      
-      <StudentPagination 
-        currentPage={currentPage} 
-        totalPages={totalPages} 
-        isLoading={isLoading} 
-        setCurrentPage={setCurrentPage} 
-      />
+      {renderContent()}
     </div>
   );
 }
