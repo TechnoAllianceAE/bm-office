@@ -24,10 +24,10 @@ export function EditParentDialog({ parent, onParentUpdated }: EditParentDialogPr
     state: parent.state,
     country: parent.country,
     phone: parent.phone,
-    relationship: parent.relationship
+    relationship: parent.relationship as 'Father' | 'Mother' | 'Guardian'
   });
 
-  const relationships = ['Father', 'Mother', 'Guardian'];
+  const relationships: ('Father' | 'Mother' | 'Guardian')[] = ['Father', 'Mother', 'Guardian'];
   const states = ['California', 'Texas', 'New York', 'Florida', 'Illinois'];
   const countries = ['USA', 'Canada', 'UK', 'Australia'];
 
@@ -92,7 +92,7 @@ export function EditParentDialog({ parent, onParentUpdated }: EditParentDialogPr
             
             <div className="space-y-2">
               <Label htmlFor="relationship">Relationship *</Label>
-              <Select value={formData.relationship} onValueChange={(value) => setFormData({ ...formData, relationship: value })}>
+              <Select value={formData.relationship} onValueChange={(value: 'Father' | 'Mother' | 'Guardian') => setFormData({ ...formData, relationship: value })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select relationship" />
                 </SelectTrigger>
