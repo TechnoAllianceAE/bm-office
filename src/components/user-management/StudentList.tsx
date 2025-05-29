@@ -22,8 +22,8 @@ export function StudentList({ students, isLoading, searchTerm, gradeFilter, batc
       student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.father_name.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesGrade = !gradeFilter || student.grade === gradeFilter;
-    const matchesBatch = !batchFilter || student.batch === batchFilter;
+    const matchesGrade = !gradeFilter || gradeFilter === 'all-grades' || student.grade === gradeFilter;
+    const matchesBatch = !batchFilter || batchFilter === 'all-batches' || student.batch === batchFilter;
     
     return matchesSearch && matchesGrade && matchesBatch;
   });

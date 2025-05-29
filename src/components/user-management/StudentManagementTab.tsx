@@ -13,8 +13,8 @@ export function StudentManagementTab() {
   const [students, setStudents] = useState<Student[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [gradeFilter, setGradeFilter] = useState('');
-  const [batchFilter, setBatchFilter] = useState('');
+  const [gradeFilter, setGradeFilter] = useState('all-grades');
+  const [batchFilter, setBatchFilter] = useState('all-batches');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const pageSize = 10;

@@ -40,7 +40,7 @@ export function StudentSearch({
           <SelectValue placeholder="Grade" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">All Grades</SelectItem>
+          <SelectItem value="all-grades">All Grades</SelectItem>
           {grades.map((grade) => (
             <SelectItem key={grade} value={grade}>
               {grade}
@@ -54,7 +54,7 @@ export function StudentSearch({
           <SelectValue placeholder="Batch" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">All Batches</SelectItem>
+          <SelectItem value="all-batches">All Batches</SelectItem>
           {batches.map((batch) => (
             <SelectItem key={batch} value={batch}>
               Batch {batch}
