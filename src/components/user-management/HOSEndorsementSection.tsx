@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -6,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { HOS, HOSEndorsement } from './types';
 
@@ -26,6 +25,7 @@ export function HOSEndorsementSection() {
   });
   const [hoses, setHOSes] = useState<HOS[]>([]);
   const [endorsements, setEndorsements] = useState<HOSEndorsement[]>([]);
+  const [viewingHOS, setViewingHOS] = useState<string | null>(null);
 
   const sessions: ('Morning' | 'Afternoon')[] = ['Morning', 'Afternoon'];
   const curriculums = ['CBSE', 'ICSE', 'State Board', 'IB', 'Cambridge'];
@@ -133,6 +133,56 @@ export function HOSEndorsementSection() {
       toast.error('Failed to endorse HOS');
     }
   };
+
+  // Group endorsements by HOS
+  const hosGroups = endorsements.reduce((acc, endorsement) => {
+    const key = endorsement.hos_id;
+    if (!acc[key]) {
+      acc[key] = {
+        hos_name: endorsement.hos_name,
+        endorsements: []
+      };
+    }
+    acc[key].endorsements.push(endorsement);
+    return acc;
+  }, {} as Record<string, { hos_name: string; endorsements: HOSEndorsement[] }>);
+
+  if (viewingHOS) {
+    const hosData = hosGroups[viewingHOS];
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-medium">Endorsements for {hosData.hos_name}</h3>
+          <Button onClick={() => setViewingHOS(null)} variant="outline">
+            Back to Overview
+          </Button>
+        </div>
+        
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Session</TableHead>
+              <TableHead>Curriculum</TableHead>
+              <TableHead>Class</TableHead>
+              <TableHead>Date</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {hosData.endorsements.map((endorsement) => (
+              <TableRow key={endorsement.id}>
+                <TableCell>
+                  <Badge variant="outline">{endorsement.session}</Badge>
+                </TableCell>
+                <TableCell>{endorsement.curriculum}</TableCell>
+                <TableCell>Class {endorsement.class}</TableCell>
+                <TableCell>{new Date(endorsement.created_at).toLocaleDateString()}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -272,29 +322,34 @@ export function HOSEndorsementSection() {
         </div>
       )}
 
-      {/* Current Endorsements */}
+      {/* HOS Endorsements Overview */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium">Current HOS Endorsements</h3>
+        <h3 className="text-lg font-medium">HOS Endorsements Overview</h3>
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>HOS Name</TableHead>
-              <TableHead>Session</TableHead>
-              <TableHead>Curriculum</TableHead>
-              <TableHead>Class</TableHead>
-              <TableHead>Date</TableHead>
+              <TableHead>Endorsement Count</TableHead>
+              <TableHead className="w-32">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {endorsements.map((endorsement) => (
-              <TableRow key={endorsement.id}>
-                <TableCell className="font-medium">{endorsement.hos_name}</TableCell>
+            {Object.entries(hosGroups).map(([hosId, data]) => (
+              <TableRow key={hosId}>
+                <TableCell className="font-medium">{data.hos_name}</TableCell>
                 <TableCell>
-                  <Badge variant="outline">{endorsement.session}</Badge>
+                  <Badge variant="secondary">{data.endorsements.length} endorsements</Badge>
                 </TableCell>
-                <TableCell>{endorsement.curriculum}</TableCell>
-                <TableCell>Class {endorsement.class}</TableCell>
-                <TableCell>{new Date(endorsement.created_at).toLocaleDateString()}</TableCell>
+                <TableCell>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setViewingHOS(hosId)}
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    View
+                  </Button>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
