@@ -122,3 +122,12 @@ export interface HOSEndorsement {
   class: string;
   created_at: string;
 }
+
+export interface ClassTeacherEndorsement {
+  id: string;
+  teacher_id: string;
+  teacher_name: string;
+  grade: string;
+  batch: string;
+  created_at: string;
+}

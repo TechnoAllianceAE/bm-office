@@ -4,7 +4,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TeacherEndorsementSection } from './TeacherEndorsementSection';
 import { HODEndorsementSection } from './HODEndorsementSection';
 import { HOSEndorsementSection } from './HOSEndorsementSection';
-import { Users, GraduationCap, UserCheck } from 'lucide-react';
+import { ClassTeacherEndorsementSection } from './ClassTeacherEndorsementSection';
+import { Users, GraduationCap, UserCheck, User } from 'lucide-react';
 
 export function EndorsementTab() {
   return (
@@ -12,12 +13,12 @@ export function EndorsementTab() {
       <div>
         <h2 className="text-xl font-semibold mb-2">Staff Endorsement</h2>
         <p className="text-muted-foreground">
-          Manage teacher, HOD, and HOS endorsements for subjects and responsibilities
+          Manage teacher, HOD, HOS, and class teacher endorsements for subjects and responsibilities
         </p>
       </div>
       
       <Tabs defaultValue="teacher" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="teacher">
             <Users className="h-4 w-4 mr-2" />
             Teacher Endorsement
@@ -29,6 +30,10 @@ export function EndorsementTab() {
           <TabsTrigger value="hos">
             <UserCheck className="h-4 w-4 mr-2" />
             HOS Endorsement
+          </TabsTrigger>
+          <TabsTrigger value="class-teacher">
+            <User className="h-4 w-4 mr-2" />
+            Class Teacher Endorsement
           </TabsTrigger>
         </TabsList>
         
@@ -42,6 +47,10 @@ export function EndorsementTab() {
         
         <TabsContent value="hos" className="mt-6">
           <HOSEndorsementSection />
+        </TabsContent>
+        
+        <TabsContent value="class-teacher" className="mt-6">
+          <ClassTeacherEndorsementSection />
         </TabsContent>
       </Tabs>
     </div>
