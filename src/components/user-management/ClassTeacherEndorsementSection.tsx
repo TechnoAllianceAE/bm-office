@@ -23,8 +23,8 @@ export function ClassTeacherEndorsementSection() {
   const [assignments, setAssignments] = useState<ClassTeacherAssignment[]>([]);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [endorsements, setEndorsements] = useState<ClassTeacherEndorsement[]>([]);
-  const [filterGrade, setFilterGrade] = useState('');
-  const [filterBatch, setFilterBatch] = useState('');
+  const [filterGrade, setFilterGrade] = useState('all');
+  const [filterBatch, setFilterBatch] = useState('all');
   const [viewingTeacher, setViewingTeacher] = useState<string | null>(null);
 
   const grades = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
@@ -164,8 +164,8 @@ export function ClassTeacherEndorsementSection() {
 
   // Filter endorsements
   const filteredEndorsements = endorsements.filter(endorsement => {
-    const gradeMatch = !filterGrade || endorsement.grade === filterGrade;
-    const batchMatch = !filterBatch || endorsement.batch === filterBatch;
+    const gradeMatch = filterGrade === 'all' || endorsement.grade === filterGrade;
+    const batchMatch = filterBatch === 'all' || endorsement.batch === filterBatch;
     return gradeMatch && batchMatch;
   });
 
@@ -315,7 +315,7 @@ export function ClassTeacherEndorsementSection() {
                 <SelectValue placeholder="All grades" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All grades</SelectItem>
+                <SelectItem value="all">All grades</SelectItem>
                 {grades.map((grade) => (
                   <SelectItem key={grade} value={grade}>
                     Grade {grade}
@@ -332,7 +332,7 @@ export function ClassTeacherEndorsementSection() {
                 <SelectValue placeholder="All batches" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All batches</SelectItem>
+                <SelectItem value="all">All batches</SelectItem>
                 {batches.map((batch) => (
                   <SelectItem key={batch} value={batch}>
                     Batch {batch}
@@ -379,12 +379,12 @@ export function ClassTeacherEndorsementSection() {
       </div>
 
       {/* Filtered Endorsements List */}
-      {(filterGrade || filterBatch) && (
+      {(filterGrade !== 'all' || filterBatch !== 'all') && (
         <div className="space-y-4">
           <h3 className="text-lg font-medium">
             Filtered Results
-            {filterGrade && ` - Grade ${filterGrade}`}
-            {filterBatch && ` - Batch ${filterBatch}`}
+            {filterGrade !== 'all' && ` - Grade ${filterGrade}`}
+            {filterBatch !== 'all' && ` - Batch ${filterBatch}`}
           </h3>
           <Table>
             <TableHeader>
