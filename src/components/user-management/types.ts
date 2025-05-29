@@ -34,6 +34,8 @@ export interface Student {
   address: string;
   phone: string;
   father_name: string;
+  mother_name?: string;
+  mother_email?: string;
   email: string;
   school: string;
   gender: 'Male' | 'Female' | 'Other';
@@ -43,5 +45,27 @@ export interface Student {
   batch: string;
   age: number;
   profile_pic?: string;
+  created_at: string;
+}
+
+export interface Parent {
+  id: string;
+  name: string;
+  email: string;
+  address: string;
+  state: string;
+  country: string;
+  phone: string;
+  relationship: 'Father' | 'Mother' | 'Guardian';
+  created_at: string;
+}
+
+export interface ParentMapping {
+  id: string;
+  student_id: string;
+  parent_id: string;
+  student_name: string;
+  parent_name: string;
+  parent_relationship: string;
   created_at: string;
 }

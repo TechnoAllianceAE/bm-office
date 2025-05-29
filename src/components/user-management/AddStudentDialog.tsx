@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -21,6 +20,8 @@ export function AddStudentDialog({ onStudentAdded }: AddStudentDialogProps) {
     address: '',
     phone: '',
     father_name: '',
+    mother_name: '',
+    mother_email: '',
     email: '',
     school: '',
     gender: '',
@@ -60,6 +61,8 @@ export function AddStudentDialog({ onStudentAdded }: AddStudentDialogProps) {
         address: '',
         phone: '',
         father_name: '',
+        mother_name: '',
+        mother_email: '',
         email: '',
         school: '',
         gender: '',
@@ -122,6 +125,15 @@ export function AddStudentDialog({ onStudentAdded }: AddStudentDialogProps) {
             </div>
             
             <div className="space-y-2">
+              <Label htmlFor="mother_name">Mother's Name</Label>
+              <Input
+                id="mother_name"
+                value={formData.mother_name}
+                onChange={(e) => setFormData({ ...formData, mother_name: e.target.value })}
+              />
+            </div>
+            
+            <div className="space-y-2">
               <Label htmlFor="email">Email *</Label>
               <Input
                 id="email"
@@ -129,6 +141,16 @@ export function AddStudentDialog({ onStudentAdded }: AddStudentDialogProps) {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="mother_email">Mother's Email</Label>
+              <Input
+                id="mother_email"
+                type="email"
+                value={formData.mother_email}
+                onChange={(e) => setFormData({ ...formData, mother_email: e.target.value })}
               />
             </div>
             
