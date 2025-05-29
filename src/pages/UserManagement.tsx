@@ -5,7 +5,8 @@ import { Card } from '@/components/common/Card';
 import { UserManagementTab } from '@/components/user-management/UserManagementTab';
 import { RoleManagementTab } from '@/components/user-management/RoleManagementTab';
 import { SecuritySettingsTab } from '@/components/user-management/SecuritySettingsTab';
-import { Users, ShieldCheck, Lock } from 'lucide-react';
+import { StudentManagementTab } from '@/components/user-management/StudentManagementTab';
+import { Users, ShieldCheck, Lock, GraduationCap } from 'lucide-react';
 
 const UserManagement = () => {
   return (
@@ -13,7 +14,7 @@ const UserManagement = () => {
       <div>
         <h1 className="text-2xl font-semibold">User Management</h1>
         <p className="text-muted-foreground">
-          Manage users, roles, permissions, and security settings
+          Manage users, students, roles, permissions, and security settings
         </p>
       </div>
       
@@ -22,6 +23,10 @@ const UserManagement = () => {
           <TabsTrigger value="users">
             <Users className="h-4 w-4 mr-2" />
             Users
+          </TabsTrigger>
+          <TabsTrigger value="students">
+            <GraduationCap className="h-4 w-4 mr-2" />
+            Students
           </TabsTrigger>
           <TabsTrigger value="roles">
             <ShieldCheck className="h-4 w-4 mr-2" />
@@ -36,6 +41,12 @@ const UserManagement = () => {
         <TabsContent value="users">
           <Card className="p-6 bg-card/40 backdrop-blur-md border border-white/10">
             <UserManagementTab />
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="students">
+          <Card className="p-6 bg-card/40 backdrop-blur-md border border-white/10">
+            <StudentManagementTab />
           </Card>
         </TabsContent>
         

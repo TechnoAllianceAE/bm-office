@@ -26,3 +26,22 @@ export interface Permission {
   can_delete: boolean;
   created_at: string;
 }
+
+export interface Student {
+  id: string;
+  admission_no: string;
+  name: string;
+  address: string;
+  phone: string;
+  father_name: string;
+  email: string;
+  school: string;
+  gender: 'Male' | 'Female' | 'Other';
+  session: string;
+  curriculum: string;
+  grade: string;
+  batch: string;
+  age: number;
+  profile_pic?: string;
+  created_at: string;
+}
