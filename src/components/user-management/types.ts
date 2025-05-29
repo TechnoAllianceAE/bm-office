@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   full_name: string;
@@ -67,5 +66,59 @@ export interface ParentMapping {
   student_name: string;
   parent_name: string;
   parent_relationship: string;
+  created_at: string;
+}
+
+export interface Teacher {
+  id: string;
+  name: string;
+  email: string;
+  subjects: string[];
+  grade: string;
+  batch: string;
+  created_at: string;
+}
+
+export interface HOD {
+  id: string;
+  name: string;
+  email: string;
+  department: string;
+  created_at: string;
+}
+
+export interface HOS {
+  id: string;
+  name: string;
+  email: string;
+  created_at: string;
+}
+
+export interface TeacherEndorsement {
+  id: string;
+  teacher_id: string;
+  teacher_name: string;
+  grade: string;
+  batch: string;
+  subjects: string[];
+  created_at: string;
+}
+
+export interface HODEndorsement {
+  id: string;
+  hod_id: string;
+  hod_name: string;
+  phase: 'Primary' | 'Middle' | 'Secondary' | 'Higher Secondary';
+  subjects: string[];
+  created_at: string;
+}
+
+export interface HOSEndorsement {
+  id: string;
+  hos_id: string;
+  hos_name: string;
+  session: 'Morning' | 'Afternoon';
+  curriculum: string;
+  class: string;
   created_at: string;
 }

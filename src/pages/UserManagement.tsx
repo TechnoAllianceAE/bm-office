@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/common/Card';
@@ -7,7 +6,8 @@ import { RoleManagementTab } from '@/components/user-management/RoleManagementTa
 import { SecuritySettingsTab } from '@/components/user-management/SecuritySettingsTab';
 import { StudentManagementTab } from '@/components/user-management/StudentManagementTab';
 import { ParentManagementTab } from '@/components/user-management/ParentManagementTab';
-import { Users, ShieldCheck, Lock, GraduationCap, UserCheck } from 'lucide-react';
+import { EndorsementTab } from '@/components/user-management/EndorsementTab';
+import { Users, ShieldCheck, Lock, GraduationCap, UserCheck, Award } from 'lucide-react';
 
 const UserManagement = () => {
   return (
@@ -32,6 +32,10 @@ const UserManagement = () => {
           <TabsTrigger value="parents">
             <UserCheck className="h-4 w-4 mr-2" />
             Parents
+          </TabsTrigger>
+          <TabsTrigger value="endorsement">
+            <Award className="h-4 w-4 mr-2" />
+            Endorsement
           </TabsTrigger>
           <TabsTrigger value="roles">
             <ShieldCheck className="h-4 w-4 mr-2" />
@@ -58,6 +62,12 @@ const UserManagement = () => {
         <TabsContent value="parents">
           <Card className="p-6 bg-card/40 backdrop-blur-md border border-white/10">
             <ParentManagementTab />
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="endorsement">
+          <Card className="p-6 bg-card/40 backdrop-blur-md border border-white/10">
+            <EndorsementTab />
           </Card>
         </TabsContent>
         
