@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 
 interface AcademicConsole {
   id: string;
+  institution: string;
   curriculum: string;
   session: string;
   grade: string;
@@ -25,12 +26,14 @@ interface MasterSetting {
 
 export function AcademicConsoleTab() {
   const [academicConsoles, setAcademicConsoles] = useState<AcademicConsole[]>([]);
+  const [institutions, setInstitutions] = useState<MasterSetting[]>([]);
   const [curriculums, setCurriculums] = useState<MasterSetting[]>([]);
   const [sessions, setSessions] = useState<MasterSetting[]>([]);
   const [grades, setGrades] = useState<MasterSetting[]>([]);
   const [batches, setBatches] = useState<MasterSetting[]>([]);
   
   // Form state
+  const [selectedInstitution, setSelectedInstitution] = useState('');
   const [selectedCurriculum, setSelectedCurriculum] = useState('');
   const [selectedSession, setSelectedSession] = useState('');
   const [selectedGrade, setSelectedGrade] = useState('');
@@ -44,6 +47,12 @@ export function AcademicConsoleTab() {
   const fetchMasterData = async () => {
     try {
       // Mock data - replace with actual API calls
+      const mockInstitutions: MasterSetting[] = [
+        { id: '1', name: 'Main Campus', type: 'institution' },
+        { id: '2', name: 'Branch Campus A', type: 'institution' },
+        { id: '3', name: 'Branch Campus B', type: 'institution' },
+      ];
+
       const mockCurriculums: MasterSetting[] = [
         { id: '1', name: 'CBSE', type: 'curriculum' },
         { id: '2', name: 'ICSE', type: 'curriculum' },
@@ -72,6 +81,7 @@ export function AcademicConsoleTab() {
         { id: '6', name: 'Batch F', type: 'batch' },
       ];
 
+      setInstitutions(mockInstitutions);
       setCurriculums(mockCurriculums);
       setSessions(mockSessions);
       setGrades(mockGrades);
@@ -88,6 +98,7 @@ export function AcademicConsoleTab() {
       const mockConsoles: AcademicConsole[] = [
         {
           id: '1',
+          institution: 'Main Campus',
           curriculum: 'CBSE',
           session: 'Morning',
           grade: 'Grade 1',
@@ -96,6 +107,7 @@ export function AcademicConsoleTab() {
         },
         {
           id: '2',
+          institution: 'Main Campus',
           curriculum: 'CBSE',
           session: 'Morning',
           grade: 'Grade 2',
@@ -104,6 +116,7 @@ export function AcademicConsoleTab() {
         },
         {
           id: '3',
+          institution: 'Branch Campus A',
           curriculum: 'ICSE',
           session: 'Afternoon',
           grade: 'Grade 1',
@@ -128,8 +141,8 @@ export function AcademicConsoleTab() {
   };
 
   const handleAddConsole = async () => {
-    if (!selectedCurriculum || !selectedSession || !selectedGrade) {
-      toast.error('Please select curriculum, session, and grade');
+    if (!selectedInstitution || !selectedCurriculum || !selectedSession || !selectedGrade) {
+      toast.error('Please select institution, curriculum, session, and grade');
       return;
     }
 
@@ -140,19 +153,21 @@ export function AcademicConsoleTab() {
 
     // Check if this combination already exists
     const exists = academicConsoles.some(console => 
+      console.institution === selectedInstitution &&
       console.curriculum === selectedCurriculum &&
       console.session === selectedSession &&
       console.grade === selectedGrade
     );
 
     if (exists) {
-      toast.error('This curriculum-session-grade combination already exists');
+      toast.error('This institution-curriculum-session-grade combination already exists');
       return;
     }
 
     try {
       const newConsole: AcademicConsole = {
         id: Math.random().toString(36).substr(2, 9),
+        institution: selectedInstitution,
         curriculum: selectedCurriculum,
         session: selectedSession,
         grade: selectedGrade,
@@ -163,6 +178,7 @@ export function AcademicConsoleTab() {
       setAcademicConsoles(prev => [...prev, newConsole]);
       
       // Reset form
+      setSelectedInstitution('');
       setSelectedCurriculum('');
       setSelectedSession('');
       setSelectedGrade('');
@@ -185,11 +201,12 @@ export function AcademicConsoleTab() {
     }
   };
 
-  // Group consoles by curriculum and session for better display
+  // Group consoles by institution, curriculum and session for better display
   const groupedConsoles = academicConsoles.reduce((acc, console) => {
-    const key = `${console.curriculum}-${console.session}`;
+    const key = `${console.institution}-${console.curriculum}-${console.session}`;
     if (!acc[key]) {
       acc[key] = {
+        institution: console.institution,
         curriculum: console.curriculum,
         session: console.session,
         grades: []
@@ -209,7 +226,7 @@ export function AcademicConsoleTab() {
       <div>
         <h2 className="text-xl font-semibold mb-2">Academic Console</h2>
         <p className="text-muted-foreground">
-          Set up academic configurations by combining curriculum, session, grade, and batches
+          Set up academic configurations by combining institution, curriculum, session, grade, and batches
         </p>
       </div>
 
@@ -222,7 +239,23 @@ export function AcademicConsoleTab() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="space-y-2">
+              <Label>Institution</Label>
+              <Select value={selectedInstitution} onValueChange={setSelectedInstitution}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select institution" />
+                </SelectTrigger>
+                <SelectContent>
+                  {institutions.map((institution) => (
+                    <SelectItem key={institution.id} value={institution.name}>
+                      {institution.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="space-y-2">
               <Label>Curriculum</Label>
               <Select value={selectedCurriculum} onValueChange={setSelectedCurriculum}>
@@ -314,7 +347,7 @@ export function AcademicConsoleTab() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Building2 className="h-5 w-5" />
-                {group.curriculum} - {group.session}
+                {group.institution} - {group.curriculum} - {group.session}
               </CardTitle>
             </CardHeader>
             <CardContent>
