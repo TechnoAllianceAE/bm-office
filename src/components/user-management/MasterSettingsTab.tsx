@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,8 +5,9 @@ import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Trash2, Edit, Check, X } from 'lucide-react';
+import { Plus, Trash2, Edit, Check, X, Building2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { AcademicConsoleTab } from './AcademicConsoleTab';
 
 interface MasterSetting {
   id: string;
@@ -290,17 +290,21 @@ export function MasterSettingsTab() {
       <div>
         <h2 className="text-xl font-semibold mb-2">Master Settings</h2>
         <p className="text-muted-foreground">
-          Manage academic year, session, curriculum, grade, and batch settings
+          Manage academic year, session, curriculum, grade, batch settings and academic console configurations
         </p>
       </div>
 
       <Tabs defaultValue="academic_year" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="academic_year">Academic Year</TabsTrigger>
           <TabsTrigger value="session">Session</TabsTrigger>
           <TabsTrigger value="curriculum">Curriculum</TabsTrigger>
           <TabsTrigger value="grade">Grade</TabsTrigger>
           <TabsTrigger value="batch">Batch</TabsTrigger>
+          <TabsTrigger value="academic_console">
+            <Building2 className="h-4 w-4 mr-2" />
+            Academic Console
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="academic_year" className="mt-6">
@@ -321,6 +325,10 @@ export function MasterSettingsTab() {
 
         <TabsContent value="batch" className="mt-6">
           {renderTable(batches, 'batch', newBatch, setNewBatch)}
+        </TabsContent>
+
+        <TabsContent value="academic_console" className="mt-6">
+          <AcademicConsoleTab />
         </TabsContent>
       </Tabs>
     </div>
