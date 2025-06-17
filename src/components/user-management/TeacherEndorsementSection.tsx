@@ -3,9 +3,9 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Plus, Edit, Trash2, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { TeacherEndorsement } from './types';
 import { TeacherEndorsementForm } from './TeacherEndorsementForm';
@@ -16,6 +16,7 @@ export function TeacherEndorsementSection() {
   const [endorsements, setEndorsements] = useState<TeacherEndorsement[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingEndorsement, setEditingEndorsement] = useState<TeacherEndorsement | null>(null);
+  const [viewingTeacher, setViewingTeacher] = useState<string | null>(null);
 
   const grades = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
   const batches = ['A', 'B', 'C', 'D'];
@@ -52,6 +53,24 @@ export function TeacherEndorsementSection() {
         grade: '8',
         batch: 'A',
         subjects: ['English', 'Literature'],
+        created_at: new Date().toISOString()
+      },
+      {
+        id: '4',
+        teacher_id: '1',
+        teacher_name: 'John Smith',
+        grade: '11',
+        batch: 'B',
+        subjects: ['Advanced Mathematics'],
+        created_at: new Date().toISOString()
+      },
+      {
+        id: '5',
+        teacher_id: '4',
+        teacher_name: 'Emily Wilson',
+        grade: '7',
+        batch: 'C',
+        subjects: ['History', 'Geography'],
         created_at: new Date().toISOString()
       }
     ];
@@ -111,6 +130,20 @@ export function TeacherEndorsementSection() {
     return gradeMatch && batchMatch;
   });
 
+  // Group endorsements by teacher
+  const teacherGroups = filteredEndorsements.reduce((acc, endorsement) => {
+    const key = endorsement.teacher_id;
+    if (!acc[key]) {
+      acc[key] = {
+        teacher_name: endorsement.teacher_name,
+        teacher_id: endorsement.teacher_id,
+        endorsements: []
+      };
+    }
+    acc[key].endorsements.push(endorsement);
+    return acc;
+  }, {} as Record<string, { teacher_name: string; teacher_id: string; endorsements: TeacherEndorsement[] }>);
+
   if (showForm) {
     return (
       <TeacherEndorsementForm
@@ -118,6 +151,60 @@ export function TeacherEndorsementSection() {
         onSubmit={handleFormSubmit}
         onCancel={handleFormCancel}
       />
+    );
+  }
+
+  if (viewingTeacher) {
+    const teacherData = teacherGroups[viewingTeacher];
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-medium">Endorsements for {teacherData.teacher_name}</h3>
+          <Button onClick={() => setViewingTeacher(null)} variant="outline">
+            Back to Overview
+          </Button>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {teacherData.endorsements.map((endorsement) => (
+            <div key={endorsement.id} className="border rounded-lg p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium">Grade {endorsement.grade} - Batch {endorsement.batch}</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {new Date(endorsement.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="flex gap-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleEditEndorsement(endorsement)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => handleDeleteEndorsement(endorsement.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label className="text-sm">Endorsed Subjects:</Label>
+                <div className="flex flex-wrap gap-1">
+                  {endorsement.subjects.map((subject) => (
+                    <Badge key={subject} variant="default">{subject}</Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     );
   }
 
@@ -174,57 +261,43 @@ export function TeacherEndorsementSection() {
         </div>
       </div>
 
-      {/* Endorsements List */}
+      {/* Teacher Endorsements Grid */}
       <div className="space-y-4">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Teacher Name</TableHead>
-              <TableHead>Grade</TableHead>
-              <TableHead>Batch</TableHead>
-              <TableHead>Endorsed Subjects</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredEndorsements.map((endorsement) => (
-              <TableRow key={endorsement.id}>
-                <TableCell className="font-medium">{endorsement.teacher_name}</TableCell>
-                <TableCell>Grade {endorsement.grade}</TableCell>
-                <TableCell>Batch {endorsement.batch}</TableCell>
-                <TableCell>
-                  <div className="flex flex-wrap gap-1">
-                    {endorsement.subjects.map((subject) => (
-                      <Badge key={subject} variant="default">{subject}</Badge>
-                    ))}
-                  </div>
-                </TableCell>
-                <TableCell>{new Date(endorsement.created_at).toLocaleDateString()}</TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEditEndorsement(endorsement)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleDeleteEndorsement(endorsement.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <h3 className="text-lg font-medium">Teacher Endorsements Overview</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Object.entries(teacherGroups).map(([teacherId, data]) => (
+            <div key={teacherId} className="border rounded-lg p-4 space-y-4 hover:shadow-lg transition-shadow">
+              <div className="flex items-center space-x-3">
+                <Avatar className="h-12 w-12">
+                  <AvatarImage src={`https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face`} />
+                  <AvatarFallback className="bg-blue-100 text-blue-600">
+                    {data.teacher_name.split(' ').map(n => n[0]).join('')}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-medium truncate">{data.teacher_name}</h4>
+                  <p className="text-sm text-muted-foreground truncate">
+                    {data.teacher_name.toLowerCase().replace(' ', '.')}@school.com
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <Badge variant="secondary">{data.endorsements.length} endorsements</Badge>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setViewingTeacher(teacherId)}
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  View
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
 
-        {filteredEndorsements.length === 0 && (
+        {Object.keys(teacherGroups).length === 0 && (
           <div className="text-center py-8 text-muted-foreground">
             No endorsements found for the selected filters.
           </div>
