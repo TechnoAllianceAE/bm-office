@@ -3,68 +3,26 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Plus, Edit, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { Teacher, TeacherEndorsement } from './types';
+import { TeacherEndorsement } from './types';
+import { TeacherEndorsementForm } from './TeacherEndorsementForm';
 
 export function TeacherEndorsementSection() {
-  const [selectedGrade, setSelectedGrade] = useState('');
-  const [selectedBatch, setSelectedBatch] = useState('');
-  const [teachers, setTeachers] = useState<Teacher[]>([]);
-  const [selectedTeachers, setSelectedTeachers] = useState<string[]>([]);
-  const [subjectSelections, setSubjectSelections] = useState<Record<string, string[]>>({});
+  const [filterGrade, setFilterGrade] = useState('all');
+  const [filterBatch, setFilterBatch] = useState('all');
   const [endorsements, setEndorsements] = useState<TeacherEndorsement[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [editingEndorsement, setEditingEndorsement] = useState<TeacherEndorsement | null>(null);
 
   const grades = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
   const batches = ['A', 'B', 'C', 'D'];
-  const subjects = ['Mathematics', 'Science', 'English', 'History', 'Geography', 'Physics', 'Chemistry', 'Biology'];
-
-  useEffect(() => {
-    if (selectedGrade && selectedBatch) {
-      fetchTeachers();
-    }
-  }, [selectedGrade, selectedBatch]);
 
   useEffect(() => {
     fetchEndorsements();
   }, []);
-
-  const fetchTeachers = async () => {
-    // Mock teachers data
-    const mockTeachers: Teacher[] = [
-      {
-        id: '1',
-        name: 'John Smith',
-        email: 'john.smith@school.com',
-        subjects: ['Mathematics'],
-        grade: selectedGrade,
-        batch: selectedBatch,
-        created_at: new Date().toISOString()
-      },
-      {
-        id: '2',
-        name: 'Sarah Johnson',
-        email: 'sarah.johnson@school.com',
-        subjects: ['Science', 'Biology'],
-        grade: selectedGrade,
-        batch: selectedBatch,
-        created_at: new Date().toISOString()
-      },
-      {
-        id: '3',
-        name: 'Mike Davis',
-        email: 'mike.davis@school.com',
-        subjects: ['English'],
-        grade: selectedGrade,
-        batch: selectedBatch,
-        created_at: new Date().toISOString()
-      }
-    ];
-    
-    setTeachers(mockTeachers);
-  };
 
   const fetchEndorsements = async () => {
     // Mock endorsements data
@@ -77,64 +35,118 @@ export function TeacherEndorsementSection() {
         batch: 'A',
         subjects: ['Mathematics', 'Physics'],
         created_at: new Date().toISOString()
+      },
+      {
+        id: '2',
+        teacher_id: '2',
+        teacher_name: 'Sarah Johnson',
+        grade: '9',
+        batch: 'B',
+        subjects: ['Science', 'Biology'],
+        created_at: new Date().toISOString()
+      },
+      {
+        id: '3',
+        teacher_id: '3',
+        teacher_name: 'Mike Davis',
+        grade: '8',
+        batch: 'A',
+        subjects: ['English', 'Literature'],
+        created_at: new Date().toISOString()
       }
     ];
     
     setEndorsements(mockEndorsements);
   };
 
-  const handleTeacherSelect = (teacherId: string, checked: boolean) => {
-    if (checked) {
-      setSelectedTeachers([...selectedTeachers, teacherId]);
-    } else {
-      setSelectedTeachers(selectedTeachers.filter(id => id !== teacherId));
-      setSubjectSelections({ ...subjectSelections, [teacherId]: [] });
-    }
+  const handleAddEndorsement = () => {
+    setEditingEndorsement(null);
+    setShowForm(true);
   };
 
-  const handleSubjectSelect = (teacherId: string, subject: string, checked: boolean) => {
-    const currentSubjects = subjectSelections[teacherId] || [];
-    if (checked) {
-      setSubjectSelections({
-        ...subjectSelections,
-        [teacherId]: [...currentSubjects, subject]
-      });
-    } else {
-      setSubjectSelections({
-        ...subjectSelections,
-        [teacherId]: currentSubjects.filter(s => s !== subject)
-      });
-    }
+  const handleEditEndorsement = (endorsement: TeacherEndorsement) => {
+    setEditingEndorsement(endorsement);
+    setShowForm(true);
   };
 
-  const handleEndorse = async () => {
-    if (selectedTeachers.length === 0) {
-      toast.error('Please select at least one teacher');
-      return;
-    }
-
+  const handleDeleteEndorsement = async (id: string) => {
     try {
-      console.log('Endorsing teachers:', selectedTeachers, subjectSelections);
-      toast.success('Teachers endorsed successfully');
-      setSelectedTeachers([]);
-      setSubjectSelections({});
-      fetchEndorsements();
+      setEndorsements(prev => prev.filter(e => e.id !== id));
+      toast.success('Endorsement deleted successfully');
     } catch (error) {
-      toast.error('Failed to endorse teachers');
+      toast.error('Failed to delete endorsement');
     }
   };
+
+  const handleFormSubmit = (endorsementData: any) => {
+    if (editingEndorsement) {
+      // Update existing endorsement
+      setEndorsements(prev => 
+        prev.map(e => e.id === editingEndorsement.id ? { ...e, ...endorsementData } : e)
+      );
+      toast.success('Endorsement updated successfully');
+    } else {
+      // Add new endorsement
+      const newEndorsement: TeacherEndorsement = {
+        id: Math.random().toString(36).substr(2, 9),
+        ...endorsementData,
+        created_at: new Date().toISOString()
+      };
+      setEndorsements(prev => [...prev, newEndorsement]);
+      toast.success('Endorsement added successfully');
+    }
+    setShowForm(false);
+    setEditingEndorsement(null);
+  };
+
+  const handleFormCancel = () => {
+    setShowForm(false);
+    setEditingEndorsement(null);
+  };
+
+  // Filter endorsements
+  const filteredEndorsements = endorsements.filter(endorsement => {
+    const gradeMatch = filterGrade === 'all' || endorsement.grade === filterGrade;
+    const batchMatch = filterBatch === 'all' || endorsement.batch === filterBatch;
+    return gradeMatch && batchMatch;
+  });
+
+  if (showForm) {
+    return (
+      <TeacherEndorsementForm
+        endorsement={editingEndorsement}
+        onSubmit={handleFormSubmit}
+        onCancel={handleFormCancel}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h3 className="text-lg font-medium">Teacher Endorsements</h3>
+          <p className="text-sm text-muted-foreground">
+            Manage teacher subject endorsements by grade and batch
+          </p>
+        </div>
+        <Button onClick={handleAddEndorsement}>
+          <Plus className="h-4 w-4 mr-2" />
+          Add Endorsement
+        </Button>
+      </div>
+
       {/* Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg">
         <div className="space-y-2">
-          <Label>Grade</Label>
-          <Select value={selectedGrade} onValueChange={setSelectedGrade}>
+          <Label>Filter by Grade</Label>
+          <Select value={filterGrade} onValueChange={setFilterGrade}>
             <SelectTrigger>
-              <SelectValue placeholder="Select grade" />
+              <SelectValue placeholder="All grades" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="all">All grades</SelectItem>
               {grades.map((grade) => (
                 <SelectItem key={grade} value={grade}>
                   Grade {grade}
@@ -145,12 +157,13 @@ export function TeacherEndorsementSection() {
         </div>
         
         <div className="space-y-2">
-          <Label>Batch</Label>
-          <Select value={selectedBatch} onValueChange={setSelectedBatch}>
+          <Label>Filter by Batch</Label>
+          <Select value={filterBatch} onValueChange={setFilterBatch}>
             <SelectTrigger>
-              <SelectValue placeholder="Select batch" />
+              <SelectValue placeholder="All batches" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="all">All batches</SelectItem>
               {batches.map((batch) => (
                 <SelectItem key={batch} value={batch}>
                   Batch {batch}
@@ -159,71 +172,10 @@ export function TeacherEndorsementSection() {
             </SelectContent>
           </Select>
         </div>
-        
-        <div className="flex items-end">
-          <Button onClick={handleEndorse} disabled={selectedTeachers.length === 0}>
-            Endorse Selected Teachers
-          </Button>
-        </div>
       </div>
-
-      {/* Teachers List */}
-      {teachers.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium">Available Teachers</h3>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-12">Select</TableHead>
-                <TableHead>Teacher Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Current Subjects</TableHead>
-                <TableHead>Assign Subjects</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {teachers.map((teacher) => (
-                <TableRow key={teacher.id}>
-                  <TableCell>
-                    <Checkbox
-                      checked={selectedTeachers.includes(teacher.id)}
-                      onCheckedChange={(checked) => handleTeacherSelect(teacher.id, checked as boolean)}
-                    />
-                  </TableCell>
-                  <TableCell className="font-medium">{teacher.name}</TableCell>
-                  <TableCell>{teacher.email}</TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {teacher.subjects.map((subject) => (
-                        <Badge key={subject} variant="secondary">{subject}</Badge>
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {selectedTeachers.includes(teacher.id) && (
-                      <div className="flex flex-wrap gap-2">
-                        {subjects.map((subject) => (
-                          <label key={subject} className="flex items-center space-x-1 text-sm">
-                            <Checkbox
-                              checked={(subjectSelections[teacher.id] || []).includes(subject)}
-                              onCheckedChange={(checked) => handleSubjectSelect(teacher.id, subject, checked as boolean)}
-                            />
-                            <span>{subject}</span>
-                          </label>
-                        ))}
-                      </div>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
 
       {/* Endorsements List */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium">Current Endorsements</h3>
         <Table>
           <TableHeader>
             <TableRow>
@@ -232,10 +184,11 @@ export function TeacherEndorsementSection() {
               <TableHead>Batch</TableHead>
               <TableHead>Endorsed Subjects</TableHead>
               <TableHead>Date</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {endorsements.map((endorsement) => (
+            {filteredEndorsements.map((endorsement) => (
               <TableRow key={endorsement.id}>
                 <TableCell className="font-medium">{endorsement.teacher_name}</TableCell>
                 <TableCell>Grade {endorsement.grade}</TableCell>
@@ -248,10 +201,34 @@ export function TeacherEndorsementSection() {
                   </div>
                 </TableCell>
                 <TableCell>{new Date(endorsement.created_at).toLocaleDateString()}</TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditEndorsement(endorsement)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleDeleteEndorsement(endorsement.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
+
+        {filteredEndorsements.length === 0 && (
+          <div className="text-center py-8 text-muted-foreground">
+            No endorsements found for the selected filters.
+          </div>
+        )}
       </div>
     </div>
   );

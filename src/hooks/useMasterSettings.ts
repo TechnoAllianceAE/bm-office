@@ -87,7 +87,7 @@ export function useMasterSettings() {
         id: Math.random().toString(36).substr(2, 9),
         name: value.trim(),
         type: type as any,
-        ...(type === 'subject' && { subject_type: subjectType as any }),
+        ...(type === 'subject' && { subject_type: subjectType as 'Core_subject' | 'language_subject' | 'cocurricular_subject' }),
         created_at: new Date().toISOString()
       };
 
@@ -132,7 +132,7 @@ export function useMasterSettings() {
             ? { 
                 ...item, 
                 name: editValue.trim(),
-                ...(type === 'subject' && { subject_type: editSubjectType })
+                ...(type === 'subject' && { subject_type: editSubjectType as 'Core_subject' | 'language_subject' | 'cocurricular_subject' })
               }
             : item
         );
