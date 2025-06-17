@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Plus, Trash2, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { HOS, HOSEndorsement } from './types';
@@ -322,25 +323,31 @@ export function HOSEndorsementSection() {
         </div>
       )}
 
-      {/* HOS Endorsements Overview */}
+      {/* HOS Endorsements Overview - Grid Layout */}
       <div className="space-y-4">
         <h3 className="text-lg font-medium">HOS Endorsements Overview</h3>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>HOS Name</TableHead>
-              <TableHead>Endorsement Count</TableHead>
-              <TableHead className="w-32">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {Object.entries(hosGroups).map(([hosId, data]) => (
-              <TableRow key={hosId}>
-                <TableCell className="font-medium">{data.hos_name}</TableCell>
-                <TableCell>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Object.entries(hosGroups).map(([hosId, data]) => {
+            const hos = hoses.find(h => h.id === hosId);
+            return (
+              <div key={hosId} className="border rounded-lg p-4 space-y-4 hover:shadow-lg transition-shadow">
+                <div className="flex items-center space-x-3">
+                  <Avatar className="h-12 w-12">
+                    <AvatarImage src={`https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop&crop=face`} />
+                    <AvatarFallback className="bg-purple-100 text-purple-600">
+                      {data.hos_name.split(' ').map(n => n[0]).join('')}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium truncate">{data.hos_name}</h4>
+                    <p className="text-sm text-muted-foreground truncate">
+                      {hos?.email || `${data.hos_name.toLowerCase().replace(' ', '.')}@school.com`}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between">
                   <Badge variant="secondary">{data.endorsements.length} endorsements</Badge>
-                </TableCell>
-                <TableCell>
                   <Button 
                     variant="outline" 
                     size="sm" 
@@ -349,11 +356,11 @@ export function HOSEndorsementSection() {
                     <Eye className="h-4 w-4 mr-2" />
                     View
                   </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
