@@ -1,13 +1,13 @@
 
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Plus, Trash2, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { Teacher, ClassTeacherEndorsement } from './types';
+import { ClassTeacherAssignmentForm } from './ClassTeacherAssignmentForm';
+import { CurrentAssignmentsList } from './CurrentAssignmentsList';
+import { EndorsementFilters } from './EndorsementFilters';
+import { EndorsementsOverview } from './EndorsementsOverview';
+import { FilteredEndorsementsList } from './FilteredEndorsementsList';
+import { TeacherDetailView } from './TeacherDetailView';
 
 interface ClassTeacherAssignment {
   teacher_id: string;
@@ -17,18 +17,12 @@ interface ClassTeacherAssignment {
 }
 
 export function ClassTeacherEndorsementSection() {
-  const [selectedTeacher, setSelectedTeacher] = useState('');
-  const [selectedGrade, setSelectedGrade] = useState('');
-  const [selectedBatch, setSelectedBatch] = useState('');
   const [assignments, setAssignments] = useState<ClassTeacherAssignment[]>([]);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [endorsements, setEndorsements] = useState<ClassTeacherEndorsement[]>([]);
   const [filterGrade, setFilterGrade] = useState('all');
   const [filterBatch, setFilterBatch] = useState('all');
   const [viewingTeacher, setViewingTeacher] = useState<string | null>(null);
-
-  const grades = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
-  const batches = ['A', 'B', 'C', 'D'];
 
   useEffect(() => {
     fetchTeachers();
@@ -94,7 +88,7 @@ export function ClassTeacherEndorsementSection() {
     setEndorsements(mockEndorsements);
   };
 
-  const handleAddAssignment = () => {
+  const handleAddAssignment = (selectedTeacher: string, selectedGrade: string, selectedBatch: string) => {
     if (!selectedTeacher || !selectedGrade || !selectedBatch) {
       toast.error('Please select teacher, grade, and batch');
       return;
@@ -123,10 +117,6 @@ export function ClassTeacherEndorsementSection() {
       grade: selectedGrade,
       batch: selectedBatch
     }]);
-
-    setSelectedTeacher('');
-    setSelectedGrade('');
-    setSelectedBatch('');
   };
 
   const handleRemoveAssignment = (index: number) => {
@@ -172,242 +162,43 @@ export function ClassTeacherEndorsementSection() {
   if (viewingTeacher) {
     const teacherData = teacherGroups[viewingTeacher];
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-medium">Class Assignments for {teacherData.teacher_name}</h3>
-          <Button onClick={() => setViewingTeacher(null)} variant="outline">
-            Back to Overview
-          </Button>
-        </div>
-        
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Grade</TableHead>
-              <TableHead>Batch</TableHead>
-              <TableHead>Date</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {teacherData.endorsements.map((endorsement) => (
-              <TableRow key={endorsement.id}>
-                <TableCell>Grade {endorsement.grade}</TableCell>
-                <TableCell>Batch {endorsement.batch}</TableCell>
-                <TableCell>{new Date(endorsement.created_at).toLocaleDateString()}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+      <TeacherDetailView
+        teacherData={teacherData}
+        onBack={() => setViewingTeacher(null)}
+      />
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Assignment Form */}
-      <div className="border rounded-lg p-4 space-y-4">
-        <h3 className="text-lg font-medium">Add Class Teacher Assignment</h3>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="space-y-2">
-            <Label>Teacher</Label>
-            <Select value={selectedTeacher} onValueChange={setSelectedTeacher}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select teacher" />
-              </SelectTrigger>
-              <SelectContent>
-                {teachers.map((teacher) => (
-                  <SelectItem key={teacher.id} value={teacher.id}>
-                    {teacher.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="space-y-2">
-            <Label>Grade</Label>
-            <Select value={selectedGrade} onValueChange={setSelectedGrade}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select grade" />
-              </SelectTrigger>
-              <SelectContent>
-                {grades.map((grade) => (
-                  <SelectItem key={grade} value={grade}>
-                    Grade {grade}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="space-y-2">
-            <Label>Batch</Label>
-            <Select value={selectedBatch} onValueChange={setSelectedBatch}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select batch" />
-              </SelectTrigger>
-              <SelectContent>
-                {batches.map((batch) => (
-                  <SelectItem key={batch} value={batch}>
-                    Batch {batch}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="flex items-end">
-            <Button onClick={handleAddAssignment} size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Add
-            </Button>
-          </div>
-        </div>
-      </div>
+      <ClassTeacherAssignmentForm
+        teachers={teachers}
+        onAddAssignment={handleAddAssignment}
+      />
 
-      {/* Current Assignments */}
-      {assignments.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium">Current Assignments</h3>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Teacher</TableHead>
-                <TableHead>Grade</TableHead>
-                <TableHead>Batch</TableHead>
-                <TableHead className="w-20">Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {assignments.map((assignment, index) => (
-                <TableRow key={index}>
-                  <TableCell className="font-medium">{assignment.teacher_name}</TableCell>
-                  <TableCell>Grade {assignment.grade}</TableCell>
-                  <TableCell>Batch {assignment.batch}</TableCell>
-                  <TableCell>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => handleRemoveAssignment(index)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          
-          <Button onClick={handleEndorse} className="w-full">
-            Endorse All Class Teacher Assignments
-          </Button>
-        </div>
-      )}
+      <CurrentAssignmentsList
+        assignments={assignments}
+        onRemoveAssignment={handleRemoveAssignment}
+        onEndorse={handleEndorse}
+      />
 
-      {/* Filters */}
-      <div className="border rounded-lg p-4 space-y-4">
-        <h3 className="text-lg font-medium">Filter Class Teacher Endorsements</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>Filter by Grade</Label>
-            <Select value={filterGrade} onValueChange={setFilterGrade}>
-              <SelectTrigger>
-                <SelectValue placeholder="All grades" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All grades</SelectItem>
-                {grades.map((grade) => (
-                  <SelectItem key={grade} value={grade}>
-                    Grade {grade}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="space-y-2">
-            <Label>Filter by Batch</Label>
-            <Select value={filterBatch} onValueChange={setFilterBatch}>
-              <SelectTrigger>
-                <SelectValue placeholder="All batches" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All batches</SelectItem>
-                {batches.map((batch) => (
-                  <SelectItem key={batch} value={batch}>
-                    Batch {batch}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </div>
+      <EndorsementFilters
+        filterGrade={filterGrade}
+        filterBatch={filterBatch}
+        onFilterGradeChange={setFilterGrade}
+        onFilterBatchChange={setFilterBatch}
+      />
 
-      {/* Class Teacher Endorsements Overview */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Class Teacher Endorsements Overview</h3>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Teacher Name</TableHead>
-              <TableHead>Endorsement Count</TableHead>
-              <TableHead className="w-32">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {Object.entries(teacherGroups).map(([teacherId, data]) => (
-              <TableRow key={teacherId}>
-                <TableCell className="font-medium">{data.teacher_name}</TableCell>
-                <TableCell>
-                  <Badge variant="secondary">{data.endorsements.length} assignments</Badge>
-                </TableCell>
-                <TableCell>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => setViewingTeacher(teacherId)}
-                  >
-                    <Eye className="h-4 w-4 mr-2" />
-                    View
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+      <EndorsementsOverview
+        teacherGroups={teacherGroups}
+        onViewTeacher={setViewingTeacher}
+      />
 
-      {/* Filtered Endorsements List */}
-      {(filterGrade !== 'all' || filterBatch !== 'all') && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium">
-            Filtered Results
-            {filterGrade !== 'all' && ` - Grade ${filterGrade}`}
-            {filterBatch !== 'all' && ` - Batch ${filterBatch}`}
-          </h3>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Teacher Name</TableHead>
-                <TableHead>Grade</TableHead>
-                <TableHead>Batch</TableHead>
-                <TableHead>Date</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredEndorsements.map((endorsement) => (
-                <TableRow key={endorsement.id}>
-                  <TableCell className="font-medium">{endorsement.teacher_name}</TableCell>
-                  <TableCell>Grade {endorsement.grade}</TableCell>
-                  <TableCell>Batch {endorsement.batch}</TableCell>
-                  <TableCell>{new Date(endorsement.created_at).toLocaleDateString()}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
+      <FilteredEndorsementsList
+        filteredEndorsements={filteredEndorsements}
+        filterGrade={filterGrade}
+        filterBatch={filterBatch}
+      />
     </div>
   );
 }
