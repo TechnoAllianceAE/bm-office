@@ -1,8 +1,8 @@
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Edit, Trash2, Eye } from 'lucide-react';
+import { Edit, Trash2, Eye, Phone, Mail, School, User } from 'lucide-react';
 import { Student } from './types';
 
 interface StudentListProps {
@@ -37,92 +37,113 @@ export function StudentList({
 
   if (isLoading) {
     return (
-      <div className="space-y-3">
-        {[...Array(5)].map((_, i) => (
-          <div key={i} className="h-16 bg-muted animate-pulse rounded" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="border rounded-lg p-4 space-y-4 animate-pulse">
+            <div className="flex items-center space-x-3">
+              <div className="h-12 w-12 bg-muted rounded-full" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 bg-muted rounded w-3/4" />
+                <div className="h-3 bg-muted rounded w-1/2" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="h-3 bg-muted rounded w-full" />
+              <div className="h-3 bg-muted rounded w-2/3" />
+            </div>
+          </div>
         ))}
       </div>
     );
   }
 
   return (
-    <div className="border rounded-lg overflow-hidden">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Student</TableHead>
-            <TableHead>Admission No</TableHead>
-            <TableHead>Father Name</TableHead>
-            <TableHead>Grade/Batch</TableHead>
-            <TableHead>School</TableHead>
-            <TableHead>Contact</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filteredStudents.map((student) => (
-            <TableRow key={student.id}>
-              <TableCell>
-                <div className="flex items-center space-x-3">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={student.profile_pic} alt={student.name} />
-                    <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="font-medium">{student.name}</div>
-                    <div className="text-sm text-muted-foreground">{student.email}</div>
-                  </div>
-                </div>
-              </TableCell>
-              <TableCell>
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredStudents.map((student) => (
+          <div key={student.id} className="border rounded-lg p-4 space-y-4 hover:shadow-lg transition-shadow bg-card">
+            <div className="flex items-center space-x-3">
+              <Avatar className="h-12 w-12">
+                <AvatarImage src={student.profile_pic} alt={student.name} />
+                <AvatarFallback className="bg-blue-100 text-blue-600">
+                  {student.name.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <h4 className="font-medium truncate">{student.name}</h4>
+                <p className="text-sm text-muted-foreground truncate">{student.email}</p>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Admission No:</span>
                 <Badge variant="outline">{student.admission_no}</Badge>
-              </TableCell>
-              <TableCell>{student.father_name}</TableCell>
-              <TableCell>
-                <div className="flex flex-col space-y-1">
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Grade/Batch:</span>
+                <div className="flex gap-1">
                   <Badge variant="secondary">{student.grade}</Badge>
                   <Badge variant="outline">Batch {student.batch}</Badge>
                 </div>
-              </TableCell>
-              <TableCell>
-                <div className="text-sm">
-                  <div>{student.school}</div>
-                  <div className="text-muted-foreground">{student.curriculum}</div>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <School className="h-4 w-4 text-muted-foreground" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm truncate">{student.school}</p>
+                  <p className="text-xs text-muted-foreground">{student.curriculum}</p>
                 </div>
-              </TableCell>
-              <TableCell>
-                <div className="text-sm">
-                  <div>{student.phone}</div>
-                  <div className="text-muted-foreground">Age: {student.age}</div>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <User className="h-4 w-4 text-muted-foreground" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm truncate">Father: {student.father_name}</p>
+                  <p className="text-xs text-muted-foreground">Age: {student.age}</p>
                 </div>
-              </TableCell>
-              <TableCell>
-                <div className="flex space-x-2">
-                  {onViewStudent && (
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => onViewStudent(student.id)}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                  )}
-                  <Button variant="ghost" size="sm">
-                    <Edit className="h-4 w-4" />
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Phone className="h-4 w-4 text-muted-foreground" />
+                <p className="text-sm">{student.phone}</p>
+              </div>
+            </div>
+            
+            <div className="flex justify-between items-center pt-2 border-t">
+              <div className="flex space-x-1">
+                {onViewStudent && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => onViewStudent(student.id)}
+                  >
+                    <Eye className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="sm">
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+                )}
+                <Button variant="ghost" size="sm">
+                  <Edit className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="sm">
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+              <Badge variant="outline" className="text-xs">
+                {new Date(student.created_at).toLocaleDateString()}
+              </Badge>
+            </div>
+          </div>
+        ))}
+      </div>
       
       {filteredStudents.length === 0 && (
-        <div className="text-center py-8">
-          <p className="text-muted-foreground">No students found matching your criteria.</p>
+        <div className="text-center py-12">
+          <div className="mx-auto h-24 w-24 bg-muted rounded-full flex items-center justify-center mb-4">
+            <User className="h-12 w-12 text-muted-foreground" />
+          </div>
+          <h3 className="text-lg font-medium mb-2">No students found</h3>
+          <p className="text-muted-foreground">No students match your current search criteria.</p>
         </div>
       )}
     </div>
