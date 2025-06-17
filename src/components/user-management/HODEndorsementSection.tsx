@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Plus, Trash2, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { HOD, HODEndorsement } from './types';
@@ -315,25 +316,34 @@ export function HODEndorsementSection() {
         </div>
       )}
 
-      {/* HOD Endorsements Overview */}
+      {/* HOD Endorsements Overview - Grid Layout */}
       <div className="space-y-4">
         <h3 className="text-lg font-medium">HOD Endorsements Overview</h3>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>HOD Name</TableHead>
-              <TableHead>Endorsement Count</TableHead>
-              <TableHead className="w-32">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {Object.entries(hodGroups).map(([hodId, data]) => (
-              <TableRow key={hodId}>
-                <TableCell className="font-medium">{data.hod_name}</TableCell>
-                <TableCell>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Object.entries(hodGroups).map(([hodId, data]) => {
+            const hod = hods.find(h => h.id === hodId);
+            return (
+              <div key={hodId} className="border rounded-lg p-4 space-y-4 hover:shadow-lg transition-shadow">
+                <div className="flex items-center space-x-3">
+                  <Avatar className="h-12 w-12">
+                    <AvatarImage src={`https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face`} />
+                    <AvatarFallback className="bg-green-100 text-green-600">
+                      {data.hod_name.split(' ').map(n => n[0]).join('')}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium truncate">{data.hod_name}</h4>
+                    <p className="text-sm text-muted-foreground truncate">
+                      {hod?.email || `${data.hod_name.toLowerCase().replace(' ', '.')}@school.com`}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {hod?.department || 'Department'}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between">
                   <Badge variant="secondary">{data.endorsements.length} endorsements</Badge>
-                </TableCell>
-                <TableCell>
                   <Button 
                     variant="outline" 
                     size="sm" 
@@ -342,11 +352,11 @@ export function HODEndorsementSection() {
                     <Eye className="h-4 w-4 mr-2" />
                     View
                   </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
