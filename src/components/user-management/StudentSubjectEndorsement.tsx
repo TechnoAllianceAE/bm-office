@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { Save, Users } from 'lucide-react';
+import { Save, Users, Filter, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -9,11 +9,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Student } from './types';
+import { SubjectSelectionDialog } from './SubjectSelectionDialog';
+import { StudentEndorsementView } from './StudentEndorsementView';
 
 interface Subject {
   id: string;
   name: string;
   code: string;
+  type: 'Core_subject' | 'language_subject' | 'cocurricular_subject';
+}
+
+interface StudentEndorsement {
+  student_id: string;
+  subject_id: string;
+  subject_name: string;
+  subject_type: string;
 }
 
 export function StudentSubjectEndorsement() {
@@ -21,15 +31,19 @@ export function StudentSubjectEndorsement() {
   const [selectedBatch, setSelectedBatch] = useState('all-batches');
   const [students, setStudents] = useState<Student[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [endorsements, setEndorsements] = useState<StudentEndorsement[]>([]);
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
-  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
+  const [filterNotEndorsed, setFilterNotEndorsed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showSubjectDialog, setShowSubjectDialog] = useState(false);
+  const [viewingStudent, setViewingStudent] = useState<string | null>(null);
 
   const grades = ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th', '11th', '12th'];
   const batches = ['A', 'B', 'C', 'D'];
 
   useEffect(() => {
     fetchSubjects();
+    fetchEndorsements();
   }, []);
 
   useEffect(() => {
@@ -42,14 +56,15 @@ export function StudentSubjectEndorsement() {
 
   const fetchSubjects = async () => {
     try {
-      // Mock subjects data
       const mockSubjects: Subject[] = [
-        { id: '1', name: 'Mathematics', code: 'MATH' },
-        { id: '2', name: 'English', code: 'ENG' },
-        { id: '3', name: 'Science', code: 'SCI' },
-        { id: '4', name: 'Social Studies', code: 'SS' },
-        { id: '5', name: 'Hindi', code: 'HIN' },
-        { id: '6', name: 'Computer Science', code: 'CS' }
+        { id: '1', name: 'Mathematics', code: 'MATH', type: 'Core_subject' },
+        { id: '2', name: 'English', code: 'ENG', type: 'language_subject' },
+        { id: '3', name: 'Science', code: 'SCI', type: 'Core_subject' },
+        { id: '4', name: 'Social Studies', code: 'SS', type: 'Core_subject' },
+        { id: '5', name: 'Hindi', code: 'HIN', type: 'language_subject' },
+        { id: '6', name: 'Computer Science', code: 'CS', type: 'Core_subject' },
+        { id: '7', name: 'Physical Education', code: 'PE', type: 'cocurricular_subject' },
+        { id: '8', name: 'Art', code: 'ART', type: 'cocurricular_subject' }
       ];
       setSubjects(mockSubjects);
     } catch (error) {
@@ -60,7 +75,6 @@ export function StudentSubjectEndorsement() {
   const fetchStudents = async () => {
     setIsLoading(true);
     try {
-      // Mock filtered students data
       const mockStudents: Student[] = [
         {
           id: "1",
@@ -97,6 +111,24 @@ export function StudentSubjectEndorsement() {
           age: 15,
           profile_pic: "https://i.pravatar.cc/150?img=5",
           created_at: new Date().toISOString()
+        },
+        {
+          id: "3", 
+          admission_no: "ADM003",
+          name: "Alex Davis",
+          address: "789 Pine St",
+          phone: "+1234567892",
+          father_name: "David Davis",
+          email: "alex@example.com",
+          school: "Springfield High",
+          gender: "Male",
+          session: "2024-25",
+          curriculum: "CBSE",
+          grade: selectedGrade === 'all-grades' ? "10th" : selectedGrade,
+          batch: selectedBatch === 'all-batches' ? "B" : selectedBatch,
+          age: 16,
+          profile_pic: "https://i.pravatar.cc/150?img=8",
+          created_at: new Date().toISOString()
         }
       ];
       setStudents(mockStudents);
@@ -107,6 +139,28 @@ export function StudentSubjectEndorsement() {
     }
   };
 
+  const fetchEndorsements = async () => {
+    try {
+      const mockEndorsements: StudentEndorsement[] = [
+        { student_id: "1", subject_id: "1", subject_name: "Mathematics", subject_type: "Core_subject" },
+        { student_id: "1", subject_id: "2", subject_name: "English", subject_type: "language_subject" },
+        { student_id: "2", subject_id: "1", subject_name: "Mathematics", subject_type: "Core_subject" },
+      ];
+      setEndorsements(mockEndorsements);
+    } catch (error) {
+      console.error("Error fetching endorsements:", error);
+    }
+  };
+
+  const getStudentEndorsementCount = (studentId: string) => {
+    return endorsements.filter(e => e.student_id === studentId).length;
+  };
+
+  const getFilteredStudents = () => {
+    if (!filterNotEndorsed) return students;
+    return students.filter(student => getStudentEndorsementCount(student.id) === 0);
+  };
+
   const handleStudentSelect = (studentId: string, checked: boolean) => {
     if (checked) {
       setSelectedStudents([...selectedStudents, studentId]);
@@ -115,34 +169,48 @@ export function StudentSubjectEndorsement() {
     }
   };
 
-  const handleSubjectSelect = (subjectId: string, checked: boolean) => {
-    if (checked) {
-      setSelectedSubjects([...selectedSubjects, subjectId]);
-    } else {
-      setSelectedSubjects(selectedSubjects.filter(id => id !== subjectId));
-    }
-  };
-
-  const handleEndorse = async () => {
-    if (selectedStudents.length === 0) {
-      toast.error('Please select at least one student');
-      return;
-    }
-    if (selectedSubjects.length === 0) {
-      toast.error('Please select at least one subject');
+  const handleEndorse = async (selectedSubjectIds: string[]) => {
+    if (selectedStudents.length === 0 || selectedSubjectIds.length === 0) {
+      toast.error('Please select students and subjects');
       return;
     }
 
     try {
       // Mock endorsement process
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success(`Successfully endorsed ${selectedSubjects.length} subjects for ${selectedStudents.length} students`);
+      const newEndorsements: StudentEndorsement[] = [];
+      selectedStudents.forEach(studentId => {
+        selectedSubjectIds.forEach(subjectId => {
+          const subject = subjects.find(s => s.id === subjectId);
+          if (subject) {
+            newEndorsements.push({
+              student_id: studentId,
+              subject_id: subjectId,
+              subject_name: subject.name,
+              subject_type: subject.type
+            });
+          }
+        });
+      });
+
+      setEndorsements([...endorsements, ...newEndorsements]);
+      toast.success(`Successfully endorsed ${selectedSubjectIds.length} subjects for ${selectedStudents.length} students`);
       setSelectedStudents([]);
-      setSelectedSubjects([]);
+      setShowSubjectDialog(false);
     } catch (error) {
       toast.error('Failed to endorse subjects');
     }
   };
+
+  if (viewingStudent) {
+    return (
+      <StudentEndorsementView
+        studentId={viewingStudent}
+        student={students.find(s => s.id === viewingStudent)}
+        endorsements={endorsements.filter(e => e.student_id === viewingStudent)}
+        onBack={() => setViewingStudent(null)}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -182,86 +250,113 @@ export function StudentSubjectEndorsement() {
               ))}
             </SelectContent>
           </Select>
+
+          {students.length > 0 && (
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="filter-not-endorsed"
+                checked={filterNotEndorsed}
+                onCheckedChange={setFilterNotEndorsed}
+              />
+              <label htmlFor="filter-not-endorsed" className="text-sm font-medium">
+                Show only non-endorsed students
+              </label>
+            </div>
+          )}
         </div>
 
         {(selectedGrade !== 'all-grades' || selectedBatch !== 'all-batches') && (
           <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-medium mb-4 flex items-center gap-2">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-medium flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                Students ({students.length})
+                Students ({getFilteredStudents().length})
               </h3>
               
-              {isLoading ? (
-                <div className="space-y-3">
-                  {[...Array(3)].map((_, i) => (
-                    <div key={i} className="h-16 bg-muted animate-pulse rounded" />
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-3 max-h-64 overflow-y-auto">
-                  {students.map((student) => (
-                    <div key={student.id} className="flex items-center space-x-3 p-3 border rounded-lg">
-                      <Checkbox
-                        checked={selectedStudents.includes(student.id)}
-                        onCheckedChange={(checked) => handleStudentSelect(student.id, checked as boolean)}
-                      />
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={student.profile_pic} alt={student.name} />
-                        <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="font-medium">{student.name}</div>
-                        <div className="text-sm text-muted-foreground">{student.admission_no}</div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Badge variant="secondary">{student.grade}</Badge>
-                        <Badge variant="outline">Batch {student.batch}</Badge>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              {selectedStudents.length > 0 && (
+                <Button onClick={() => setShowSubjectDialog(true)}>
+                  Select Subjects ({selectedStudents.length} selected)
+                </Button>
               )}
             </div>
-
-            <div>
-              <h3 className="text-lg font-medium mb-4">Select Subjects</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                {subjects.map((subject) => (
-                  <div key={subject.id} className="flex items-center space-x-3 p-3 border rounded-lg">
-                    <Checkbox
-                      checked={selectedSubjects.includes(subject.id)}
-                      onCheckedChange={(checked) => handleSubjectSelect(subject.id, checked as boolean)}
-                    />
-                    <div>
-                      <div className="font-medium">{subject.name}</div>
-                      <div className="text-sm text-muted-foreground">{subject.code}</div>
-                    </div>
-                  </div>
+            
+            {isLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="h-32 bg-muted animate-pulse rounded-lg" />
                 ))}
               </div>
-            </div>
-
-            {selectedStudents.length > 0 && selectedSubjects.length > 0 && (
-              <div className="bg-muted p-4 rounded-lg">
-                <p className="text-sm font-medium mb-2">Endorsement Summary:</p>
-                <p className="text-sm text-muted-foreground">
-                  {selectedStudents.length} student(s) will be endorsed for {selectedSubjects.length} subject(s)
-                </p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {getFilteredStudents().map((student) => {
+                  const endorsementCount = getStudentEndorsementCount(student.id);
+                  return (
+                    <div key={student.id} className="border rounded-lg p-4 space-y-3 hover:shadow-lg transition-shadow">
+                      <div className="flex items-start space-x-3">
+                        <Checkbox
+                          checked={selectedStudents.includes(student.id)}
+                          onCheckedChange={(checked) => handleStudentSelect(student.id, checked as boolean)}
+                        />
+                        <Avatar className="h-12 w-12">
+                          <AvatarImage src={student.profile_pic} alt={student.name} />
+                          <AvatarFallback className="bg-blue-100 text-blue-600">
+                            {student.name.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium truncate">{student.name}</h4>
+                          <p className="text-sm text-muted-foreground truncate">{student.email}</p>
+                          <Badge variant="outline" className="text-xs mt-1">{student.admission_no}</Badge>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="flex gap-2">
+                          <Badge variant="secondary">{student.grade}</Badge>
+                          <Badge variant="outline">Batch {student.batch}</Badge>
+                        </div>
+                        
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setViewingStudent(student.id)}
+                          className="flex items-center gap-1"
+                        >
+                          <span className="font-medium">{endorsementCount}</span>
+                          <span className="text-xs">subjects</span>
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
 
-            <Button 
-              onClick={handleEndorse}
-              disabled={selectedStudents.length === 0 || selectedSubjects.length === 0}
-              className="w-full"
-            >
-              <Save className="h-4 w-4 mr-2" />
-              Endorse Selected Students
-            </Button>
+            {getFilteredStudents().length === 0 && !isLoading && (
+              <div className="text-center py-12">
+                <div className="mx-auto h-24 w-24 bg-muted rounded-full flex items-center justify-center mb-4">
+                  <Users className="h-12 w-12 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-medium mb-2">No students found</h3>
+                <p className="text-muted-foreground">
+                  {filterNotEndorsed 
+                    ? "No non-endorsed students found for the selected criteria."
+                    : "No students match your current selection criteria."
+                  }
+                </p>
+              </div>
+            )}
           </div>
         )}
       </Card>
+
+      <SubjectSelectionDialog
+        open={showSubjectDialog}
+        onOpenChange={setShowSubjectDialog}
+        subjects={subjects}
+        onEndorse={handleEndorse}
+        selectedStudentCount={selectedStudents.length}
+      />
     </div>
   );
 }
