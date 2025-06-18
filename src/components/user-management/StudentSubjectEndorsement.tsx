@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Save, Users, Filter, X } from 'lucide-react';
@@ -169,6 +168,24 @@ export function StudentSubjectEndorsement() {
     }
   };
 
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      const allStudentIds = getFilteredStudents().map(student => student.id);
+      setSelectedStudents(allStudentIds);
+    } else {
+      setSelectedStudents([]);
+    }
+  };
+
+  const isAllSelected = () => {
+    const filteredStudents = getFilteredStudents();
+    return filteredStudents.length > 0 && selectedStudents.length === filteredStudents.length;
+  };
+
+  const isSomeSelected = () => {
+    return selectedStudents.length > 0 && selectedStudents.length < getFilteredStudents().length;
+  };
+
   const handleEndorse = async (selectedSubjectIds: string[]) => {
     if (selectedStudents.length === 0 || selectedSubjectIds.length === 0) {
       toast.error('Please select students and subjects');
@@ -256,7 +273,7 @@ export function StudentSubjectEndorsement() {
               <Checkbox
                 id="filter-not-endorsed"
                 checked={filterNotEndorsed}
-                onCheckedChange={setFilterNotEndorsed}
+                onCheckedChange={(checked) => setFilterNotEndorsed(checked as boolean)}
               />
               <label htmlFor="filter-not-endorsed" className="text-sm font-medium">
                 Show only non-endorsed students
@@ -268,10 +285,26 @@ export function StudentSubjectEndorsement() {
         {(selectedGrade !== 'all-grades' || selectedBatch !== 'all-batches') && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                Students ({getFilteredStudents().length})
-              </h3>
+              <div className="flex items-center gap-4">
+                <h3 className="text-lg font-medium flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Students ({getFilteredStudents().length})
+                </h3>
+                
+                {getFilteredStudents().length > 0 && (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="select-all"
+                      checked={isAllSelected()}
+                      onCheckedChange={handleSelectAll}
+                      className={isSomeSelected() ? "data-[state=checked]:bg-primary/50" : ""}
+                    />
+                    <label htmlFor="select-all" className="text-sm font-medium">
+                      Select All
+                    </label>
+                  </div>
+                )}
+              </div>
               
               {selectedStudents.length > 0 && (
                 <Button onClick={() => setShowSubjectDialog(true)}>
